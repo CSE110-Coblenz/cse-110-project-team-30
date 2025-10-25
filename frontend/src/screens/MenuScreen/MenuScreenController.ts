@@ -1,6 +1,7 @@
 import { ScreenController } from "../../types.ts";
 import type { ScreenSwitcher } from "../../types.ts";
 import { MenuScreenView } from "./MenuScreenView.ts";
+import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
 
 /**
  * MenuScreenController - Handles menu interactions
@@ -14,20 +15,29 @@ export class MenuScreenController extends ScreenController {
                 this.screenSwitcher = screenSwitcher;
             	const buttons: ButtonConfig[] = [
             		{
+                		id: "leaderboard",
+                		label: "Leaderboard", 
+                		x: STAGE_WIDTH - 100,
+                		y: 50,
+                		width: 60,
+                		height: 60,
+                		textColor: "pink",
+            		},
+            		{
                 		id: "battle",
                 		label: "Battle",
-               			x: 200,
-                		y: 300,
+               			x: STAGE_WIDTH / 2,
+                		y: STAGE_HEIGHT / 2 - 150,
                 		width: 150,
                 		height: 50,
-                		fill: "green",
+                		fill: "yellow",
                 		textColor: "white",
             		},
             		{
                 		id: "cards",
                 		label: "Cards",
-                		x: 200,
-                		y: 380,
+                		x: STAGE_WIDTH / 2,
+                		y: STAGE_HEIGHT / 2 - 100,
                 		width: 150,
                 		height: 50,
                 		fill: "blue",
@@ -36,24 +46,15 @@ export class MenuScreenController extends ScreenController {
             		{
                 		id: "levelup",
                 		label: "Level Up",
-                		x: 200,
-                		y: 460,
+                		x: STAGE_WIDTH / 2,
+                		y: STAGE_HEIGHT / 2 - 50,
                 		width: 150,
                 		height: 50,
                 		fill: "purple",
                 		textColor: "white",
-            		},
-            		{
-                		id: "leaderboard",
-                		label: "Leaderboard", 
-                		x: 500,
-                		y: 50,
-                		width: 60,
-                		height: 60,
-                		textColor: "yellow",
             		}
         	];
-		this.view = new MenuScreenView((buttonId: string) => this.handleClick(buttonId));
+		this.view = new MenuScreenView((buttons), (id: string) => this.handleClick(id));
         }
 
         /**
@@ -75,11 +76,18 @@ export class MenuScreenController extends ScreenController {
 	}
 
         /**
+         * Get total points
+         */
+        /*getTotalPoints(): number {
+                return this.model.getPoints();
+        }*/
+        
+	/**
          * Get the view
 	 * Not done, need points location
          */
         getView(): MenuScreenView {
-		this.view.show(this.placeholder.getPoints());
+		// this.view.updatePoints(this.placeholder.getPoints());
                 return this.view;
         }
 }
