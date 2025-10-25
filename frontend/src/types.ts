@@ -12,14 +12,14 @@ export interface View {
  * - "menu": Main menu screen
  * - "cards": Cards screen
  * - "battle": Battle screen
- * - "results": Results screen with final score
+ * - "results": Results screen with total points
  *   - score: Final score to display on results screen
  */
 export type Screen =
         | { type: "menu" }
         | { type: "cards" }
         | { type: "battle" }
-        | { type: "results"; score: number };
+        | { type: "results"; points: number };
 
 export abstract class ScreenController {
         abstract getView(): View;
