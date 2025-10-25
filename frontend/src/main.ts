@@ -1,7 +1,8 @@
 import Konva from "konva";
 import type { ScreenSwitcher, Screen } from "./types.ts";
 import { MenuScreenController } from "./screens/MenuScreen/MenuScreenController.ts";
-import { GameScreenController } from "./screens/GameScreen/GameScreenController.ts";
+import { CardsScreenController } from "./screens/CardsScreen/CardsScreenController.ts";
+import { BattleScreenController } from "./screens/BattleScreen/BattleScreenController.ts";
 import { ResultsScreenController } from "./screens/ResultsScreen/ResultsScreenController.ts";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "./constants.ts";
 
@@ -20,7 +21,8 @@ class App implements ScreenSwitcher {
         private layer: Konva.Layer;
 
         private menuController: MenuScreenController;
-        private gameController: GameScreenController;
+        private cardsController: CardsScreenController;
+        private battleController: BattleScreenController;
         private resultsController: ResultsScreenController;
 
         constructor(container: string) {
@@ -38,19 +40,22 @@ class App implements ScreenSwitcher {
                 // Initialize all screen controllers
                 // Each controller manages a Model, View, and handles user interactions
                 this.menuController = new MenuScreenController(this);
-                this.gameController = new GameScreenController(this);
+                this.cardsController = new CardsScreenController(this);
+                this.battleController = new BattleScreenController(this);
                 this.resultsController = new ResultsScreenController(this);
 
                 // Add all screen groups to the layer
                 // All screens exist simultaneously but only one is visible at a time
                 this.layer.add(this.menuController.getView().getGroup());
-                this.layer.add(this.gameController.getView().getGroup());
+                this.layer.add(this.cardsController.getView().getGroup());
+                this.layer.add(this.battleController.getView().getGroup());
                 this.layer.add(this.resultsController.getView().getGroup());
 
                 // Draw the layer (render everything to the canvas)
                 this.layer.draw();
 
-                // Start with menu screen visible
+                // Start with menu screen visible 
+		// Later change to LOGIN SCREEN
                 this.menuController.getView().show();
         }
 
@@ -66,7 +71,8 @@ class App implements ScreenSwitcher {
         switchToScreen(screen: Screen): void {
                 // Hide all screens first by setting their Groups to invisible
                 this.menuController.hide();
-                this.gameController.hide();
+                this.cardsController.hide();
+                this.battleController.hide();
                 this.resultsController.hide();
 
                 //
@@ -75,13 +81,18 @@ class App implements ScreenSwitcher {
                         case "menu":
                                 this.menuController.show();
                                 break;
-
-                        case "game":
-                                // Start the game (which also shows the game screen)
-                                this.gameController.startGame();
+                        
+			case "cards":
+                                this.cardsController.show();
                                 break;
 
-                        case "result":
+
+                        case "battle":
+                                // Start the battle (which also shows the battle screen)
+                                this.battleController.startGame();
+                                break;
+
+                        case "results":
                                 // Show results with the final score
                                 this.resultsController.showResults(screen.score);
                                 break;
