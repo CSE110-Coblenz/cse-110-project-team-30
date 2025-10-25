@@ -2,5 +2,5 @@
 export const STAGE_WIDTH = 800;
 export const STAGE_HEIGHT = 600;
 
-// Game settings
-export const GAME_DURATION = 180; // seconds
+// Battle settings
+export const BATTLE_DURATION = 180; // seconds
