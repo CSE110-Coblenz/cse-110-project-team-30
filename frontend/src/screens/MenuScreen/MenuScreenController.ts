@@ -17,7 +17,7 @@ export class MenuScreenController extends ScreenController {
             		{
                 		id: "leaderboard",
                 		label: "Leaderboard", 
-                		x: STAGE_WIDTH - 100,
+                		x: STAGE_WIDTH - 110,
                 		y: 50,
                 		width: 60,
                 		height: 60,

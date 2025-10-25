@@ -26,7 +26,7 @@ export class MenuScreenView implements View {
                 // Title text
                 const title = new Konva.Text({
                         x: STAGE_WIDTH / 2,
-                        y: 50,
+                        y: 30,
                         text: "Welcome!",
                         fontSize: 48,
                         fontFamily: "Arial",
@@ -35,19 +35,21 @@ export class MenuScreenView implements View {
                         strokeWidth: 2,
                         align: "center",
                 });
-                title.offsetX(title.width() / 2);
                 this.group.add(title);
+                title.offsetX(title.width() / 2);
                 
 		// Display points
-		const pointsGroup = new Konva.Group({ x: 20, y: 20 });
+		const padding = 5;	
+		const pointsGroup = new Konva.Group({ x: 50, y: 50 });
 		const pointsImage = new Konva.Image({
             		x: 0,
             		y: 0,
-            		width: 50,
-            		height: 50,
-            		offsetX: 25,
-           		offsetY: 25,
+            		width: 60,
+            		height: 60,
         	});
+		pointsImage.offsetX(pointsImage.width() / 2);
+		pointsImage.offsetY(pointsImage.height() / 2);
+
         	const pointsImgObj = new Image();
         	pointsImgObj.src = "/menu_images/points.png";
         	pointsImgObj.onload = () => {
@@ -65,42 +67,44 @@ export class MenuScreenView implements View {
             		strokeWidth: 1,
             		align: "left",
         	});
-            	this.pointsText.x(pointsImage.width() + 5);
-            	this.pointsText.y(pointsImage.height() / 2 - this.pointsText.fontSize() / 2);
-        	
+            	this.pointsText.x(pointsImage.width() / 2 + padding);
+            	this.pointsText.y(pointsImage.height() / 2 - 42);
 		pointsGroup.add(this.pointsText);
+
                 this.group.add(pointsGroup);
 
 		buttons.forEach(btn => {
 			const buttonGroup = new Konva.Group(); 
-			const padding = 5;	
 
 			if (btn.id === "leaderboard") {
-                		const leaderboardText = new Konva.Text({
-                        		text: btn.label,
-                        		fontSize: 16,
-                        		fontFamily: "Arial",
-					x: btn.x - btn.width / 2,
-                			y: btn.y + btn.height / 2 + padding,
-                        		fill: btn.textColor,
-                		});
-
+				const leaderboardGroup = new Konva.Group({ x: btn.x, y: btn.y });
 				const leaderboardImage = new Konva.Image({
+                    			x: 0,
+                    			y: 0,
                     			width: btn.width,
                     			height: btn.height,
                     			offsetX: btn.width / 2,
                     			offsetY: btn.height / 2,
-                    			x: btn.x,
-                    			y: btn.y,
                 		});
                 		const lbImgObj = new Image();
                 		lbImgObj.src = "/menu_images/leaderboard.png";
                 		lbImgObj.onload = () => {
-                    			leaderboardImg.image(lbImgObj);
+                    			leaderboardImage.image(lbImgObj);
                     			this.group.getLayer()?.draw();
                 		};
-                		buttonGroup.add(leaderboardImage);
-                		buttonGroup.add(leaderboardText);
+				leaderboardGroup.add(leaderboardImage);
+				
+				const leaderboardText = new Konva.Text({
+                        		text: btn.label,
+                        		fontSize: 16,
+                        		fontFamily: "Arial",
+                        		fill: btn.textColor,
+                		});
+				leaderboardText.x(-leaderboardText.width() / 2);
+				leaderboardText.y(btn.height / 2 + padding);		
+				leaderboardGroup.add(leaderboardText);
+
+                		this.group.add(leaderboardGroup);
 			} else {
                 		const text = new Konva.Text({
                         		text: btn.label,
@@ -109,7 +113,7 @@ export class MenuScreenView implements View {
                         		fill: btn.textColor,
                         		align: "center",
                 		});
-
+				
 				const btnWidth = text.width() + padding * 2;
 				const btnHeight = text.height() + padding * 2;
 				const rect = new Konva.Rect({
@@ -128,11 +132,11 @@ export class MenuScreenView implements View {
     					shadowOffsetX: 4,
     					shadowOffsetY: 4,
     					shadowOpacity: 0.6,
-                		});
+                		}); 
 				text.x(btn.x - text.width() / 2);
                 		text.y(btn.y - text.height() / 2);
-                
-                		buttonGroup.add(rect);
+                		
+				buttonGroup.add(rect);
                 		buttonGroup.add(text);
 			}
 
