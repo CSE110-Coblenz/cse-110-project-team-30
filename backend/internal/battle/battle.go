@@ -19,15 +19,15 @@ func NewBattle() *Battle {
 	}
 	return b
 }
-func (this *Battle) SpawnTroop(team common.Team, pos common.Position) (*troops.Troop, error) {
-	if !this.Arena.InBounds(pos) {
+func (b *Battle) SpawnTroop(team common.Team, pos common.Position) (*troops.Troop, error) {
+	if !b.Arena.InBounds(pos) {
 		return nil, errors.New("position out of arena bounds")
 	}
 	newTroop := troops.NewKnight(team, pos)
-	this.Arena.AddTroop(int(pos.X), int(pos.Y), &newTroop.Troop)
+	b.Arena.AddTroop(int(pos.X), int(pos.Y), &newTroop.Troop)
 	return &newTroop.Troop, nil
 }
 
-func (this *Battle) printArena() string {
-	return this.Arena.String()
+func (b *Battle) PrintArena() string {
+	return b.Arena.String()
 }
