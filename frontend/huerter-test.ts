@@ -1,5 +1,4 @@
-// ethan-test.ts
-// 这个文件只用于你（Ethan）的独立测试
+// huerter-test.ts
 
 import Konva from 'konva';
 import { STAGE_WIDTH, STAGE_HEIGHT } from './src/constants.ts'; // 导入常量
@@ -9,7 +8,7 @@ import { CardDetailsPopup } from './src/screens/CardsScreen/CardDetailsPopup.ts'
 import { TutorialPlayerPopup } from './src/screens/CardsScreen/TutorialPlayerPopup.ts';
 import type { Card } from './src/types.ts';
 
-// --- 1. 准备“假数据” (Mock Data) ---
+// --- (Mock Data) ---
 
 const MOCK_UNLOCKED_CARD: Card = {
   id: 'c001',
@@ -28,8 +27,7 @@ const MOCK_LOCKED_CARD: Card = {
   cost: 7,
   imageUrl: '',
   is_locked: true,
-  // 假设教程是一个图片
-  tutorial_path: '\menu_images\tutorial.jpg'
+  tutorial_path: '/menu_images/tutorial.jpg'  //change to a valid path 
 };
 
 
@@ -48,7 +46,7 @@ stage.add(mainLayer);
 
 // --- 3. 实例化你的组件 ---
 
-console.log('正在实例化 Ethan 的弹窗...');
+console.log('正在实例化 Huerter 的弹窗...');
 const detailsPopup = new CardDetailsPopup();
 const tutorialPopup = new TutorialPlayerPopup();
 
@@ -74,7 +72,7 @@ document.getElementById('test-details-btn')!.addEventListener('click', () => {
 
 document.getElementById('test-tutorial-btn')!.addEventListener('click', () => {
   console.log('测试“教程”弹窗...');
-  // 调用你写的 show() 方法！
-  tutorialPopup.show(MOCK_LOCKED_CARD.tutorial_path);
+  // call your show() method
+  tutorialPopup.show(MOCK_LOCKED_CARD);
   mainLayer.draw();
 });

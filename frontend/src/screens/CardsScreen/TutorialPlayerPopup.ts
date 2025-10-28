@@ -2,7 +2,7 @@
 
 import Konva from 'konva';
 import type { Group } from 'konva/lib/Group';
-import type { ITutorialPlayerPopup } from '../../types'; // 导入契约
+import type { ITutorialPlayerPopup, Card } from '../../types'; // 导入契约
 import { SCREEN_WIDTH, SCREEN_HEIGHT, POPUP_STYLES } from '../../constants';
 
 
@@ -10,6 +10,9 @@ export class TutorialPlayerPopup implements ITutorialPlayerPopup {
     
     private group: Group;
     private tutorialImage: Konva.Image;
+    private cardNameText: Konva.Text;
+    private tutorialTitleText: Konva.Text;
+    private tutorialDescriptionText: Konva.Text;
 
     constructor() {
         // create the main group
@@ -58,24 +61,68 @@ export class TutorialPlayerPopup implements ITutorialPlayerPopup {
         closeBtn.on('click', () => this.hide());
         this.group.add(closeBtn);
 
-        //create placeholder rectangle and tutorial image
-     const placeholderRect = new Konva.Rect({
+        // create card name text
+        this.cardNameText = new Konva.Text({
             x: windowX + POPUP_STYLES.PADDING,
-            y: windowY + POPUP_STYLES.PADDING + 30, 
+            y: windowY + 40,
             width: windowWidth - (POPUP_STYLES.PADDING * 2),
-            height: windowHeight - (POPUP_STYLES.PADDING * 2) - 30,
+            text: 'Card Tutorial',
+            fontSize: POPUP_STYLES.TITLE_FONT_SIZE,
+            fontFamily: POPUP_STYLES.FONT_FAMILY,
+            fill: POPUP_STYLES.TEXT_COLOR,
+            align: 'center'
+        });
+
+        // create tutorial title text
+        this.tutorialTitleText = new Konva.Text({
+            x: windowX + POPUP_STYLES.PADDING,
+            y: windowY + 80,
+            width: windowWidth - (POPUP_STYLES.PADDING * 2),
+            text: 'Tutorial: How to Unlock This Card',
+            fontSize: POPUP_STYLES.TEXT_FONT_SIZE + 2,
+            fontFamily: POPUP_STYLES.FONT_FAMILY,
+            fill: POPUP_STYLES.TEXT_COLOR,
+            align: 'center',
+            fontStyle: 'bold'
+        });
+
+        //create placeholder rectangle and tutorial image
+        const placeholderRect = new Konva.Rect({
+            x: windowX + POPUP_STYLES.PADDING,
+            y: windowY + 120, 
+            width: windowWidth - (POPUP_STYLES.PADDING * 2),
+            height: 200,
             fill: '#ccc'
         });
 
         //  Konva.Image
         this.tutorialImage = new Konva.Image({
             x: windowX + POPUP_STYLES.PADDING,
-            y: windowY + POPUP_STYLES.PADDING + 30,
+            y: windowY + 120,
             width: windowWidth - (POPUP_STYLES.PADDING * 2),
-            height: windowHeight - (POPUP_STYLES.PADDING * 2) - 30,
+            height: 200,
             image: undefined // 必须有 image 属性
         });
-        this.group.add(placeholderRect, this.tutorialImage);
+
+        // create tutorial description text
+        this.tutorialDescriptionText = new Konva.Text({
+            x: windowX + POPUP_STYLES.PADDING,
+            y: windowY + 340,
+            width: windowWidth - (POPUP_STYLES.PADDING * 2),
+            text: 'Complete the tutorial to unlock this card and add it to your deck!',
+            fontSize: POPUP_STYLES.TEXT_FONT_SIZE,
+            fontFamily: POPUP_STYLES.FONT_FAMILY,
+            fill: POPUP_STYLES.TEXT_COLOR,
+            align: 'center'
+        });
+
+        this.group.add(
+            this.cardNameText,
+            this.tutorialTitleText,
+            placeholderRect, 
+            this.tutorialImage,
+            this.tutorialDescriptionText
+        );
     }
 
     // implement interface method
@@ -84,14 +131,20 @@ export class TutorialPlayerPopup implements ITutorialPlayerPopup {
         return this.group;
     }
 
-    show(tutorialPath: string): void {
-        // load tutorial image from path
-        Konva.Image.fromURL(tutorialPath, (img) => {
-            this.tutorialImage.image(img.image());
-            
-        });
+    show(card: Card): void {
+        // 更新文字内容
+        this.cardNameText.text(`${card.name} Tutorial`);
+        this.tutorialTitleText.text(`How to Unlock ${card.name}`);
+        this.tutorialDescriptionText.text(`Complete the tutorial below to unlock ${card.name} and add it to your deck!`);
 
-        // 2. 显示组
+        // load tutorial image from path
+        if (card.tutorial_path) {
+            Konva.Image.fromURL(card.tutorial_path, (img) => {
+                this.tutorialImage.image(img.image());
+            });
+        }
+
+        // 显示组
         this.group.visible(true);
     }
 

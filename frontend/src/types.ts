@@ -31,7 +31,7 @@ export interface ITutorialPlayerPopup {
   
   getGroup(): Group;
   
-  show(tutorialPath: string): void;
+  show(card: Card): void;
   
   hide(): void;
 }
