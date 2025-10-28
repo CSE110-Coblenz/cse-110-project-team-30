@@ -5,24 +5,20 @@ import type { Group } from 'konva/lib/Group';
 import type { ITutorialPlayerPopup } from '../../types'; // 导入契约
 import { SCREEN_WIDTH, SCREEN_HEIGHT, POPUP_STYLES } from '../../constants';
 
-/**
- * Ethan 的“教程”弹窗组件
- * 它实现了 ITutorialPlayerPopup 接口
- * (假设教程是一张图片)
- */
+
 export class TutorialPlayerPopup implements ITutorialPlayerPopup {
     
     private group: Group;
     private tutorialImage: Konva.Image;
 
     constructor() {
-        // 1. 创建总组
+        // create the main group
         this.group = new Konva.Group({
             visible: false, // 默认隐藏
             zIndex: 1000
         });
 
-        // 2. 创建遮罩
+        //careate overlay
         const overlay = new Konva.Rect({
             x: 0,
             y: 0,
@@ -34,7 +30,7 @@ export class TutorialPlayerPopup implements ITutorialPlayerPopup {
         overlay.on('click', () => this.hide());
         this.group.add(overlay);
 
-        // 3. 创建弹窗背景 (让它大一点以适应教程图片)
+        // create popup window
         const windowWidth = 600;
         const windowHeight = 450;
         const windowX = (SCREEN_WIDTH - windowWidth) / 2;
@@ -51,7 +47,7 @@ export class TutorialPlayerPopup implements ITutorialPlayerPopup {
         });
         this.group.add(popupWindow);
 
-        // 4. 创建关闭按钮
+        // create close button
         const closeBtn = new Konva.Text({
             x: windowX + windowWidth - POPUP_STYLES.PADDING - 10,
             y: windowY + POPUP_STYLES.PADDING,
@@ -62,16 +58,16 @@ export class TutorialPlayerPopup implements ITutorialPlayerPopup {
         closeBtn.on('click', () => this.hide());
         this.group.add(closeBtn);
 
-        // 5. 创建教程图片占位符
+        //create placeholder rectangle and tutorial image
      const placeholderRect = new Konva.Rect({
             x: windowX + POPUP_STYLES.PADDING,
-            y: windowY + POPUP_STYLES.PADDING + 30, // 在关闭按钮下方
+            y: windowY + POPUP_STYLES.PADDING + 30, 
             width: windowWidth - (POPUP_STYLES.PADDING * 2),
             height: windowHeight - (POPUP_STYLES.PADDING * 2) - 30,
             fill: '#ccc'
         });
 
-        // 【已修复】 5.2: 创建 Konva.Image
+        //  Konva.Image
         this.tutorialImage = new Konva.Image({
             x: windowX + POPUP_STYLES.PADDING,
             y: windowY + POPUP_STYLES.PADDING + 30,
@@ -82,17 +78,17 @@ export class TutorialPlayerPopup implements ITutorialPlayerPopup {
         this.group.add(placeholderRect, this.tutorialImage);
     }
 
-    // --- 实现接口要求的方法 ---
+    // implement interface method
 
     getGroup(): Group {
         return this.group;
     }
 
     show(tutorialPath: string): void {
-        // 1. 异步加载教程图片
+        // load tutorial image from path
         Konva.Image.fromURL(tutorialPath, (img) => {
             this.tutorialImage.image(img.image());
-            // (你可能需要调整图片的宽高比)
+            
         });
 
         // 2. 显示组

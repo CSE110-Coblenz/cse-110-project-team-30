@@ -5,28 +5,24 @@ import type { Group } from 'konva/lib/Group';
 import type { Card, ICardDetailsPopup } from '../../types'; // 导入契约
 import { SCREEN_WIDTH, SCREEN_HEIGHT, POPUP_STYLES } from '../../constants';
 
-/**
- * Ethan 的“卡片详情”弹窗组件
- * 它实现了 ICardDetailsPopup 接口，并使用 Konva 绘制
- */
+
 export class CardDetailsPopup implements ICardDetailsPopup {
     
     private group: Group;
     
-    // 弹窗内的 Konva 元素
+    // popup content elements
     private cardNameText: Konva.Text;
     private cardImage: Konva.Image;
     private cardCostText: Konva.Text;
     private cardDescriptionText: Konva.Text;
 
     constructor() {
-        // 1. 创建总组 (Group)，Huerter 将通过 getGroup() 获取它
         this.group = new Konva.Group({
-            visible: false, // 默认隐藏
-            zIndex: 1000     // 确保它在最上层
+            visible: false, 
+            zIndex: 1000    
         });
 
-        // 2. 创建一个全屏黑色半透明遮罩
+        //create overlay
         const overlay = new Konva.Rect({
             x: 0,
             y: 0,
@@ -35,11 +31,11 @@ export class CardDetailsPopup implements ICardDetailsPopup {
             fill: POPUP_STYLES.OVERLAY_COLOR,
             opacity: POPUP_STYLES.OVERLAY_OPACITY
         });
-        // 点击遮罩时关闭弹窗
+        // click overlay to close popup
         overlay.on('click', () => this.hide());
         this.group.add(overlay);
 
-        // 3. 创建弹窗的背景窗口
+        // create popup window
         const windowWidth = POPUP_STYLES.WINDOW_WIDTH;
         const windowHeight = POPUP_STYLES.WINDOW_HEIGHT;
         const windowX = (SCREEN_WIDTH - windowWidth) / 2;
@@ -56,7 +52,7 @@ export class CardDetailsPopup implements ICardDetailsPopup {
         });
         this.group.add(popupWindow);
 
-        // 4. 创建一个关闭按钮
+        // create close button
         const closeBtn = new Konva.Text({
             x: windowX + windowWidth - POPUP_STYLES.PADDING - 10,
             y: windowY + POPUP_STYLES.PADDING,
@@ -68,8 +64,8 @@ export class CardDetailsPopup implements ICardDetailsPopup {
         closeBtn.on('click', () => this.hide());
         this.group.add(closeBtn);
 
-        // 5. 创建用于显示内容的 Konva 节点 (先占位)
-        // --- 卡片名称 ---
+        
+        // card name
         this.cardNameText = new Konva.Text({
             x: windowX,
             y: windowY + 40,
@@ -86,19 +82,19 @@ export class CardDetailsPopup implements ICardDetailsPopup {
             y: windowY + 80,
             width: windowWidth - (POPUP_STYLES.PADDING * 2),
             height: 200,
-            fill: '#ccc' // 灰色占位符颜色
+            fill: '#ccc' 
         });
 
-        // 【已修复】 5.2: 创建 Konva.Image，它没有 'fill'，但需要 'image' 属性
+        //  Konva.Image
         this.cardImage = new Konva.Image({
             x: windowX + POPUP_STYLES.PADDING,
             y: windowY + 80,
             width: windowWidth - (POPUP_STYLES.PADDING * 2),
             height: 200,
-            image: undefined // 必须有 image 属性，即使是 undefined
+            image: undefined 
         });
 
-        // --- 卡片费用 ---
+        // card cost
         this.cardCostText = new Konva.Text({
             x: windowX + POPUP_STYLES.PADDING,
             y: windowY + 300,
@@ -108,7 +104,7 @@ export class CardDetailsPopup implements ICardDetailsPopup {
             fill: POPUP_STYLES.TEXT_COLOR,
         });
 
-        // --- 卡片描述 ---
+        // -- card description
         this.cardDescriptionText = new Konva.Text({
             x: windowX + POPUP_STYLES.PADDING,
             y: windowY + 340,
@@ -121,46 +117,40 @@ export class CardDetailsPopup implements ICardDetailsPopup {
 
        this.group.add(
             this.cardNameText, 
-            imagePlaceholder, // 添加占位符
-            this.cardImage,    // 添加图片层
+            imagePlaceholder, 
+            this.cardImage,   
             this.cardCostText, 
             this.cardDescriptionText
         );
     }
 
-    // --- 实现接口要求的方法 ---
+    // implement interface method
 
-    /**
-     * Huerter (或 Controller) 将调用此方法来获取你的弹窗组
-     */
+   
     getGroup(): Group {
         return this.group;
     }
 
-    /**
-     * Huerter (或 Controller) 将调用此方法来显示和填充弹窗
-     */
+    
     show(card: Card): void {
-        // 1. 填充文本数据
+       
         this.cardNameText.text(card.name);
         this.cardCostText.text(`Cost: ${card.cost}`);
         this.cardDescriptionText.text(card.description);
 
-        // 2. 异步加载卡片图片
+    
         Konva.Image.fromURL(card.imageUrl, (img) => {
             this.cardImage.image(img.image());
-            // 可选：根据图片调整大小
+            // you may need to adjust image size here
             // this.cardImage.width(img.width());
             // this.cardImage.height(img.height());
         });
 
-        // 3. 显示组
+
         this.group.visible(true);
     }
 
-    /**
-     * Huerter (或 Controller) 将调用此方法来隐藏弹窗
-     */
+   
     hide(): void {
         this.group.visible(false);
     }
