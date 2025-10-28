@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Huerter's Popup Test Sandbox</title>
+  <style>
+    /* 简单的样式，让按钮和画布分开 */
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    #konva-container {
+      border: 1px solid #ccc;
+      width: 1024px; /* 必须和 constants.ts 里的 SCREEN_WIDTH 一致 */
+      height: 768px; /* 必须和 constants.ts 里的 SCREEN_HEIGHT 一致 */
+    }
+    .controls { margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+
+  <h1>Huerter 的弹窗测试平台</h1>
+  
+  <div class="controls">
+    <button id="test-details-btn">测试 (已解锁) 卡片详情弹窗</button>
+    <button id="test-tutorial-btn">测试 (未解锁) 教程弹窗</button>
+  </div>
+
+  <div id="konva-container"></div>
+
+  <script type="module" src="/huerter-test.ts"></script>
+
+</body>
+</html>
