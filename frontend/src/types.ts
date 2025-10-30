@@ -9,13 +9,15 @@ export interface View {
 /**
  * Screen types for navigation
  *
+ * - "login": Login screen
  * - "menu": Main menu screen
  * - "cards": Cards screen
  * - "battle": Battle screen
  * - "results": Results screen with total points
- *   - score: Final score to display on results screen
+ * - score: Final score to display on results screen
  */
 export type Screen =
+        | { type: "login" }
         | { type: "menu" }
         | { type: "cards" }
         | { type: "battle" }

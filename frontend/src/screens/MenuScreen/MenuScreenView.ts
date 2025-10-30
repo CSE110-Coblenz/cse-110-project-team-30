@@ -21,7 +21,7 @@ export class MenuScreenView implements View {
 	private pointsText: Konva.Text;
 
         constructor(buttons: ButtonConfig[]) {
-		this.group = new Konva.Group({ visible: true });
+		this.group = new Konva.Group({ visible: false });
 		
                 // Title text
                 const title = new Konva.Text({
