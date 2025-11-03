@@ -2,7 +2,7 @@
 // This file maps API endpoints to the Controller functions.
 const express = require('express');
 const router = express.Router();
-const LeaderboardController = require('./leaderboard.controller');
+const LeaderboardController = require('./LeaderboardScreenController');
 
 /**
  * @route GET /api/leaderboard/
