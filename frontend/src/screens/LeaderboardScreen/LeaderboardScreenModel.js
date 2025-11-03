@@ -1,14 +1,17 @@
 // --- MODEL (M) ---
 // This file handles all direct interaction with the MySQL database.
-// To run this, you must install the 'mysql2' package: npm install mysql2
+// To run this, you must install the 'mysql2' and 'dotenv' packages: npm install mysql2 dotenv
+
+require('dotenv').config(); // Load environment variables from .env
 const mysql = require('mysql2/promise');
 
-// IMPORTANT: Replace these with your actual database credentials.
+// Load database configuration from environment variables
 const dbConfig = {
-    host: 'localhost',
-    user: 'root',
-    password: 'your_mysql_password', // Change this!
-    database: 'game_db', // Ensure this database and a 'leaderboard' table exist
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
 };
 
 /**
@@ -28,7 +31,7 @@ async function getLeaderboardData() {
         ORDER BY points DESC 
         LIMIT 10;
     `;
-    
+
     try {
         // Execute the query. The result is an array of rows and field data.
         const [rows] = await pool.execute(query);

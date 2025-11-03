@@ -26,5 +26,5 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
     console.log('API endpoint: http://localhost:3000/api/leaderboard');
-    // REMINDER: You need to run 'node server.js' and have MySQL running for the app to work.
+    // run 'node server.js' and have MySQL running for the app to work
 });

@@ -1,6 +1,6 @@
 // --- CONTROLLER (C) ---
 // This file handles the logic for processing the request and generating the response.
-const LeaderboardModel = require('./leaderboard.model');
+const LeaderboardModel = require('./LeaderboardScreenModel');
 
 /**
  * Controller function to fetch and send the leaderboard data.
