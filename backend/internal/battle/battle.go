@@ -31,3 +31,7 @@ func (b *Battle) SpawnTroop(team common.Team, pos common.Position) (*troops.Troo
 func (b *Battle) PrintArena() string {
 	return b.Arena.String()
 }
+
+func (b *Battle) PrintArenaWithMarkers(markers []common.Position) string {
+	return b.Arena.StringWithMarkers(markers)
+}

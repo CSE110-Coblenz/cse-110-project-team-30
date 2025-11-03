@@ -1,1 +1,1 @@
-This is for private code that the client should not access
+This is for private code that the client should not access directly. All endpoints should go in routes!
