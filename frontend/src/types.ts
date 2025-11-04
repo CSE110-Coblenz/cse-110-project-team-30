@@ -1,9 +1,9 @@
 import type { Group } from "konva/lib/Group";
 
 export interface View {
-        getGroup(): Group;
-        show(): void;
-        hide(): void;
+  getGroup(): Group;
+  show(): void;
+  hide(): void;
 }
 
 /**
@@ -13,28 +13,28 @@ export interface View {
  * - "menu": Main menu screen
  * - "cards": Cards screen
  * - "battle": Battle screen
- * - "results": Results screen with total points
- * - score: Final score to display on results screen
+ * - "results": Results screen
+ * - pointsUpdate: Points earned/lost to display on results screen
  */
 export type Screen =
-        | { type: "login" }
-        | { type: "menu" }
-        | { type: "cards" }
-        | { type: "battle" }
-        | { type: "results"; points: number };
+  | { type: "login" }
+  | { type: "menu" }
+  | { type: "cards" }
+  | { type: "battle" }
+  | { type: "results"; pointsUpdate: number };
 
 export abstract class ScreenController {
-        abstract getView(): View;
+  abstract getView(): View;
 
-        show(): void {
-                this.getView().show();
-        }
+  show(): void {
+    this.getView().show();
+  }
 
-        hide(): void {
-                this.getView().hide();
-        }
+  hide(): void {
+    this.getView().hide();
+  }
 }
 
 export interface ScreenSwitcher {
-        switchToScreen(screen: Screen): void;
+  switchToScreen(screen: Screen): void;
 }
