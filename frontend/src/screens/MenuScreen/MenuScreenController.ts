@@ -1,5 +1,6 @@
 import { ScreenController } from "../../types.ts";
 import type { ScreenSwitcher } from "../../types.ts";
+import { PlayerModel } from "../../PlayerModel.ts";
 import { MenuScreenView } from "./MenuScreenView.ts";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
 
@@ -13,7 +14,10 @@ export class MenuScreenController extends ScreenController {
   constructor(screenSwitcher: ScreenSwitcher) {
     super();
     this.screenSwitcher = screenSwitcher;
-    this.view = new MenuScreenView((id: string) => this.handleClick(id));
+    this.playerModel = new PlayerModel();
+    this.view = new MenuScreenView(this.playerModel, (id: string) =>
+      this.handleClick(id),
+    );
   }
 
   /**

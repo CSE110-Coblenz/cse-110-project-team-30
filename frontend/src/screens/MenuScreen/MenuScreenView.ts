@@ -1,5 +1,6 @@
 import Konva from "konva";
 import type { View } from "../../types.ts";
+import { PlayerModel } from "../../PlayerModel";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
 
 /**
@@ -9,7 +10,10 @@ export class MenuScreenView implements View {
   private group: Konva.Group;
   private pointsText: Konva.Text;
 
-  constructor(private onButtonClick: (id: string) => void) {
+  constructor(
+    private model: PlayerModel,
+    private onButtonClick: (id: string) => void,
+  ) {
     this.group = new Konva.Group({ visible: false });
 
     // Background Image
@@ -49,8 +53,8 @@ export class MenuScreenView implements View {
     const pointsImage = new Konva.Image({
       x: 0,
       y: 0,
-      width: 70,
-      height: 70,
+      width: 75,
+      height: 75,
     });
 
     const pointsImgObj = new Image();
@@ -62,10 +66,10 @@ export class MenuScreenView implements View {
     pointsGroup.add(pointsImage);
 
     this.pointsText = new Konva.Text({
-      x: pointsImage.x() + pointsImage.width() + padding,
-      y: pointsImage.y() + pointsImage.height() / 2,
-      text: "0",
-      fontSize: 24,
+      x: pointsImage.x() + pointsImage.width() / 2,
+      y: pointsImage.y() + pointsImage.height() + padding,
+      text: "Points: 0",
+      fontSize: 18,
       fontFamily: "Arial",
       fill: "black",
     });
@@ -104,13 +108,13 @@ export class MenuScreenView implements View {
         leaderboardGroup.add(leaderboardImage);
 
         const leaderboardText = new Konva.Text({
+          x: imgWidth / 2,
+          y: imgHeight + padding,
           text: btn.label,
           fontSize: 18,
           fontFamily: "Arial",
           fill: "black",
         });
-        leaderboardText.x(imgWidth / 2);
-        leaderboardText.y(imgHeight + padding);
         leaderboardText.offsetX(leaderboardText.width() / 2);
         leaderboardGroup.add(leaderboardText);
 
@@ -226,13 +230,17 @@ export class MenuScreenView implements View {
       minigameButton,
       logoutButton,
     );
+
+    this.model.subscribe(() => this.updatePoints());
+    this.updatePoints();
   }
 
   /**
    * Update points display
    */
-  updatePoints(points: number) {
-    this.pointsText.text(`${points}`);
+  updatePoints() {
+    this.pointsText.text(`Points: ${this.model.getTotalPoints()}`);
+    this.pointsText.offsetX(this.pointsText.width() / 2);
     this.group.getLayer()?.draw();
   }
 
