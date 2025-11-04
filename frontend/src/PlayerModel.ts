@@ -1,6 +1,6 @@
 export class PlayerModel {
   private totalPoints: number = 0;
-  private subscribers: (() => void)[] = [];
+  private subscribers: ((points: number) => void)[] = [];
 
   updateTotalPoints(points: number) {
     this.totalPoints += points;
