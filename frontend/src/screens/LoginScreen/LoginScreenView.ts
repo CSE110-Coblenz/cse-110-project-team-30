@@ -15,7 +15,8 @@ export class LoginScreenView implements View {
   private errorText: Konva.Text | null = null;
 
   constructor(private onButtonClick: (id: string) => void) {
-    this.group = new Konva.Group({ visible: true });
+    //SHOULD BE SET TO TRUE; ONLY FALSE FOR TESTING
+    this.group = new Konva.Group({ visible: false });
 
     // Background Image
     const backgroundImage = new Image();
@@ -309,6 +310,8 @@ export class LoginScreenView implements View {
       password: this.passwordInput.value,
     };
   }
+
+  // Show error message when necessary
   showErrorMessage(message: string): void {
     // If errorText doesn’t exist yet, create it
     if (!this.errorText) {
@@ -332,22 +335,25 @@ export class LoginScreenView implements View {
     this.errorText.visible(true);
     this.errorText.getLayer()?.batchDraw();
   }
+
+  // Hide error message
   hideErrorMessage(): void {
     if (this.errorText) {
       this.errorText.visible(false);
       this.errorText.getLayer()?.batchDraw();
     }
   }
+
   /**
    * Show the screen
    */
   show(): void {
     this.group.visible(true);
-    this.group.getLayer()?.draw();
     this.usernameInput.value = "";
     this.passwordInput.value = "";
     this.usernameInput.style.display = "block";
     this.passwordInput.style.display = "block";
+    this.group.getLayer()?.draw();
   }
 
   /**
@@ -355,9 +361,9 @@ export class LoginScreenView implements View {
    */
   hide(): void {
     this.group.visible(false);
-    this.group.getLayer()?.draw();
     this.usernameInput.style.display = "none";
     this.passwordInput.style.display = "none";
+    this.group.getLayer()?.draw();
   }
 
   getGroup(): Konva.Group {

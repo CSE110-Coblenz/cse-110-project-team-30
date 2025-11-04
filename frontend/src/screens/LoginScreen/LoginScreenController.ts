@@ -20,7 +20,7 @@ export class LoginScreenController extends ScreenController {
    * Handle button click
    */
   private handleButtonClick(buttonId: string): void {
-	const { username, password } = this.view.getInputValues();
+    const { username, password } = this.view.getInputValues();
 
     if (!username.trim() || !password.trim()) {
       this.view.showErrorMessage("Please enter both username and password");
