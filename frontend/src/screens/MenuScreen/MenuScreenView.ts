@@ -68,14 +68,16 @@ export class MenuScreenView implements View {
     this.pointsText = new Konva.Text({
       x: pointsImage.x() + pointsImage.width() / 2,
       y: pointsImage.y() + pointsImage.height() + padding,
-      text: "Points: 0",
+      width: pointsImage.width(),
+      text: `Points: ${this.model.getTotalPoints()}`,
       fontSize: 18,
       fontFamily: "Arial",
       fill: "black",
+      align: "center",
+      wrap: "word",
     });
     pointsGroup.add(this.pointsText);
     this.pointsText.offsetX(this.pointsText.width() / 2);
-    this.pointsText.offsetY(this.pointsText.height() / 2);
 
     this.group.add(pointsGroup);
 
@@ -241,6 +243,7 @@ export class MenuScreenView implements View {
   updatePoints() {
     this.pointsText.text(`Points: ${this.model.getTotalPoints()}`);
     this.pointsText.offsetX(this.pointsText.width() / 2);
+    this.pointsText.offsetY(this.pointsText.height() / 2);
     this.group.getLayer()?.draw();
   }
 
