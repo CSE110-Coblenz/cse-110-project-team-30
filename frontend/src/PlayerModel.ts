@@ -17,6 +17,6 @@ export class PlayerModel {
   }
 
   private notify() {
-    this.subscribers.forEach(callback => callback(this.totalPoints));
+    this.subscribers.forEach((callback) => callback(this.totalPoints));
   }
 }

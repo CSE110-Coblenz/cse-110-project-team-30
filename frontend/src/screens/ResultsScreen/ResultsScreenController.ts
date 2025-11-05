@@ -14,15 +14,15 @@ export class ResultsScreenController extends ScreenController {
   private view: ResultsScreenView;
   private screenSwitcher: ScreenSwitcher;
 
-  private gameOverSound: HTMLAudioElement;
+  //private gameOverSound: HTMLAudioElement;
 
   constructor(screenSwitcher: ScreenSwitcher) {
     super();
     this.screenSwitcher = screenSwitcher;
     this.model = new ResultsScreenModel();
-    this.view = new ResultsScreenView(() => this.handleHomeClick());
+    this.view = new ResultsScreenView(() => this.handleClick());
 
-    this.gameOverSound = new Audio("/gameover.mp3"); // Placeholder
+    //this.gameOverSound = new Audio("/gameover.mp3");
   }
 
   /**
@@ -52,7 +52,7 @@ export class ResultsScreenController extends ScreenController {
   /**
    * Handle home button click
    */
-  private handleHomeClick(): void {
+  private handleClick(): void {
     this.screenSwitcher.switchToScreen({ type: "menu" });
   }
 
