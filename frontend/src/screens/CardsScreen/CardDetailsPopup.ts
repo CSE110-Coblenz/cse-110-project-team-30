@@ -144,14 +144,17 @@ export class CardDetailsPopup implements ICardDetailsPopup {
             // you may need to adjust image size here
             // this.cardImage.width(img.width());
             // this.cardImage.height(img.height());
+            this.group.getLayer()?.draw();
         });
 
 
         this.group.visible(true);
+        this.group.getLayer()?.draw();
     }
 
    
     hide(): void {
         this.group.visible(false);
+        this.group.getLayer()?.draw();
     }
 }

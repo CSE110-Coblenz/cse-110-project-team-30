@@ -1,5 +1,6 @@
 import Konva from 'konva';
-import type { View } from "../../types.ts";
+// NEW: Import the Card interface you defined
+import type { View, Card } from "../../types.ts"; 
 import { STAGE_WIDTH, STAGE_HEIGHT } from '../../constants';
 
 /**
@@ -8,11 +9,18 @@ import { STAGE_WIDTH, STAGE_HEIGHT } from '../../constants';
 export class CardsScreenView implements View {
   private group: Konva.Group;
   private handleHomeClick: () => void;
+  // NEW: Add a private member to store the card data
+  private cardsData: Card[];
+  // NEW: Add callback for card clicks
+  private handleCardClick: (card: Card) => void;
 
-
-  // TODO: get menu Cards Button handler and insert into constructor
-  constructor(handleHomeClick: () => void) {
-    this.handleHomeClick = handleHomeClick; 
+  // CHANGED: Constructor now requires card data and card click handler
+  constructor(handleHomeClick: () => void, cardsData: Card[], handleCardClick: (card: Card) => void) {
+    this.handleHomeClick = handleHomeClick;
+    // NEW: Store the card data
+    this.cardsData = cardsData;
+    // NEW: Store the card click handler
+    this.handleCardClick = handleCardClick; 
 
     //create group
     this.group = new Konva.Group({visible: false});
@@ -26,6 +34,7 @@ export class CardsScreenView implements View {
    * Create the title text at the top center
    */
   private createTitle(): void {
+    // ... (This function is unchanged) ...
     const title = new Konva.Text({
       text: 'Card Collection',
       fontSize: 48,
@@ -42,6 +51,7 @@ export class CardsScreenView implements View {
    * Create a home button at the top-left corner
    */
   private createHomeButton(): void {
+    // ... (This function is unchanged) ...
     const buttonGroup = new Konva.Group({
       x: 30,
       y: 30,
@@ -104,21 +114,28 @@ export class CardsScreenView implements View {
     const startX = (STAGE_WIDTH - gridWidth) / 2;
     const startY = (STAGE_HEIGHT - gridHeight) / 2 + 60;
 
-    const rowImages = [
-        '/menu_images/swordsman.png',
-        '/menu_images/archer.png',
-        '/menu_images/spearman.png',
-        '/menu_images/cavalry.png',
-    ];
+    // DELETED: The old rowImages array has been removed
+    // const rowImages = [ ... ];
 
     for (let row = 0; row < rows; row++) {
-      const imageSrc = rowImages[row]!;
       for (let col = 0; col < cols; col++) {
+        
+        // NEW: Get the current card's data from the this.cardsData array
+        const cardIndex = row * cols + col;
+        const cardData = this.cardsData[cardIndex];
+
+        // NEW: Skip if data is missing
+        if (!cardData) {
+          console.warn(`Missing card data for index ${cardIndex}`);
+          continue;
+        }
+
         const x = startX + col * (cardWidth + gap);
         const y = startY + row * (cardHeight + gap);
 
         const imageObj = new Image();
-        imageObj.src = imageSrc;
+        // CHANGED: Use cardData.imageUrl
+        imageObj.src = cardData.imageUrl; 
 
         imageObj.onload = () => {
           const cardGroup = new Konva.Group({
@@ -126,7 +143,8 @@ export class CardsScreenView implements View {
             y,
             width: cardWidth,
             height: cardHeight,
-            cursor: 'pointer',
+            // CHANGED: Cursor is 'pointer' since all cards are clickable
+            cursor: 'pointer', 
           });
 
           const cardImage = new Konva.Image({
@@ -139,7 +157,7 @@ export class CardsScreenView implements View {
           const cardBorder = new Konva.Rect({
             width: cardWidth,
             height: cardHeight,
-            stroke: '#ccc',
+            stroke: '#ccc', // Default border
             strokeWidth: 2,
             cornerRadius: 8,
             shadowColor: 'black',
@@ -147,15 +165,46 @@ export class CardsScreenView implements View {
             shadowOffset: { x: 2, y: 2 },
             shadowOpacity: 0.1,
           });
+          
+          // --- NEW: Core Logic ---
+          if (cardData.is_locked) {
+            // **Card is LOCKED**
+            // 1. Apply grayscale filter
+            cardImage.filters([Konva.Filters.Grayscale]);
+            cardImage.cache(); // Filters require caching
+            
+            // 2. Set border to gray
+            cardBorder.stroke('#999');
 
-          cardGroup.on('mouseover', () => {
-            cardBorder.stroke('#4a90e2');
-            cardGroup.getLayer()?.draw();
-          });
-          cardGroup.on('mouseout', () => {
-            cardBorder.stroke('#ccc');
-            cardGroup.getLayer()?.draw();
-          });
+            // 3. Click event - show tutorial popup
+            cardGroup.on('click', () => {
+              console.log('Clicked LOCKED card:', cardData.name);
+              this.handleCardClick(cardData);
+            });
+            // (No mouseover effect)
+
+          } else {
+            // **Card is UNLOCKED**
+            
+            // 1. (No filters)
+
+            // 2. Add mouseover/mouseout effects
+            cardGroup.on('mouseover', () => {
+              cardBorder.stroke('#4a90e2');
+              cardGroup.getLayer()?.draw();
+            });
+            cardGroup.on('mouseout', () => {
+              cardBorder.stroke('#ccc');
+              cardGroup.getLayer()?.draw();
+            });
+
+            // 3. Click event - show card details popup
+            cardGroup.on('click', () => {
+              console.log('Clicked UNLOCKED card:', cardData.name);
+              this.handleCardClick(cardData);
+            });
+          }
+          // --- End of Logic ---
 
           cardGroup.add(cardImage);
           cardGroup.add(cardBorder);

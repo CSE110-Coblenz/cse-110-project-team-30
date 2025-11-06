@@ -141,14 +141,17 @@ export class TutorialPlayerPopup implements ITutorialPlayerPopup {
         if (card.tutorial_path) {
             Konva.Image.fromURL(card.tutorial_path, (img) => {
                 this.tutorialImage.image(img.image());
+                this.group.getLayer()?.draw();
             });
         }
 
         // 显示组
         this.group.visible(true);
+        this.group.getLayer()?.draw();
     }
 
     hide(): void {
         this.group.visible(false);
+        this.group.getLayer()?.draw();
     }
 }
