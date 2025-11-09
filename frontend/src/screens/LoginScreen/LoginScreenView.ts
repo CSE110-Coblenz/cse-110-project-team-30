@@ -55,7 +55,7 @@ export class LoginScreenView implements View {
       y: STAGE_HEIGHT / 2,
     });
 
-    const containerWidth = STAGE_WIDTH / 2;
+    const containerWidth = STAGE_WIDTH / 2.5;
     const containerHeight = STAGE_HEIGHT / 2;
 
     // Container rectangle
@@ -177,7 +177,7 @@ export class LoginScreenView implements View {
 
     const btnWidth = 120;
     const btnHeight = 40;
-    const btnSpacing = 10;
+    const btnSpacing = 40;
 
     // Create buttons helper
     const createButton = (btn: {
@@ -319,13 +319,13 @@ export class LoginScreenView implements View {
         x: 0,
         y: 0,
         text: message,
-        fontSize: 14,
+        fontSize: 15,
         fontFamily: "Arial",
         fill: "red",
         align: "center",
       });
 
-      this.errorText.y(this.loginGroup.height() / 2 + 200);
+      this.errorText.y(this.loginGroup.height() / 2 + 180);
       this.errorText.offsetX(this.errorText.width() / 2);
       this.loginGroup.add(this.errorText);
     } else {

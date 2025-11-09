@@ -32,9 +32,6 @@ export class MenuScreenController extends ScreenController {
       case "cards":
         this.screenSwitcher.switchToScreen({ type: "cards" });
         break;
-      case "levelUp":
-        this.screenSwitcher.switchToScreen({ type: "minigame" });
-        break;
       case "logout":
         this.screenSwitcher.switchToScreen({ type: "login" });
         break;
