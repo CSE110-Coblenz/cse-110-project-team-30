@@ -193,7 +193,7 @@ export class MenuScreenView implements View {
       id: "battle",
       label: "Battle",
       x: STAGE_WIDTH / 2,
-      y: STAGE_HEIGHT / 2 - 150,
+      y: STAGE_HEIGHT / 2 - 70,
       width: btnWidth,
       height: btnHeight,
       fill: "#004a3a", // dark green
@@ -202,19 +202,10 @@ export class MenuScreenView implements View {
       id: "cards",
       label: "Cards Library",
       x: STAGE_WIDTH / 2,
-      y: STAGE_HEIGHT / 2,
+      y: STAGE_HEIGHT / 2 + 70,
       width: btnWidth,
       height: btnHeight,
       fill: "#000080", // dark blue
-    });
-    const minigameButton = createButton({
-      id: "levelUp",
-      label: "Level Up",
-      x: STAGE_WIDTH / 2,
-      y: STAGE_HEIGHT / 2 + 150,
-      width: btnWidth,
-      height: btnHeight,
-      fill: "#220135", // dark purple
     });
     const logoutButton = createButton({
       id: "logout",
@@ -225,13 +216,7 @@ export class MenuScreenView implements View {
       height: 40,
       fill: "#460000", // dark red
     });
-    this.group.add(
-      leaderboardButton,
-      battleButton,
-      cardsButton,
-      minigameButton,
-      logoutButton,
-    );
+    this.group.add(leaderboardButton, battleButton, cardsButton, logoutButton);
 
     this.model.subscribe(() => this.updatePoints());
     this.updatePoints();
