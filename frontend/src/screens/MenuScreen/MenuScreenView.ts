@@ -26,7 +26,7 @@ export class MenuScreenView implements View {
         width: STAGE_WIDTH,
         height: STAGE_HEIGHT,
         image: backgroundImage,
-        opacity: 0.6,
+        opacity: 0.5,
       });
       this.group.add(bg);
       bg.moveToBottom();
@@ -49,12 +49,12 @@ export class MenuScreenView implements View {
 
     // Display points
     const padding = 5;
-    const pointsGroup = new Konva.Group({ x: 10, y: 10 });
+    const pointsGroup = new Konva.Group({ x: 10, y: 5 });
     const pointsImage = new Konva.Image({
       x: 0,
       y: 0,
-      width: 75,
-      height: 75,
+      width: 80,
+      height: 80,
     });
 
     const pointsImgObj = new Image();
@@ -67,11 +67,12 @@ export class MenuScreenView implements View {
 
     this.pointsText = new Konva.Text({
       x: pointsImage.x() + pointsImage.width() / 2,
-      y: pointsImage.y() + pointsImage.height() + padding,
+      y: pointsImage.y() + pointsImage.height() + padding * 2,
       width: pointsImage.width(),
       text: `Points: ${this.model.getTotalPoints()}`,
       fontSize: 18,
       fontFamily: "Arial",
+      fontStyle: "bold",
       fill: "black",
       align: "center",
       wrap: "word",
@@ -115,6 +116,7 @@ export class MenuScreenView implements View {
           text: btn.label,
           fontSize: 18,
           fontFamily: "Arial",
+          fontStyle: "bold",
           fill: "black",
         });
         leaderboardText.offsetX(leaderboardText.width() / 2);
