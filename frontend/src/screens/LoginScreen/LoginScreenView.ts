@@ -319,13 +319,13 @@ export class LoginScreenView implements View {
         x: 0,
         y: 0,
         text: message,
-        fontSize: 14,
+        fontSize: 15,
         fontFamily: "Arial",
         fill: "red",
         align: "center",
       });
 
-      this.errorText.y(this.loginGroup.height() / 2 + 200);
+      this.errorText.y(this.loginGroup.height() / 2 + 180);
       this.errorText.offsetX(this.errorText.width() / 2);
       this.loginGroup.add(this.errorText);
     } else {
