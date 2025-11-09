@@ -55,7 +55,7 @@ export class LoginScreenView implements View {
       y: STAGE_HEIGHT / 2,
     });
 
-    const containerWidth = STAGE_WIDTH / 2;
+    const containerWidth = STAGE_WIDTH / 2.5;
     const containerHeight = STAGE_HEIGHT / 2;
 
     // Container rectangle
@@ -177,7 +177,7 @@ export class LoginScreenView implements View {
 
     const btnWidth = 120;
     const btnHeight = 40;
-    const btnSpacing = 10;
+    const btnSpacing = 40;
 
     // Create buttons helper
     const createButton = (btn: {
