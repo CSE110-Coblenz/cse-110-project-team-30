@@ -3,7 +3,7 @@
 // To run this, you must install the 'express' and 'cors' packages: npm install express cors
 const express = require('express');
 const cors = require('cors'); 
-const leaderboardRoutes = require('./LeaderboardScreenRoutes');
+const routes = require('./routes');
 
 // --- Setup ---
 const app = express();
@@ -15,7 +15,7 @@ app.use(express.json());
 
 // --- Link Routes ---
 // All requests starting with /api/leaderboard will be handled by leaderboardRoutes
-app.use('/api/leaderboard', leaderboardRoutes);
+app.use('/api', routes);
 
 // Simple root route to confirm server is running
 app.get('/', (req, res) => {
