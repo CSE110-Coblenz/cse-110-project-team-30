@@ -3,21 +3,10 @@
 // To run this, you must install the 'mysql2' and 'dotenv' packages: npm install mysql2 dotenv
 
 require('dotenv').config(); // Load environment variables from .env
-const mysql = require('mysql2/promise');
+const db = require('../db');
 
-// Load database configuration from environment variables
-const dbConfig = {
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-};
-
-/**
- * Creates a connection pool to the database.
- */
-const pool = mysql.createPool(dbConfig);
+// Use singleton pool from backend-REST/db.js
+const pool = db.getPool();
 
 /**
  * Fetches the top 10 players from the 'leaderboard' table, ordered by points.
