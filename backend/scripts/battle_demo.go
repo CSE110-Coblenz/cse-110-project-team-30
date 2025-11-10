@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"cse-110-project-team-30/backend/internal/battle"
 	"cse-110-project-team-30/backend/internal/battle/common"
@@ -45,6 +46,16 @@ func main() {
 		fmt.Println("No enemies found for Troop 1")
 	}
 	// Print some info about spawned troops
+	fmt.Printf("Troop 1: %s at (%.1f, %.1f)\n", t1.Type, t1.Position.X, t1.Position.Y)
+	fmt.Printf("Troop 2: %s at (%.1f, %.1f)\n", t2.Type, t2.Position.X, t2.Position.Y)
+	fmt.Printf("Troop 3: %s at (%.1f, %.1f)\n", t3.Type, t3.Position.X, t3.Position.Y)
+	for i := 1; i <= 5; i++ {
+		fmt.Printf("\n--- Tick %d ---\n", i)
+		b.Tick() // This calls CalculateAction and applyMovement internally
+		fmt.Println(b.PrintArena())
+		time.Sleep(500 * time.Millisecond)
+	}
+	fmt.Printf("\nFinal Troop Positions after 5 ticks:\n")
 	fmt.Printf("Troop 1: %s at (%.1f, %.1f)\n", t1.Type, t1.Position.X, t1.Position.Y)
 	fmt.Printf("Troop 2: %s at (%.1f, %.1f)\n", t2.Type, t2.Position.X, t2.Position.Y)
 	fmt.Printf("Troop 3: %s at (%.1f, %.1f)\n", t3.Type, t3.Position.X, t3.Position.Y)

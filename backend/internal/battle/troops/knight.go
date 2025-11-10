@@ -28,6 +28,7 @@ func (k *Knight) CalculateAction(mv MapView) Action {
 	action := Action{
 		NextPosition: k.Position,
 		AttackTarget: nil,
+		Damage:       0,
 	}
 
 	// Find nearest enemy using BFS
@@ -39,6 +40,7 @@ func (k *Knight) CalculateAction(mv MapView) Action {
 	// If enemy is in range (adjacent), attack
 	if len(path) == 1 || util.GetDistance(k.Position, enemy.Position) <= float64(k.Range) {
 		action.AttackTarget = enemy
+		action.Damage = k.Damage
 		return action
 	}
 
