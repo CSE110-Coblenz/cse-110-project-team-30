@@ -5,6 +5,9 @@ export const STAGE_HEIGHT = window.innerHeight;
 // Battle settings
 export const BATTLE_DURATION = 180; // seconds
 
+// Cards selection
+export const MAX_CARDS_SELECTED = 4;
+
 // Points awarded per match
 export const WIN_POINTS = 5;
 export const LOSS_POINTS = -3;
