@@ -17,10 +17,30 @@ export class CardsScreenView implements View {
     //create group
     this.group = new Konva.Group({visible: false});
 
+    const backgroundImage = new Image();
+    backgroundImage.src = "card_images/wizard_background.png";
+    backgroundImage.onload = () => {
+      const bg = new Konva.Image({
+        x: 0,
+        y: 0,
+        width: STAGE_WIDTH,
+        height: STAGE_HEIGHT,
+        image: backgroundImage,
+        opacity: 0.5,
+      });
+      this.group.add(bg);
+      bg.moveToBottom();
+      this.createWizardBubble(1100, 275, "Click a card to learn more")
+    };
+
+    
+
     this.createTitle();
     this.createHomeButton();
     this.loadCardGrid();
+
   }
+  
 
   /**
    * Create the title text at the top center
@@ -165,6 +185,54 @@ export class CardsScreenView implements View {
       }
     }
   }
+/**
+ * Adds a speech bubble above the wizard's head, sized to fit the text
+ */
+private createWizardBubble(wizardX: number, wizardY: number, text: string): void {
+  const padding = 10;
+  const fontSize = 16;
+
+  // Create text first
+  const bubbleText = new Konva.Text({
+    text,
+    fontSize,
+    fontFamily: 'Arial',
+    fill: '#000',
+    align: 'center',
+    verticalAlign: 'middle',
+  });
+
+  // Create bubble background sized to fit text + padding
+  const bubbleRect = new Konva.Rect({
+    width: bubbleText.width() + padding * 2,
+    height: bubbleText.height() + padding * 2,
+    fill: '#fff',
+    stroke: '#333',
+    strokeWidth: 2,
+    cornerRadius: 10,
+    shadowColor: 'black',
+    shadowBlur: 5,
+    shadowOffset: { x: 2, y: 2 },
+    shadowOpacity: 0.2,
+  });
+
+  // Center the text inside the bubble
+  bubbleText.x(padding);
+  bubbleText.y(padding);
+
+  // Group them together
+  const bubbleGroup = new Konva.Group({
+    x: wizardX - bubbleRect.width() / 2,
+    y: wizardY - bubbleRect.height() - 10, // above wizard
+  });
+
+  bubbleGroup.add(bubbleRect);
+  bubbleGroup.add(bubbleText);
+
+  this.group.add(bubbleGroup);
+  bubbleGroup.getLayer()?.draw();
+}
+
 
   /**
    * Show the screen
