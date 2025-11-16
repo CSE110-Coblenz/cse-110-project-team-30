@@ -105,10 +105,10 @@ export class CardsScreenView implements View {
     const startY = (STAGE_HEIGHT - gridHeight) / 2 + 60;
 
     const rowImages = [
-        '/menu_images/swordsman.png',
-        '/menu_images/archer.png',
-        '/menu_images/spearman.png',
-        '/menu_images/cavalry.png',
+        '/card_images/swordsman.png',
+        '/card_images/archer.png',
+        '/card_images/spearman.png',
+        '/card_images/cavalry.png',
     ];
 
     for (let row = 0; row < rows; row++) {
@@ -189,114 +189,3 @@ export class CardsScreenView implements View {
     return this.group;
   }
 }
-
-
-// import Konva from 'konva';
-// import type { View } from "../../types.ts";
-// import { STAGE_WIDTH, STAGE_HEIGHT } from '../../constants';
-
-
-// export class CardsScreenView implements View {
-    
-//     private group: Konva.Group;
-//     private cardCollection: Konva.Text;
-//     private cardImage: Konva.Image;
-//     private cardCostText: Konva.Text;
-//     private cardDescriptionText: Konva.Text;
-
-//     constructor(handleHomeClick: () => void) {
-//         this.group = new Konva.Group({
-//             visible: false, 
-//             zIndex: 1000    
-//         });
-
-//         const overlay = new Konva.Rect({
-//             x: 0,
-//             y: 0,
-//             width: SCREEN_WIDTH,
-//             height: SCREEN_HEIGHT,
-//             fill: POPUP_STYLES.OVERLAY_COLOR,
-//             opacity: POPUP_STYLES.OVERLAY_OPACITY
-//         });
-//         overlay.on('click', () => this.hide());
-//         this.group.add(overlay);
-
-
-
-//         // create home button
-//         const homeButton = new Konva.Text({
-//             x: windowX + windowWidth,
-//             y: windowY,
-//             text: 'Home',
-//             fontSize: 20,
-//             fill: '#333333',
-//             fontFamily: 'Arial'
-//         });
-//         homeButton.on('click', () => this.hide());
-//         this.group.add(homeButton);
-
-        
-
-//         //  Konva.Image
-//         this.cardImage = new Konva.Image({
-//             x: windowX + POPUP_STYLES.PADDING,
-//             y: windowY + 80,
-//             width: windowWidth - (POPUP_STYLES.PADDING * 2),
-//             height: 200,
-//             image: undefined 
-//         });
-
-//         // card cost
-//         this.cardCostText = new Konva.Text({
-//             x: windowX + POPUP_STYLES.PADDING,
-//             y: windowY + 300,
-//             text: 'Cost: ?',
-//             fontSize: POPUP_STYLES.TEXT_FONT_SIZE,
-//             fontFamily: POPUP_STYLES.FONT_FAMILY,
-//             fill: POPUP_STYLES.TEXT_COLOR,
-//         });
-
-//         // -- card description
-//         this.cardDescriptionText = new Konva.Text({
-//             x: windowX + POPUP_STYLES.PADDING,
-//             y: windowY + 340,
-//             width: windowWidth - (POPUP_STYLES.PADDING * 2),
-//             text: 'Card description goes here...',
-//             fontSize: POPUP_STYLES.TEXT_FONT_SIZE,
-//             fontFamily: POPUP_STYLES.FONT_FAMILY,
-//             fill: POPUP_STYLES.TEXT_COLOR,
-//         });
-
-
-
-//        this.group.add(
-//             this.cardNameText, 
-//             imagePlaceholder, 
-//             this.cardImage,   
-//             this.cardCostText, 
-//             this.cardDescriptionText
-//         );
-//     }
-
-   
-//     /**
-// 	 * Show the screen
-// 	 */
-// 	show(): void {
-// 		this.group.visible(true);
-// 		this.group.getLayer()?.draw();
-// 	}
-
-// 	/**
-// 	 * Hide the screen
-// 	 */
-// 	hide(): void {
-// 		this.group.visible(false);
-// 		this.group.getLayer()?.draw();
-// 	}
-
-// 	getGroup(): Konva.Group {
-// 		return this.group;
-// 	}
-// }
-
