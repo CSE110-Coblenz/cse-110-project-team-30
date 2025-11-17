@@ -45,6 +45,8 @@ func (k *Knight) CalculateAction(mv MapView) Action {
 	}
 
 	// Otherwise, move one step along the path toward enemy
-	action.NextPosition = path[1] // path[0] is current position
+	if len(path) > 1 {
+		action.NextPosition = path[1] // path[0] is current position
+	}
 	return action
 }
