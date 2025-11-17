@@ -36,7 +36,7 @@ export class CardsScreenView implements View {
   private createTitle(): void {
     // ... (This function is unchanged) ...
     const title = new Konva.Text({
-      text: 'Card Collection',
+      text: 'Card Library',
       fontSize: 48,
       fontFamily: 'Arial',
       fill: '#333',

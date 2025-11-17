@@ -42,6 +42,9 @@ export interface View {
   getGroup(): Group;
   show(): void;
   hide(): void;
+  getGroup(): Group;
+  show(): void;
+  hide(): void;
 }
 
 
@@ -53,7 +56,11 @@ export type Screen =
 
 export abstract class ScreenController {
   abstract getView(): View;
+  abstract getView(): View;
 
+  show(): void {
+    this.getView().show();
+  }
   show(): void {
     this.getView().show();
   }
@@ -61,8 +68,12 @@ export abstract class ScreenController {
   hide(): void {
     this.getView().hide();
   }
+  hide(): void {
+    this.getView().hide();
+  }
 }
 
 export interface ScreenSwitcher {
+  switchToScreen(screen: Screen): void;
   switchToScreen(screen: Screen): void;
 }
