@@ -145,18 +145,5 @@ func (m *Map) InBounds(pos common.Position) bool {
 	x := int(pos.X)
 	y := int(pos.Y)
 
-	if x < 0 {
-		return false
-	}
-	if x >= m.Width {
-		return false
-	}
-	if y < 0 {
-		return false
-	}
-	if y >= m.Height {
-		return false
-	}
-
-	return true
+	return x >= 0 && x < m.Width && y >= 0 && y < m.Height
 }
