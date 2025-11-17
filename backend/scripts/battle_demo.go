@@ -14,17 +14,17 @@ func main() {
 	b := battle.NewBattle()
 
 	// Spawn some troops
-	t1, err := b.SpawnTroop(common.Team(0), common.NewPosition(2, 3))
+	t1, err := b.SpawnTroop(common.Team(0), common.NewPosition(2, 3), "knight")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	t2, err := b.SpawnTroop(common.Team(1), common.NewPosition(7, 7))
+	t2, err := b.SpawnTroop(common.Team(1), common.NewPosition(7, 7), "knight")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	t3, err := b.SpawnTroop(common.Team(1), common.NewPosition(5, 5))
+	t3, err := b.SpawnTroop(common.Team(1), common.NewPosition(5, 5), "knight")
 	if err != nil {
 		log.Fatal(err)
 	}

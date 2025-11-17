@@ -9,7 +9,7 @@ type Knight struct {
 	Troop
 }
 
-func NewKnight(team common.Team, pos common.Position) *Knight {
+func NewKnight(team common.Team, pos common.Position) Entity {
 	return &Knight{
 		Troop: Troop{
 			Type:     "Knight",
@@ -38,7 +38,7 @@ func (k *Knight) CalculateAction(mv MapView) Action {
 	}
 
 	// If enemy is in range (adjacent), attack
-	if len(path) == 1 || util.GetDistance(k.Position, enemy.Position) <= float64(k.Range) {
+	if len(path) == 1 || util.GetDistance(k.Position, enemy.GetPosition()) <= float64(k.Range) {
 		action.AttackTarget = enemy
 		action.Damage = k.Damage
 		return action

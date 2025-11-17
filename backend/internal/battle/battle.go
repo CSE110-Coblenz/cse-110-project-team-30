@@ -15,19 +15,23 @@ type Battle struct {
 
 func NewBattle() *Battle {
 	b := &Battle{
-		Arena:  arena.NewMap(10, 20), // instantiate here
+		Arena:  arena.NewMap(16, 16), // instantiate here
 		Troops: []troops.Entity{},
 	}
 	return b
 }
-func (b *Battle) SpawnTroop(team common.Team, pos common.Position) (*troops.Troop, error) {
+
+func (b *Battle) SpawnTroop(team common.Team, pos common.Position, troopType string) (*troops.Troop, error) {
 	if !b.Arena.InBounds(pos) {
 		return nil, errors.New("position out of arena bounds")
 	}
-	newTroop := troops.NewKnight(team, pos)
-	b.Arena.AddTroop(int(pos.X), int(pos.Y), &newTroop.Troop)
+	troopRegistry := map[string]func(team common.Team, pos common.Position) troops.Entity{
+		"knight": troops.NewKnight,
+	}
+	newTroop := troopRegistry[troopType](team, pos)
+	b.Arena.AddTroop(int(pos.X), int(pos.Y), newTroop.GetTroop())
 	b.Troops = append(b.Troops, newTroop)
-	return &newTroop.Troop, nil
+	return newTroop.GetTroop(), nil
 }
 
 func (b *Battle) PrintArena() string {
@@ -41,6 +45,7 @@ func (b *Battle) Tick() {
 	actions := b.calculateActions()
 	b.applyMovement(actions)
 	b.applyAttacks(actions)
+	b.removeDeadTroops()
 }
 
 // ------------------------
@@ -81,11 +86,6 @@ func (b *Battle) applyAttacks(actions map[troops.Entity]troops.Action) {
 		if action.AttackTarget != nil {
 			target := action.AttackTarget.GetTroop()
 			target.Health -= action.Damage
-			if target.Health <= 0 {
-				x, y := int(math.Round(target.Position.X)), int(math.Round(target.Position.Y))
-				b.removeTroopFromTile(target, x, y)
-				b.removeTroopFromBattle(target)
-			}
 		}
 	}
 }
@@ -95,7 +95,8 @@ func (b *Battle) applyAttacks(actions map[troops.Entity]troops.Action) {
 // ------------------------
 func (b *Battle) removeTroopFromTile(t *troops.Troop, x, y int) {
 	tile := b.Arena.Tiles[y][x]
-	for i, tt := range tile.Troops {
+	for i, e := range tile.Troops {
+		tt := e.GetTroop()
 		if tt == t {
 			tile.Troops = append(tile.Troops[:i], tile.Troops[i+1:]...)
 			break
@@ -107,10 +108,27 @@ func (b *Battle) removeTroopFromTile(t *troops.Troop, x, y int) {
 // Helper: remove troop from battle slice
 // ------------------------
 func (b *Battle) removeTroopFromBattle(t *troops.Troop) {
-	for i, tt := range b.Troops {
+	for i, e := range b.Troops {
+		tt := e.GetTroop()
 		if tt == t {
 			b.Troops = append(b.Troops[:i], b.Troops[i+1:]...)
 			break
 		}
 	}
+}
+
+//step 4: remove dead troops
+
+func (b *Battle) removeDeadTroops() {
+	alive := b.Troops[:0]
+	for _, e := range b.Troops {
+		t := e.GetTroop()
+		if t.Health > 0 {
+			alive = append(alive, e)
+		} else {
+			x, y := int(math.Round(t.Position.X)), int(math.Round(t.Position.Y))
+			b.removeTroopFromTile(t, x, y)
+		}
+	}
+	b.Troops = alive
 }
