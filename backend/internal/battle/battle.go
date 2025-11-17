@@ -9,14 +9,16 @@ import (
 )
 
 type Battle struct {
-	Arena  *arena.Map
-	Troops []troops.Entity
+	TickCount int
+	Arena     *arena.Map
+	Troops    []troops.Entity
 }
 
 func NewBattle() *Battle {
 	b := &Battle{
-		Arena:  arena.NewMap(16, 16), // instantiate here
-		Troops: []troops.Entity{},
+		TickCount: 0,
+		Arena:     arena.NewMap(16, 16), // instantiate here
+		Troops:    []troops.Entity{},
 	}
 	return b
 }
@@ -42,6 +44,7 @@ func (b *Battle) PrintArenaWithMarkers(markers []common.Position) string {
 	return b.Arena.StringWithMarkers(markers)
 }
 func (b *Battle) Tick() {
+	b.TickCount++
 	actions := b.calculateActions()
 	b.applyMovement(actions)
 	b.applyAttacks(actions)

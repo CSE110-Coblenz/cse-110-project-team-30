@@ -11,6 +11,7 @@ import (
 
 	"cse-110-project-team-30/backend/internal/battle"
 	"cse-110-project-team-30/backend/internal/battle/common"
+	"cse-110-project-team-30/backend/internal/battle/troops"
 )
 
 type Hub struct {
@@ -43,7 +44,16 @@ func (h *Hub) Run() {
 			h.battle.Tick()
 
 			// Step 2: serialize arena
-			state, err := json.Marshal(h.battle.Arena)
+			payload := struct {
+				Tick   int             `json:"tick"`
+				Troops []troops.Entity `json:"troops"`
+			}{
+				Tick:   h.battle.TickCount, // or whatever your tick variable is named
+				Troops: h.battle.Troops,
+			}
+
+			state, err := json.Marshal(payload)
+
 			if err != nil {
 				log.Println("error marshaling arena:", err)
 				continue
