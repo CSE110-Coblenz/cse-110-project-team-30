@@ -1,4 +1,4 @@
-import { TROOPS } from "../troops";
+import { troops } from "./troops";
 
 export interface MathProblem {
   num1: number;

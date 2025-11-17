@@ -104,7 +104,7 @@ export class BattleScreenController extends ScreenController {
   /**
    * Called when player submits an answer
    */
-  private answerSubmit(userAnswer: number, userRemainder?: number): void {
+  /*private answerSubmit(userAnswer: number, userRemainder?: number): void {
     const problem = this.model.getCurrentProblem();
     if (!problem) return false;
 
@@ -120,7 +120,7 @@ export class BattleScreenController extends ScreenController {
       this.model.placeTroop(this.model.getSelectedTroop());
     }
   }
-
+*/
   /**
    * End the battle
    */

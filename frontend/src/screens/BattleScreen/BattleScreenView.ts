@@ -7,6 +7,8 @@ import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
  */
 export class BattleScreenView implements View {
   private group: Konva.Group;
+  private answerInput: HTMLInputElement;
+  private remainderInput: HTMLInputElement;
   private timerText: Konva.Text;
   private crownText: Konva.Text;
   private selectedCardImages: Konva.Image[] = [];
@@ -121,6 +123,7 @@ export class BattleScreenView implements View {
         fill: "#ddd",
         stroke: "black",
         strokeWidth: 2,
+        cornerRadius: 10,
       });
 
       const label = new Konva.Text({
@@ -141,14 +144,35 @@ export class BattleScreenView implements View {
   }
 
   private addBattleField(): void {
-    const padding = 20;
-    const field = new Konva.Rect({
-      x: 0,
-      y: 20,
-      width: this.BATTLE_AREA_WIDTH - padding,
-      height: this.BATTLE_AREA_HEIGHT - padding * 2,
-      fill: "white",
-    });
+    const cols = 16;
+    const rows = 16;
+    const margin = 20;
+
+    const gridWidth = this.BATTLE_AREA_WIDTH - margin * 2;
+    const gridHeight = this.BATTLE_AREA_HEIGHT - margin * 2;
+
+    const tileWidth = gridWidth / cols;
+    const tileHeight = gridHeight / rows;
+
+    const field = new Konva.Group({ x: margin, y: margin });
+
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const x = col * tileWidth;
+        const y = row * tileHeight;
+
+        const tile = new Konva.Rect({
+          x: x,
+          y: y,
+          width: tileWidth,
+          height: tileHeight,
+          fill: "white",
+          stroke: "black",
+          strokeWidth: 1,
+        });
+        field.add(tile);
+      }
+    }
     this.battleFieldGroup.add(field);
   }
 
@@ -156,7 +180,7 @@ export class BattleScreenView implements View {
   private addTimerDisplay(): void {
     const timerGroup = new Konva.Group();
     const timerRect = new Konva.Rect({
-      x: STAGE_WIDTH - 110,
+      x: this.BATTLE_AREA_WIDTH - 110,
       y: 20,
       width: 90,
       height: 50,
@@ -436,7 +460,11 @@ export class BattleScreenView implements View {
     problemText: string,
     correctAnswer: string,
     onQuit: () => void,
-    onComplete: (isCorrect: boolean, answer: string) => void,
+    onComplete: (
+      isCorrect: boolean,
+      answer: number,
+      remainder?: number,
+    ) => void,
   ): void {
     if (this.group.findOne(".math-popup")) return;
 
@@ -588,6 +616,12 @@ export class BattleScreenView implements View {
     this.timerText.offsetX(this.timerText.width() / 2);
     this.timerText.offsetY(this.timerText.height() / 2);
     this.group.getLayer()?.draw();
+  }
+
+  showMathProblem(operation: string): void {
+    if (operation === "division") {
+      return;
+    }
   }
 
   /**
