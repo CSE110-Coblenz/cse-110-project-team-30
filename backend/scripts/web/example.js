@@ -17,7 +17,7 @@ ws.onopen = () => {
     x: 0,
     y: 0
   }));
-  // Example: spawn a knight at 0,0
+  // Example: spawn a knight at 5,0
   ws.send(JSON.stringify({
     team: "blue", // "red" or "blue"
     troopType: "knight",
