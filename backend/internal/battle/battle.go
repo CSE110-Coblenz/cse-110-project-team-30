@@ -120,7 +120,7 @@ func (b *Battle) removeTroopFromBattle(t *troops.Troop) {
 	}
 }
 
-//step 4: remove dead troops
+// Step 4: remove dead troops
 
 func (b *Battle) removeDeadTroops() {
 	alive := b.Troops[:0]
