@@ -1,13 +1,15 @@
 // --- SERVER ENTRY POINT ---
 // Main file to initialize the Express server and link all components.
 // To run this, you must install the 'express' and 'cors' packages: npm install express cors
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const express = require('express');
 const cors = require('cors'); 
 const routes = require('./routes');
 
 // --- Setup ---
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 
 // Middleware
 app.use(cors()); // Allows the frontend (index.html) to fetch data from this server
@@ -25,16 +27,6 @@ app.get('/', (req, res) => {
 // --- Server Start ---
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
+    console.log('API endpoint: http://localhost:3000/api/leaderboard');
     // run 'node server.js' and have MySQL running for the app to work
-});
-
-app.on('error', (err) => {
-    if (err && err.code === 'EADDRINUSE') {
-        console.error(`Port ${PORT} is already in use.`);
-        // choose behavior: exit or try another port
-        process.exit(1);
-    } else {
-        console.error('Server error:', err);
-        process.exit(1);
-    }
 });
