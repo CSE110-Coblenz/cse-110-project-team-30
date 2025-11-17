@@ -2,7 +2,7 @@
 
 import Konva from 'konva';
 import type { Group } from 'konva/lib/Group';
-import type { ITutorialPlayerPopup, Card } from '../../types'; // 导入契约
+import type { ITutorialPlayerPopup, Card } from '../../types'; 
 import { SCREEN_WIDTH, SCREEN_HEIGHT, POPUP_STYLES } from '../../constants';
 
 
@@ -17,7 +17,7 @@ export class TutorialPlayerPopup implements ITutorialPlayerPopup {
     constructor() {
         // create the main group
         this.group = new Konva.Group({
-            visible: false, // 默认隐藏
+            visible: false, 
             zIndex: 1000
         });
 
@@ -141,17 +141,14 @@ export class TutorialPlayerPopup implements ITutorialPlayerPopup {
         if (card.tutorial_path) {
             Konva.Image.fromURL(card.tutorial_path, (img) => {
                 this.tutorialImage.image(img.image());
-                this.group.getLayer()?.draw();
             });
         }
 
         // 显示组
         this.group.visible(true);
-        this.group.getLayer()?.draw();
     }
 
     hide(): void {
         this.group.visible(false);
-        this.group.getLayer()?.draw();
     }
 }

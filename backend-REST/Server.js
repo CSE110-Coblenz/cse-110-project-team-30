@@ -1,6 +1,8 @@
 // --- SERVER ENTRY POINT ---
 // Main file to initialize the Express server and link all components.
 // To run this, you must install the 'express' and 'cors' packages: npm install express cors
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const express = require('express');
 const cors = require('cors'); 
 const routes = require('./routes');
