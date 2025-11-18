@@ -1,0 +1,51 @@
+package troops
+
+import (
+	"cse-110-project-team-30/backend/internal/battle/common"
+	"fmt"
+)
+
+type MapView interface {
+	FindNearestEnemyBFS(t Entity) (Entity, []common.Position)
+}
+type Entity interface {
+	CalculateAction(mv MapView) Action
+	GetTroop() *Troop
+	GetPosition() common.Position
+	GetTeam() common.Team
+}
+type Action struct {
+	NextPosition common.Position // where the entity wants to move
+	AttackTarget Entity          // who to attack (nil if none)
+	Damage       int             // damage to deal (0 if none)
+}
+type Troop struct {
+	ID       int
+	Type     string
+	Health   int
+	Team     common.Team     // e.g., 0 for player, 1 for enemy
+	Position common.Position // optional: x, y on the map
+	Damage   int
+	Speed    float64
+	Range    int
+}
+
+// CalculateAction for a generic troop — warns if called
+func (t *Troop) CalculateAction(mv MapView) Action {
+	fmt.Printf("WARNING: CalculateAction called on base Troop (ID=%d, Type=%s). You should override this method.\n", t.ID, t.Type)
+	return Action{
+		NextPosition: t.Position,
+		AttackTarget: nil,
+	}
+}
+
+func (t *Troop) GetPosition() common.Position {
+	return t.Position
+}
+func (t *Troop) GetTeam() common.Team {
+	return t.Team
+}
+
+func (t *Troop) GetTroop() *Troop {
+	return t
+}
