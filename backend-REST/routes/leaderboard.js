@@ -9,22 +9,21 @@ const db = require('../db');
 const pool = db.getPool();
 
 /**
- * Fetches the top 10 players from the 'leaderboard' table, ordered by points.
- * The 'leaderboard' table is expected to have 'username' (VARCHAR) and 'points' (INT) columns.
+ * Fetches all players from the 'Users' table, ordered by Points (highest first).
+ * Returns username and Points for each user.
  * @returns {Promise<Array<{username: string, points: number}>>}
  */
 async function getLeaderboardData() {
     const query = `
-        SELECT username, points 
-        FROM leaderboard 
-        ORDER BY points DESC 
-        LIMIT 10;
+        SELECT Username as username, Points as points 
+        FROM Users 
+        ORDER BY Points DESC;
     `;
 
     try {
         // Execute the query. The result is an array of rows and field data.
         const [rows] = await pool.execute(query);
-        console.log("Database query successful.");
+        console.log("Database query successful. Retrieved", rows.length, "players.");
         return rows;
     } catch (error) {
         console.error("Error executing MySQL query:", error);

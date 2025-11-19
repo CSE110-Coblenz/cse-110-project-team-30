@@ -10,12 +10,13 @@ export class LoginScreenView implements View {
   private loginGroup: Konva.Group;
   private usernameRect: Konva.Rect;
   private passwordRect: Konva.Rect;
-  private usernameInput: HTMLInputElement;
-  private passwordInput: HTMLInputElement;
+  private usernameInput!: HTMLInputElement;
+  private passwordInput!: HTMLInputElement;
   private errorText: Konva.Text | null = null;
+  private onButtonClick: (id: string) => void;
 
-  constructor(private onButtonClick: (id: string) => void) {
-    //SHOULD BE SET TO TRUE; ONLY FALSE FOR TESTING
+  constructor(onButtonClick: (id: string) => void) {
+    this.onButtonClick = onButtonClick;
     this.group = new Konva.Group({ visible: false });
 
     // Background Image
@@ -267,18 +268,14 @@ export class LoginScreenView implements View {
     this.usernameInput.type = "text";
     this.usernameInput.placeholder = "Username";
 
-    const usernamePos = this.usernameRect.getClientRect();
     Object.assign(this.usernameInput.style, {
       position: "absolute",
-      left: `${usernamePos.x}px`,
-      top: `${usernamePos.y}px`,
-      width: `${usernamePos.width}px`,
-      height: `${usernamePos.height}px`,
       fontSize: "18px",
       padding: "0 10px",
       border: "none",
       backgroundColor: "transparent",
       outline: "none",
+      display: "none", // Initially hidden
     });
     document.body.appendChild(this.usernameInput);
 
@@ -287,20 +284,25 @@ export class LoginScreenView implements View {
     this.passwordInput.type = "password";
     this.passwordInput.placeholder = "Password";
 
-    const passwordPos = this.passwordRect.getClientRect();
     Object.assign(this.passwordInput.style, {
       position: "absolute",
-      left: `${passwordPos.x}px`,
-      top: `${passwordPos.y}px`,
-      width: `${passwordPos.width}px`,
-      height: `${passwordPos.height}px`,
       fontSize: "18px",
       padding: "0 10px",
       border: "none",
       backgroundColor: "transparent",
       outline: "none",
+      display: "none", // Initially hidden
     });
     document.body.appendChild(this.passwordInput);
+  }
+
+  // Handle input box click to focus the HTML input
+  private onInputClick(type: "username" | "password"): void {
+    if (type === "username") {
+      this.usernameInput.focus();
+    } else {
+      this.passwordInput.focus();
+    }
   }
 
   // Get username & password values
@@ -351,9 +353,30 @@ export class LoginScreenView implements View {
     this.group.visible(true);
     this.usernameInput.value = "";
     this.passwordInput.value = "";
-    this.usernameInput.style.display = "block";
-    this.passwordInput.style.display = "block";
+    
+    // Update input positions after group is visible and drawn
     this.group.getLayer()?.draw();
+    
+    // Wait for next frame to ensure positions are calculated correctly
+    setTimeout(() => {
+      const usernamePos = this.usernameRect.getClientRect();
+      Object.assign(this.usernameInput.style, {
+        display: "block",
+        left: `${usernamePos.x}px`,
+        top: `${usernamePos.y}px`,
+        width: `${usernamePos.width}px`,
+        height: `${usernamePos.height}px`,
+      });
+      
+      const passwordPos = this.passwordRect.getClientRect();
+      Object.assign(this.passwordInput.style, {
+        display: "block",
+        left: `${passwordPos.x}px`,
+        top: `${passwordPos.y}px`,
+        width: `${passwordPos.width}px`,
+        height: `${passwordPos.height}px`,
+      });
+    }, 0);
   }
 
   /**
