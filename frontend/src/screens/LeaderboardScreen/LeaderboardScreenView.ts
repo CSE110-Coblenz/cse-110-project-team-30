@@ -1,84 +1,254 @@
-// --- FRONTEND LOGIC (VIEW COMPONENT) ---
-// This is the TypeScript code demonstrating type safety for fetching the data.
-// It would need to be transpiled to JavaScript before running in a browser.
+import Konva from "konva";
+import type { View } from "../../types.ts";
+import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
+import { API_BASE_URL } from "../../constants.ts";
 
-// Define the shape of a Leaderboard entry for strong typing
 interface LeaderboardEntry {
-    username: string;
-    points: number;
-}
-
-const API_URL: string = 'http://localhost:3000/api/leaderboard';
-
-/**
- * Fetches the leaderboard data from the Node.js API.
- */
-async function fetchLeaderboard(): Promise<LeaderboardEntry[]> {
-    try {
-        const response = await fetch(API_URL);
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const result: { success: boolean, data: LeaderboardEntry[] } = await response.json();
-
-        if (result.success && Array.isArray(result.data)) {
-            // TypeScript ensures the data matches the LeaderboardEntry interface
-            return result.data;
-        }
-
-        throw new Error('API response format was invalid.');
-
-    } catch (error) {
-        console.error('Failed to fetch leaderboard:', error);
-        return []; // Return an empty array on failure
-    }
+  username: string;
+  points: number;
 }
 
 /**
- * Renders the data into the HTML table (View update).
- * @param data - The array of leaderboard entries to render.
+ * LeaderboardScreenView - Renders the leaderboard screen
  */
-function renderLeaderboard(data: LeaderboardEntry[]): void {
-    const tableBody = document.getElementById('leaderboard-body') as HTMLTableSectionElement | null;
-    if (!tableBody) return;
+export class LeaderboardScreenView implements View {
+  private group: Konva.Group;
+  private entries: LeaderboardEntry[] = [];
+  private entryTexts: Konva.Text[] = [];
+  private onBackClick: () => void;
 
-    tableBody.innerHTML = ''; // Clear existing content
+  constructor(onBackClick: () => void) {
+    this.onBackClick = onBackClick;
+    this.group = new Konva.Group({ visible: false });
+    this.createUI();
+    this.loadLeaderboard();
+  }
 
-    data.forEach((entry, index) => {
-        const row = tableBody.insertRow();
-        row.className = 'hover:bg-gray-50 transition duration-150 ease-in-out';
-        
-        // Highlight top 3
-        if (index === 0) row.className += ' bg-yellow-50 font-extrabold';
-        else if (index === 1) row.className += ' bg-gray-100 font-bold';
-        else if (index === 2) row.className += ' bg-amber-50 font-medium';
-
-        // Rank
-        let cell = row.insertCell();
-        cell.textContent = (index + 1).toString();
-        cell.className = 'text-center text-lg';
-
-        // Username
-        cell = row.insertCell();
-        cell.textContent = entry.username;
-        cell.className = 'text-left text-base';
-
-        // Points
-        cell = row.insertCell();
-        cell.textContent = entry.points.toLocaleString();
-        cell.className = 'font-semibold text-right text-base';
+  private createUI(): void {
+    // Background
+    const background = new Konva.Rect({
+      x: 0,
+      y: 0,
+      width: STAGE_WIDTH,
+      height: STAGE_HEIGHT,
+      fill: "#2d2d44",
     });
-}
+    this.group.add(background);
 
-/**
- * Main application initializer.
- */
-async function initLeaderboard(): Promise<void> {
-    const data = await fetchLeaderboard();
-    renderLeaderboard(data);
-}
+    // Title
+    const title = new Konva.Text({
+      x: STAGE_WIDTH / 2,
+      y: 50,
+      text: "Leaderboard",
+      fontSize: 48,
+      fontFamily: "Arial",
+      fill: "#ffffff",
+      align: "center",
+    });
+    title.offsetX(title.width() / 2);
+    this.group.add(title);
 
-// Execute the main function when the DOM is fully loaded
-document.addEventListener('DOMContentLoaded', initLeaderboard);
+    // Back button
+    const backButton = new Konva.Group({
+      x: 30,
+      y: 30,
+      cursor: "pointer",
+    });
+
+    const buttonRect = new Konva.Rect({
+      width: 100,
+      height: 40,
+      fill: "#4a90e2",
+      cornerRadius: 10,
+      shadowColor: "black",
+      shadowBlur: 5,
+      shadowOffset: { x: 2, y: 2 },
+      shadowOpacity: 0.2,
+    });
+
+    const buttonText = new Konva.Text({
+      text: "Back",
+      fontSize: 20,
+      fontFamily: "Arial",
+      fill: "white",
+      width: 100,
+      height: 40,
+      align: "center",
+      verticalAlign: "middle",
+    });
+
+    backButton.add(buttonRect);
+    backButton.add(buttonText);
+
+    backButton.on("click", () => this.onBackClick());
+    backButton.on("mouseover", () => {
+      buttonRect.fill("#3a7bd5");
+      backButton.getLayer()?.draw();
+    });
+    backButton.on("mouseout", () => {
+      buttonRect.fill("#4a90e2");
+      backButton.getLayer()?.draw();
+    });
+
+    this.group.add(backButton);
+  }
+
+  private async loadLeaderboard(): Promise<void> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/leaderboard`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: LeaderboardEntry[] = await response.json();
+      this.entries = data;
+      this.renderLeaderboard();
+    } catch (error) {
+      console.error("Failed to fetch leaderboard:", error);
+      // Show error message
+      const errorText = new Konva.Text({
+        x: STAGE_WIDTH / 2,
+        y: STAGE_HEIGHT / 2,
+        text: "Failed to load leaderboard",
+        fontSize: 24,
+        fontFamily: "Arial",
+        fill: "#ff6b6b",
+        align: "center",
+      });
+      errorText.offsetX(errorText.width() / 2);
+      this.group.add(errorText);
+      this.group.getLayer()?.draw();
+    }
+  }
+
+  private renderLeaderboard(): void {
+    // Clear existing entries
+    this.entryTexts.forEach((text) => text.destroy());
+    this.entryTexts = [];
+
+    const startY = 150;
+    const rowHeight = 40;
+    const maxEntries = 20; // Show top 20
+
+    // Header
+    const headerY = startY - 30;
+    const rankHeader = new Konva.Text({
+      x: 100,
+      y: headerY,
+      text: "Rank",
+      fontSize: 20,
+      fontFamily: "Arial",
+      fontStyle: "bold",
+      fill: "#ffffff",
+    });
+    this.group.add(rankHeader);
+
+    const nameHeader = new Konva.Text({
+      x: 200,
+      y: headerY,
+      text: "Username",
+      fontSize: 20,
+      fontFamily: "Arial",
+      fontStyle: "bold",
+      fill: "#ffffff",
+    });
+    this.group.add(nameHeader);
+
+    const pointsHeader = new Konva.Text({
+      x: STAGE_WIDTH - 150,
+      y: headerY,
+      text: "Points",
+      fontSize: 20,
+      fontFamily: "Arial",
+      fontStyle: "bold",
+      fill: "#ffffff",
+      align: "right",
+    });
+    pointsHeader.offsetX(pointsHeader.width());
+    this.group.add(pointsHeader);
+
+    // Render entries
+    const entriesToShow = this.entries.slice(0, maxEntries);
+    entriesToShow.forEach((entry, index) => {
+      const y = startY + index * rowHeight;
+
+      // Rank color (top 3 get special colors)
+      let rankColor = "#ffffff";
+      let pointColor = "#cccccc";
+      if (index === 0) {
+        rankColor = "#ffd700"; // Gold
+        pointColor = "#ffd700";
+      } else if (index === 1) {
+        rankColor = "#c0c0c0"; // Silver
+        pointColor = "#c0c0c0";
+      } else if (index === 2) {
+        rankColor = "#cd7f32"; // Bronze
+        pointColor = "#cd7f32";
+      }
+
+      // Rank
+      const rankText = new Konva.Text({
+        x: 100,
+        y: y,
+        text: `${index + 1}`,
+        fontSize: 18,
+        fontFamily: "Arial",
+        fontStyle: index < 3 ? "bold" : "normal",
+        fill: rankColor,
+      });
+      this.group.add(rankText);
+      this.entryTexts.push(rankText);
+
+      // Username
+      const nameText = new Konva.Text({
+        x: 200,
+        y: y,
+        text: entry.username,
+        fontSize: 18,
+        fontFamily: "Arial",
+        fill: "#ffffff",
+      });
+      this.group.add(nameText);
+      this.entryTexts.push(nameText);
+
+      // Points
+      const pointsText = new Konva.Text({
+        x: STAGE_WIDTH - 150,
+        y: y,
+        text: entry.points.toString(),
+        fontSize: 18,
+        fontFamily: "Arial",
+        fontStyle: index < 3 ? "bold" : "normal",
+        fill: pointColor,
+        align: "right",
+      });
+      pointsText.offsetX(pointsText.width());
+      this.group.add(pointsText);
+      this.entryTexts.push(pointsText);
+    });
+
+    this.group.getLayer()?.draw();
+  }
+
+  /**
+   * Show the screen
+   */
+  show(): void {
+    this.group.visible(true);
+    // Reload leaderboard data when showing
+    this.loadLeaderboard();
+    this.group.getLayer()?.draw();
+  }
+
+  /**
+   * Hide the screen
+   */
+  hide(): void {
+    this.group.visible(false);
+    this.group.getLayer()?.draw();
+  }
+
+  getGroup(): Konva.Group {
+    return this.group;
+  }
+}

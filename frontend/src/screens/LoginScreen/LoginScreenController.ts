@@ -51,8 +51,7 @@
 import { ScreenController } from "../../types.ts";
 import type { ScreenSwitcher } from "../../types.ts";
 import { LoginScreenView } from "./LoginScreenView.ts";
-// 确保这个常量指向你后端运行的地址
-const API_BASE_URL = "http://localhost:3000/api/auth";
+import { API_BASE_URL } from "../../constants.ts";
 
 /**
  * LoginScreenController - Handles login interactions
@@ -102,8 +101,8 @@ export class LoginScreenController extends ScreenController {
     credentials: { username: string; password: string }
   ): Promise<void> {
     try {
-      // 1. 发送请求到你的后端
-      const response = await fetch(`${API_BASE_URL}/${endpoint}`, {
+      // 1. 发送请求到你的后端
+      const response = await fetch(`${API_BASE_URL}/auth/${endpoint}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

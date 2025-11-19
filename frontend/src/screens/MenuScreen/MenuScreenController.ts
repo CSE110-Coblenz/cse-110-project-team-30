@@ -2,7 +2,6 @@ import { ScreenController } from "../../types.ts";
 import type { ScreenSwitcher } from "../../types.ts";
 import { PlayerModel } from "../../PlayerModel.ts";
 import { MenuScreenView } from "./MenuScreenView.ts";
-import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
 
 /**
  * MenuScreenController - Handles menu interactions
@@ -10,6 +9,7 @@ import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
 export class MenuScreenController extends ScreenController {
   private view: MenuScreenView;
   private screenSwitcher: ScreenSwitcher;
+  private playerModel: PlayerModel;
 
   constructor(screenSwitcher: ScreenSwitcher) {
     super();
@@ -29,6 +29,8 @@ export class MenuScreenController extends ScreenController {
         this.screenSwitcher.switchToScreen({ type: "leaderboard" });
         break;
       case "battle":
+        this.screenSwitcher.switchToScreen({ type: "battle" });
+        break;
       case "cards":
         this.screenSwitcher.switchToScreen({ type: "cards" });
         break;
