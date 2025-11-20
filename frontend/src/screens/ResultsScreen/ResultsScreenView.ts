@@ -12,8 +12,7 @@ export class ResultsScreenView implements View {
   private statsText: Konva.Text;
 
   constructor(onClick: () => void) {
-    //should be false; true for testing
-    this.group = new Konva.Group({ visible: true });
+    this.group = new Konva.Group({ visible: false });
 
     // Background
     const background = new Konva.Rect({

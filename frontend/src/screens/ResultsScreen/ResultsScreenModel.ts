@@ -1,17 +1,8 @@
 /**
- * Represents a single leaderboard entry
- */
-/*export type LeaderboardEntry = {
-  score: number;
-  timestamp: string; // formatted timestamp
-};*/
-
-/**
- * ResultsScreenModel - Stores final score and leaderboard
+ * ResultsScreenModel - Stores final score
  */
 export class ResultsScreenModel {
   private totalPoints: number;
-  //private leaderboard: LeaderboardEntry[] = [];
 
   /**
    * Set total points
@@ -27,11 +18,4 @@ export class ResultsScreenModel {
   getTotalPoints(): number {
     return this.totalPoints;
   }
-
-  /**
-   * Set the leaderboard entries
-   */
-  /*setLeaderboard(entries: LeaderboardEntry[]): void {
-    this.leaderboard = entries;
-  }*/
 }
