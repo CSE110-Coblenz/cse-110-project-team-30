@@ -1,4 +1,4 @@
-import { troops } from "./troops";
+import troops from "./troops.json";
 
 export interface MathProblem {
   num1: number;

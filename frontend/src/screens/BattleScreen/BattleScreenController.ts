@@ -3,6 +3,7 @@ import type { ScreenSwitcher } from "../../types.ts";
 import { BattleScreenModel } from "./BattleScreenModel.ts";
 import { BattleScreenView } from "./BattleScreenView.ts";
 import { MAX_CARDS_SELECTED, BATTLE_DURATION } from "../../constants.ts";
+import troops from "../../troops.json";
 
 /**
  * BattleScreenController - Coordinates battle logic between Model and View
@@ -12,17 +13,24 @@ export class BattleScreenController extends ScreenController {
   private view: BattleScreenView;
   private screenSwitcher: ScreenSwitcher;
   private battleTimer: number | null = null;
-
-  //private squeezeSound: HTMLAudioElement;
+  private currentCardType: string | null = null;
+  private isCorrect: boolean | null = null;
 
   constructor(screenSwitcher: ScreenSwitcher) {
     super();
     this.screenSwitcher = screenSwitcher;
 
     this.model = new BattleScreenModel();
-    this.view = new BattleScreenView(() => this.handleHomeClick());
-
-    //this.squeezeSound = new Audio('/squeeze.mp3'); // Placeholder
+    this.view = new BattleScreenView(
+      () => this.handleHomeClick(),
+      () => this.handleLeaveClick(),
+      () => this.handleContinueClick(),
+      (cardType: string) => this.handleCardClick(cardType),
+      () => this.handleQuitClick(),
+      (answer: number, remainder?: number) =>
+        this.handleSubmitClick(answer, remainder),
+      () => this.handleOkayClick(),
+    );
   }
 
   /**
@@ -59,8 +67,8 @@ export class BattleScreenController extends ScreenController {
    */
   private stopTimer(): void {
     if (this.battleTimer !== null) {
-      clearInterval(this.gameTimer);
-      this.gameTimer = null;
+      clearInterval(this.battleTimer);
+      this.battleTimer = null;
     }
   }
 
@@ -68,23 +76,88 @@ export class BattleScreenController extends ScreenController {
    * Handle home button click
    */
   private handleHomeClick(): void {
+    console.log("entered home click handler");
     //maybe add this.model.pauseBattle();
-    this.view.showConfirmPopup({
-      onQuit: () => {
-        this.endBattle("quit");
-      },
-      onContinue: () => {
-        console.log("continued playing");
-      }, //this.model.resumeBattle();
-    });
+    this.view.showConfirmPopup(
+      () => this.handleLeaveClick(),
+      () => this.handleContinueClick(),
+    );
+  }
+
+  /**
+   * Handle continue button click for battle
+   */
+  private handleContinueClick(): void {
+    console.log("entered continue click handler");
+    console.log("continued playing");
+  }
+
+  /**
+   * Handle leave button click for home
+   */
+  private handleLeaveClick(): void {
+    console.log("entered leave click handler");
+    this.endBattle("leave");
   }
 
   /**
    * Handle card click
    */
-  private handleCardClick(cardType: string, level: number): void {
-    this.model.generateProblem(cardType, level);
-    this.view.showProblem(problem.question);
+  private handleCardClick(cardType: string): void {
+    console.log("entered card click handler");
+    this.currentCardType = cardType;
+    const problem = this.model.generateProblem(cardType);
+
+    this.view.showMathPopup(
+      troops[this.currentCardType].operation,
+      problem.question,
+      () => this.handleQuitClick(),
+      (answer, remainder?) => this.handleSubmitClick(answer, remainder),
+      () => this.handleOkayClick(),
+    );
+  }
+
+  /**
+   * Handle quit button click for math problem
+   */
+  private handleQuitClick(): void {
+    console.log("entered quit click handler for math problem");
+    this.isCorrect = null;
+    this.currentCardType = null;
+  }
+
+  /**
+   * Handle submit button click for math problem
+   */
+  private handleSubmitClick(userAnswer: number, userRemainder?: number): void {
+    console.log("entered submit click handler for math problem");
+    const problem = this.model.getCurrentProblem();
+    if (!problem) return;
+
+    this.isCorrect = this.model.checkAnswer(userAnswer, userRemainder);
+    console.log("checked answer");
+    this.view.showFeedback(
+      troops[this.currentCardType].operation,
+      problem.answer,
+      problem.remainder,
+      this.isCorrect,
+    );
+  }
+
+  /**
+   * Handle okay button click for math problem
+   */
+  private handleOkayClick(): void {
+    console.log("entered okay click handler for math problem");
+
+    if (this.isCorrect) {
+      console.log("correct!");
+      this.model.spawnTroop(this.currentCardType, 0, 2, 7);
+      this.view.renderTroop(this.currentCardType);
+    }
+
+    this.isCorrect = null;
+    this.currentCardType = null;
   }
 
   /**
@@ -102,36 +175,18 @@ export class BattleScreenController extends ScreenController {
   }
 
   /**
-   * Called when player submits an answer
-   */
-  /*private answerSubmit(userAnswer: number, userRemainder?: number): void {
-    const problem = this.model.getCurrentProblem();
-    if (!problem) return false;
-
-    const isCorrect = false;
-    if (problem.remainder !== undefined) {
-      isCorrect =
-        userAnswer === problem.answer && userRemainder === problem.remainder;
-    } else {
-      isCorrect = userAnswer === problem.answer;
-    }
-
-    if (isCorrect) {
-      this.model.placeTroop(this.model.getSelectedTroop());
-    }
-  }
-*/
-  /**
    * End the battle
    */
-  private endBattle(reason: "quit" | "complete"): void {
+  private endBattle(reason: "leave" | "complete"): void {
     this.stopTimer();
 
-    if (reason === "quit") {
+    if (reason === "leave") {
+      console.log("Now going to menu screen");
       this.screenSwitcher.switchToScreen({ type: "menu" });
       return;
     }
 
+    console.log("Now going to results screen");
     this.screenSwitcher.switchToScreen({
       type: "result",
       points: this.model.getPoints(),

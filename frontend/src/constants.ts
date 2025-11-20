@@ -3,7 +3,7 @@ export const STAGE_WIDTH = window.innerWidth;
 export const STAGE_HEIGHT = window.innerHeight;
 
 // Battle settings
-export const BATTLE_DURATION = 180; // seconds
+export const BATTLE_DURATION = 420; // seconds
 
 // Cards selection
 export const MAX_CARDS_SELECTED = 4;
