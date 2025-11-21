@@ -8,19 +8,76 @@ import (
 	"math"
 )
 
+const MaxTicks = 10000
+
 type Battle struct {
-	TickCount int
-	Arena     *arena.Map
-	Troops    []troops.Entity
+	TickCount   int
+	Arena       *arena.Map
+	Troops      []troops.Entity
+	TowerStatus map[common.Team][]bool
+	Enabled     bool
 }
 
 func NewBattle() *Battle {
 	b := &Battle{
-		TickCount: 0,
-		Arena:     arena.NewMap(16, 16), // instantiate here
-		Troops:    []troops.Entity{},
+		TickCount:   0,
+		Arena:       arena.NewMap(16, 16), // instantiate here
+		Troops:      []troops.Entity{},
+		TowerStatus: make(map[common.Team][]bool),
 	}
+	// Spawn castles for team 0 (e.g., player)
+
+	b.TowerStatus = map[common.Team][]bool{
+		0: {false, false, false},
+		1: {false, false, false},
+	}
+	// Spawn castles for team 1 (e.g., enemy)
+	b.spawnTeamCastles(0)
+	b.spawnTeamCastles(1)
 	return b
+}
+
+func (b *Battle) spawnTeamCastles(team common.Team) {
+	rows := 3 // total castles per team
+	mapWidth := b.Arena.Width
+	mapHeight := b.Arena.Height
+
+	var xFront int
+	var xKingOffset int
+	yStart := mapHeight / 4
+	kingIndex := rows / 2 // middle castle
+
+	if team == 0 {
+		xFront = 1
+		xKingOffset = -1 // king tower one tile behind
+	} else {
+		xFront = mapWidth - 2
+		xKingOffset = 1
+	}
+
+	for i := 0; i < rows; i++ {
+		y := yStart + i*2
+		x := xFront
+		damage := 25
+
+		if i == kingIndex {
+			x += xKingOffset
+			damage = 35
+		}
+
+		b.TowerStatus[team][i] = true
+		pos := common.NewPosition(x, y)
+		castle := &troops.Castle{
+			ID:       i + int(team)*10, // watch out for collisions!
+			Team:     team,
+			Position: pos,
+			Health:   200,
+			Damage:   damage,
+			Range:    3,
+		}
+		b.Arena.AddTroop(int(pos.X), int(pos.Y), castle.GetTroop())
+		b.Troops = append(b.Troops, castle)
+	}
 }
 
 func (b *Battle) SpawnTroop(team common.Team, pos common.Position, troopType string) (*troops.Troop, error) {
@@ -45,10 +102,16 @@ func (b *Battle) PrintArenaWithMarkers(markers []common.Position) string {
 }
 func (b *Battle) Tick() {
 	b.TickCount++
+	if !b.Enabled {
+		return
+	}
 	actions := b.calculateActions()
 	b.applyMovement(actions)
 	b.applyAttacks(actions)
 	b.removeDeadTroops()
+	if b.TickCount >= MaxTicks {
+		b.Enabled = false
+	}
 }
 
 // ------------------------
@@ -126,6 +189,9 @@ func (b *Battle) removeDeadTroops() {
 	alive := b.Troops[:0]
 	for _, e := range b.Troops {
 		t := e.GetTroop()
+		if t.Health <= 0 && t.Type == "Castle" {
+			b.TowerStatus[t.Team][t.ID%10] = false
+		}
 		if t.Health > 0 {
 			alive = append(alive, e)
 		} else {
