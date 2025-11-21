@@ -122,12 +122,17 @@ export class BattleScreenView implements View {
 
   // only for testing
   private loadPlaceholderCards(onCardClick: (cardType: string) => void) {
-    const cardsIds = [1, 2, 3, 4];
-    this.loadCards(cardsIds, onCardClick);
+    const cardsIds = [
+      "spearmanOne",
+      "spearmanTwo",
+      "spearmanThree",
+      "spearmanFour",
+    ];
+    this.addCards(cardsIds, onCardClick);
   }
 
-  private loadCards(
-    cardsIds: string[] | number[],
+  private addCards(
+    cardTypes: string[] | number[],
     onCardClick: (cardType: string) => void,
   ) {
     const cols = 2;
@@ -142,31 +147,29 @@ export class BattleScreenView implements View {
     const startX = (this.CARD_AREA_WIDTH - gridWidth) / 2;
     const startY = this.CARD_AREA_HEIGHT - gridHeight;
 
-    cardsIds.forEach((id, i) => {
-      const col = i % cols;
-      const row = Math.floor(i / cols);
-      /*cardPaths.forEach((src, i) => {
-    const imageObj = new Image();
-    imageObj.src = src;
-
-    imageObj.onload = () => {
-      const col = i % cols;
-      const row = Math.floor(i / cols);
-
-      const card = new Konva.Image({
-        image: imageObj,
-        x: areaX + col * (cardWidth + padding),
-        y: areaY + row * (cardHeight + padding),
-        width: cardWidth,
-        height: cardHeight,
-        cornerRadius: 10,
-      });
-
-      this.group.add(card);
-      this.group.getLayer()?.draw();
+    // Map from card types to image paths
+    const cardTypeToImage: Record<string, string> = {
+      swordsman: "/card_images/swordsman.png",
+      archer: "/card_images/archer.png",
+      spearman: "/card_images/spearman.png",
+      cavalry: "/card_images/cavalry.png",
     };
-  });*/
 
+    const suffixes = ["One", "Two", "Three", "Four"];
+
+    cardTypes.forEach((name, i) => {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+
+      // Strip suffix to get type
+      let type = name;
+      for (const s of suffixes) {
+        if (name.endsWith(s)) {
+          type = name.slice(0, -s.length);
+          console.log(type);
+          break;
+        }
+      }
       const card = new Konva.Group({
         x: startX + col * (cardWidth + padding),
         y: startY + row * (cardHeight + padding / 2),
@@ -180,20 +183,31 @@ export class BattleScreenView implements View {
         strokeWidth: 2,
         cornerRadius: 10,
       });
+      card.add(rect);
+
+      const imageObj = new Image();
+      imageObj.src = cardTypeToImage[type];
+      imageObj.onload = () => {
+        const cardImage = new Konva.Image({
+          image: imageObj,
+          width: cardWidth,
+          height: cardHeight,
+          cornerRadius: 10,
+        });
+        card.add(cardImage);
+        this.card.getLayer()?.draw();
+      };
 
       const label = new Konva.Text({
-        text: `Card ${id}`,
+        text: `${name}`,
         width: cardWidth,
         height: cardHeight,
         align: "center",
         verticalAlign: "middle",
-        fontSize: 22,
+        fontSize: 18,
       });
-
-      card.add(rect);
       card.add(label);
 
-      // swordsman for testing
       card.on("click", (cardType: string) => onCardClick(cardType));
       this.cardsGroup.add(card);
     });
@@ -865,7 +879,6 @@ export class BattleScreenView implements View {
         : undefined;
       answerInput.remove();
       if (remainderInput) remainderInput.remove();
-      console.log("submit");
       onSubmitClick(answer, remainder);
       quitBtn.visible(false);
       submitBtn.visible(false);
@@ -889,46 +902,28 @@ export class BattleScreenView implements View {
   ): void {
     console.log("entered showfeedback");
     console.log(`${operation}`);
-    if (isCorrect) {
-      switch (operation) {
-        case "Addition":
-          this.label.text(`Correct! The sum is ${answer}.`);
-          break;
-        case "Subtraction":
-          this.label.text(`Correct! The difference is ${answer}.`);
-          break;
-        case "Multiplication":
-          this.label.text(`Correct! The product is ${answer}.`);
-          break;
-        case "Division":
-          this.label.text(
-            `Correct! The quotient is ${answer} and the remainder is ${remainder}.`,
-          );
-          break;
-      }
-    } else {
-      switch (operation) {
-        case "Addition":
-          this.label.text(`Incorrect. The sum is ${answer}.`);
-          break;
-        case "Subtraction":
-          this.label.text(`Incorrect. The difference is ${answer}.`);
-          break;
-        case "Multiplication":
-          this.label.text(`Incorrect. The product is ${answer}.`);
-          break;
-        case "Division":
-          this.label.text(
-            `Incorrect. The quotient is ${answer} and the remainder is ${remainder}.`,
-          );
-          break;
-      }
+    const prefix = isCorrect ? "Correct!" : "Incorrect.";
+    switch (operation) {
+      case "Addition":
+        this.label.text(`${prefix} The sum is ${answer}.`);
+        break;
+      case "Subtraction":
+        this.label.text(`${prefix} The difference is ${answer}.`);
+        break;
+      case "Multiplication":
+        this.label.text(`${prefix} The product is ${answer}.`);
+        break;
+      case "Division":
+        this.label.text(
+          `${prefix} The quotient is ${answer} and the remainder is ${remainder}.`,
+        );
+        break;
     }
     this.group.getLayer()?.draw();
   }
 
   /**
-   * Update score display
+   * Update crowns display
    */
   /*updateScore(score: number): void {
     this.scoreText.text(`Score: ${score}`);
