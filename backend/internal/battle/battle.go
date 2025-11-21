@@ -6,6 +6,7 @@ import (
 	"cse-110-project-team-30/backend/internal/battle/troops"
 	"errors"
 	"math"
+	"time"
 )
 
 const MaxTicks = 10000
@@ -16,6 +17,7 @@ type Battle struct {
 	Troops      []troops.Entity
 	TowerStatus map[common.Team][]bool
 	Enabled     bool
+	OnDelete    func()
 }
 
 func NewBattle() *Battle {
@@ -38,13 +40,13 @@ func NewBattle() *Battle {
 }
 
 func (b *Battle) spawnTeamCastles(team common.Team) {
-	rows := 3 // total castles per team
+	numCastles := 3 // total castles per team
 	mapWidth := b.Arena.Width
 	mapHeight := b.Arena.Height
 
 	var yFront int
 	var yKingOffset int
-	kingIndex := rows / 2 // middle castle
+	kingIndex := numCastles / 2 // middle castle
 
 	if team == 0 {
 		yFront = 3
@@ -54,7 +56,7 @@ func (b *Battle) spawnTeamCastles(team common.Team) {
 		yKingOffset = 1
 	}
 
-	for i := 0; i < rows; i++ {
+	for i := 0; i < numCastles; i++ {
 		x := (mapHeight / 4) * (i + 1)
 		y := yFront
 		damage := 10
@@ -99,6 +101,7 @@ func (b *Battle) PrintArena() string {
 func (b *Battle) PrintArenaWithMarkers(markers []common.Position) string {
 	return b.Arena.StringWithMarkers(markers)
 }
+
 func (b *Battle) Tick() {
 	b.TickCount++
 	if !b.Enabled {
@@ -109,8 +112,21 @@ func (b *Battle) Tick() {
 	b.applyAttacks(actions)
 	b.removeDeadTroops()
 	if b.TickCount >= MaxTicks {
-		b.Enabled = false
+		b.EndGame()
 	}
+}
+
+func (b *Battle) EndGame() {
+	if !b.Enabled {
+		return
+	}
+	b.Enabled = false
+	go func() {
+		time.Sleep(1000 * time.Millisecond)
+		if b.OnDelete != nil {
+			b.OnDelete()
+		}
+	}()
 }
 
 // ------------------------
@@ -190,6 +206,9 @@ func (b *Battle) removeDeadTroops() {
 		t := e.GetTroop()
 		if t.Health <= 0 && t.Type == "Castle" {
 			b.TowerStatus[t.Team][t.ID%10] = false
+			if t.ID%10 == 1 { // king tower
+				b.EndGame()
+			}
 		}
 		if t.Health > 0 {
 			alive = append(alive, e)

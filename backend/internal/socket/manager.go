@@ -19,6 +19,22 @@ func NewBattleManager() *BattleManager {
 	}
 }
 
+func (m *BattleManager) DeleteRoom(roomID string) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	room, ok := m.rooms[roomID]
+	if !ok {
+		return
+	}
+
+	// Stop the hub (stops the ticker & closes connections)
+	room.Hub.Stop()
+
+	// Remove the room from manager
+	delete(m.rooms, roomID)
+}
+
 func (m *BattleManager) CreateRoom() *Room {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -26,6 +42,10 @@ func (m *BattleManager) CreateRoom() *Room {
 	id := uuid.NewString()
 
 	b := battle.NewBattle()
+
+	b.OnDelete = func() {
+		m.DeleteRoom(id)
+	}
 	h := NewHub(b)
 
 	room := &Room{
