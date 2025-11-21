@@ -5,6 +5,7 @@ import { MenuScreenController } from "./screens/MenuScreen/MenuScreenController.
 import { CardsScreenController } from "./screens/CardsScreen/CardsScreenController.ts";
 import { BattleScreenController } from "./screens/BattleScreen/BattleScreenController.ts";
 import { ResultsScreenController } from "./screens/ResultsScreen/ResultsScreenController.ts";
+import { LeaderboardScreenController } from "./screens/LeaderboardScreen/LeaderboardScreenController.ts";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "./constants.ts";
 
 /**
@@ -26,6 +27,7 @@ class App implements ScreenSwitcher {
   private cardsController: CardsScreenController;
   private battleController: BattleScreenController;
   private resultsController: ResultsScreenController;
+  private leaderboardController: LeaderboardScreenController;
 
   constructor(container: string) {
     // Initialize Konva stage (the main canvas)
@@ -46,6 +48,7 @@ class App implements ScreenSwitcher {
     this.cardsController = new CardsScreenController(this);
     this.battleController = new BattleScreenController(this);
     this.resultsController = new ResultsScreenController(this);
+    this.leaderboardController = new LeaderboardScreenController(this);
 
     // Add all screen groups to the layer
     // All screens exist simultaneously but only one is visible at a time
@@ -54,6 +57,7 @@ class App implements ScreenSwitcher {
     this.layer.add(this.cardsController.getView().getGroup());
     this.layer.add(this.battleController.getView().getGroup());
     this.layer.add(this.resultsController.getView().getGroup());
+    this.layer.add(this.leaderboardController.getView().getGroup());
 
     // Draw the layer (render everything to the canvas)
     this.layer.draw();
@@ -78,6 +82,7 @@ class App implements ScreenSwitcher {
     this.cardsController.hide();
     this.battleController.hide();
     this.resultsController.hide();
+    this.leaderboardController.hide();
 
     switch (screen.type) {
       case "login":
@@ -98,6 +103,10 @@ class App implements ScreenSwitcher {
 
       case "results":
         this.resultsController.show();
+        break;
+
+      case "leaderboard":
+        this.leaderboardController.show();
         break;
     }
   }

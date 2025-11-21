@@ -14,6 +14,7 @@ export interface View {
  * - "cards": Cards screen
  * - "battle": Battle screen
  * - "results": Results screen
+ * - "leaderboard": Leaderboard screen
  * - pointsUpdate: Points earned/lost to display on results screen
  */
 export type Screen =
@@ -21,7 +22,8 @@ export type Screen =
   | { type: "menu" }
   | { type: "cards" }
   | { type: "battle" }
-  | { type: "results"; pointsUpdate: number };
+  | { type: "results"; pointsUpdate: number }
+  | { type: "leaderboard" };
 
 export abstract class ScreenController {
   abstract getView(): View;
