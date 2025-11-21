@@ -17,7 +17,7 @@ export class LoginScreenView implements View {
 
   constructor(onButtonClick: (id: string) => void) {
     this.onButtonClick = onButtonClick;
-    this.group = new Konva.Group({ visible: false });
+    this.group = new Konva.Group({ visible: true });
 
     // Background Image
     const backgroundImage = new Image();
@@ -275,7 +275,6 @@ export class LoginScreenView implements View {
       border: "none",
       backgroundColor: "transparent",
       outline: "none",
-      display: "none", // Initially hidden
     });
     document.body.appendChild(this.usernameInput);
 
@@ -291,7 +290,6 @@ export class LoginScreenView implements View {
       border: "none",
       backgroundColor: "transparent",
       outline: "none",
-      display: "none", // Initially hidden
     });
     document.body.appendChild(this.passwordInput);
   }
@@ -353,6 +351,8 @@ export class LoginScreenView implements View {
     this.group.visible(true);
     this.usernameInput.value = "";
     this.passwordInput.value = "";
+    this.usernameInput.style.display = "block";
+    this.passwordInput.style.display = "block";
     
     // Update input positions after group is visible and drawn
     this.group.getLayer()?.draw();
