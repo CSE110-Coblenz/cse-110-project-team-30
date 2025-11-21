@@ -42,26 +42,25 @@ func (b *Battle) spawnTeamCastles(team common.Team) {
 	mapWidth := b.Arena.Width
 	mapHeight := b.Arena.Height
 
-	var xFront int
-	var xKingOffset int
-	yStart := mapHeight / 4
+	var yFront int
+	var yKingOffset int
 	kingIndex := rows / 2 // middle castle
 
 	if team == 0 {
-		xFront = 1
-		xKingOffset = -1 // king tower one tile behind
+		yFront = 3
+		yKingOffset = -1 // king tower one tile behind
 	} else {
-		xFront = mapWidth - 2
-		xKingOffset = 1
+		yFront = mapWidth - 4
+		yKingOffset = 1
 	}
 
 	for i := 0; i < rows; i++ {
-		y := yStart + i*2
-		x := xFront
-		damage := 25
+		x := (mapHeight / 4) * (i + 1)
+		y := yFront
+		damage := 10
 
 		if i == kingIndex {
-			x += xKingOffset
+			y += yKingOffset
 			damage = 35
 		}
 
