@@ -3,7 +3,6 @@ import type { ScreenSwitcher } from "../../types.ts";
 import { BattleScreenModel } from "./BattleScreenModel.ts";
 import { BattleScreenView } from "./BattleScreenView.ts";
 import { MAX_CARDS_SELECTED, BATTLE_DURATION } from "../../constants.ts";
-import troops from "../../troops.json";
 
 /**
  * BattleScreenController - Coordinates battle logic between Model and View
@@ -77,7 +76,6 @@ export class BattleScreenController extends ScreenController {
    */
   private handleHomeClick(): void {
     console.log("entered home click handler");
-    //maybe add this.model.pauseBattle();
     this.view.showConfirmPopup(
       () => this.handleLeaveClick(),
       () => this.handleContinueClick(),
@@ -89,7 +87,6 @@ export class BattleScreenController extends ScreenController {
    */
   private handleContinueClick(): void {
     console.log("entered continue click handler");
-    console.log("continued playing");
   }
 
   /**
@@ -107,9 +104,10 @@ export class BattleScreenController extends ScreenController {
     console.log("entered card click handler");
     this.currentCardType = cardType;
     const problem = this.model.generateProblem(cardType);
+    const operation = this.model.getCardOperation(cardType);
 
     this.view.showMathPopup(
-      troops[this.currentCardType].operation,
+      operation,
       problem.question,
       () => this.handleQuitClick(),
       (answer, remainder?) => this.handleSubmitClick(answer, remainder),
@@ -135,9 +133,10 @@ export class BattleScreenController extends ScreenController {
     if (!problem) return;
 
     this.isCorrect = this.model.checkAnswer(userAnswer, userRemainder);
+    const operation = this.model.getCardOperation(this.currentCardType);
     console.log("checked answer");
     this.view.showFeedback(
-      troops[this.currentCardType].operation,
+      operation,
       problem.answer,
       problem.remainder,
       this.isCorrect,
@@ -152,8 +151,9 @@ export class BattleScreenController extends ScreenController {
 
     if (this.isCorrect) {
       console.log("correct!");
+      /*
       this.model.spawnTroop(this.currentCardType, 0, 2, 7);
-      this.view.renderTroop(this.currentCardType);
+      this.view.renderTroop(this.currentCardType);*/
     }
 
     this.isCorrect = null;
@@ -171,7 +171,7 @@ export class BattleScreenController extends ScreenController {
       return;
     }
 
-    this.view.loadCards(cards);
+    this.view.addCards(cards);
   }
 
   /**

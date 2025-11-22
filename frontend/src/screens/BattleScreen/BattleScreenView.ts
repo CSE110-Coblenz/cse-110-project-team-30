@@ -8,7 +8,7 @@ import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
 export class BattleScreenView implements View {
   private group: Konva.Group;
   private answerInput: HTMLInputElement;
-  private remainderInput: HTMLInputElement;
+  private remainderInput: HTMLInputElement | null = null;
   private label: Konva.Text;
   private timerText: Konva.Text;
   private crownText: Konva.Text;
@@ -115,7 +115,7 @@ export class BattleScreenView implements View {
       y: 0,
       width: STAGE_WIDTH,
       height: STAGE_HEIGHT,
-      fill: "#000010", // blue-black
+      fill: "#C8F0F0", // pastel cyan
     });
     this.group.add(bg);
   }
@@ -228,7 +228,7 @@ export class BattleScreenView implements View {
         height: gridHeight,
         image: battleImage,
         strokeLinearGradientStartPoint: { x: 0, y: 0 },
-        strokeLinearGradientEndPoint: { x: 200, y: 1000 },
+        strokeLinearGradientEndPoint: { x: 100, y: 1000 },
         strokeLinearGradientColorStops: [
           0,
           "#6b4c00",
@@ -304,7 +304,7 @@ export class BattleScreenView implements View {
         text: labelText,
         fontSize: 20,
         fontFamily: "Arial",
-        fill: "white",
+        fill: "black",
         wrap: "word",
         align: "center",
       });
@@ -358,7 +358,7 @@ export class BattleScreenView implements View {
     };
   }
 
-  // Timer display (top-right)
+  // Timer display
   private addTimerDisplay(): void {
     const timerGroup = new Konva.Group();
     const timerWidth = 105;
@@ -370,6 +370,27 @@ export class BattleScreenView implements View {
       height: timerHeight,
       fill: "white",
       cornerRadius: 10,
+      strokeLinearGradientStartPoint: { x: 0, y: 0 },
+      strokeLinearGradientEndPoint: { x: 100, y: 300 },
+      strokeLinearGradientColorStops: [
+        0,
+        "#6b4c00",
+        0.2,
+        "#b08d36",
+        0.4,
+        "#fff8c4",
+        0.6,
+        "#d4af37",
+        0.8,
+        "#b08d36",
+        1,
+        "#6b4c00",
+      ],
+      shadowColor: "rgba(0,0,0,0.4)",
+      shadowBlur: 5,
+      shadowOffsetX: 2,
+      shadowOffsetY: 2,
+      strokeWidth: 3,
     });
     timerGroup.add(timerRect);
 
@@ -437,7 +458,12 @@ export class BattleScreenView implements View {
     homeText.offsetY(homeText.height() / 2);
     homeButton.add(homeText);
 
-    homeButton.on("click", onHomeClick);
+    homeButton.on("click", () => {
+      if (this.answerInput) this.answerInput.style.display = "none";
+      if (this.remainderInput) this.remainderInput.style.display = "none";
+      onHomeClick();
+    });
+    //    homeButton.on("click", onHomeClick);
     this.group.add(homeButton);
   }
 
@@ -459,11 +485,11 @@ export class BattleScreenView implements View {
       width: STAGE_WIDTH,
       height: STAGE_HEIGHT,
       fill: "black",
-      opacity: 0.4,
+      opacity: 0.7,
     });
 
-    const popupWidth = 260;
-    const popupHeight = 120;
+    const popupWidth = 300;
+    const popupHeight = 160;
     const popup = new Konva.Group();
 
     const popupRect = new Konva.Rect({
@@ -482,18 +508,18 @@ export class BattleScreenView implements View {
       x: popupRect.x(),
       y: popupRect.y() - popupHeight / 4.5,
       text: "Are you sure you want to go home? Your battle progress will not be saved.",
-      fontSize: 15,
+      fontSize: 16,
       width: popupWidth - 40,
       verticalAlign: "middle",
     });
     popupText.offsetX(popupText.width() / 2);
     popupText.offsetY(popupText.height() / 2);
 
-    const btnWidth = 110;
-    const btnHeight = 30;
-    const padding = 10;
+    const btnWidth = 120;
+    const btnHeight = 35;
+    const padding = 15;
 
-    // Leave/Yes button
+    // Leave Battle/Yes button
     const yesBtn = new Konva.Group();
     const yesRect = new Konva.Rect({
       x: popupRect.x() + btnWidth / 2 + padding,
@@ -534,13 +560,13 @@ export class BattleScreenView implements View {
       y: yesRect.y(),
       text: "Leave battle",
       fill: "#bfa24a", // gold
-      fontSize: 14,
+      fontSize: 16,
     });
     yesText.offsetX(yesText.width() / 2);
     yesText.offsetY(yesText.height() / 2);
     yesBtn.add(yesText);
 
-    // Continue/No button
+    // Keeping Playing/No button
     const noBtn = new Konva.Group();
     const noRect = new Konva.Rect({
       x: popupRect.x() - btnWidth / 2 - padding,
@@ -579,9 +605,9 @@ export class BattleScreenView implements View {
     const noText = new Konva.Text({
       x: noRect.x(),
       y: noRect.y(),
-      text: "Continue battle",
+      text: "Keep Playing",
       fill: "#bfa24a", // gold
-      fontSize: 14,
+      fontSize: 16,
     });
     noText.offsetX(noText.width() / 2);
     noText.offsetY(noText.height() / 2);
@@ -601,6 +627,8 @@ export class BattleScreenView implements View {
 
     noBtn.on("click", () => {
       console.log("Continue button clicked");
+      if (this.answerInput) this.answerInput.style.display = "block";
+      if (this.remainderInput) this.remainderInput.style.display = "block";
       popupGroup.destroy();
       onContinueClick();
     });
@@ -691,37 +719,36 @@ export class BattleScreenView implements View {
     const inpWidth = popupWidth / 4;
     const inpPading = 20;
     // HTML input for answer
-    const answerInput = document.createElement("input");
-    answerInput.type = "text";
-    answerInput.placeholder = placeholderAnswer;
-    answerInput.style.position = "absolute";
+    this.answerInput = document.createElement("input");
+    this.answerInput.type = "text";
+    this.answerInput.placeholder = placeholderAnswer;
+    this.answerInput.style.position = "absolute";
     const rectPos = popupRect.getClientRect();
-    answerInput.style.left = `${rectPos.width / 2}px`;
-    answerInput.style.top = `${rectPos.height / 2 + inpWidth}px`;
-    answerInput.style.width = `${inpWidth}px`;
-    answerInput.style.fontSize = "18px";
-    answerInput.style.padding = "5px";
-    answerInput.style.border = "2px solid black";
-    answerInput.style.borderRadius = "5px";
-    document.body.appendChild(answerInput);
+    this.answerInput.style.left = `${rectPos.width / 2}px`;
+    this.answerInput.style.top = `${rectPos.height / 2 + inpWidth}px`;
+    this.answerInput.style.width = `${inpWidth}px`;
+    this.answerInput.style.fontSize = "18px";
+    this.answerInput.style.padding = "5px";
+    this.answerInput.style.border = "2px solid black";
+    this.answerInput.style.borderRadius = "5px";
+    document.body.appendChild(this.answerInput);
 
-    let remainderInput: HTMLInputElement | null = null;
     if (showRemainder) {
-      remainderInput = document.createElement("input");
-      remainderInput.type = "text";
-      remainderInput.placeholder = placeholderRemainder;
-      remainderInput.style.position = "absolute";
-      remainderInput.style.left = `${rectPos.width / 2}px`;
-      remainderInput.style.top = `${rectPos.height / 2 + inpWidth * 1.5}px`;
-      remainderInput.style.width = `${inpWidth}px`;
-      remainderInput.style.fontSize = "18px";
-      remainderInput.style.padding = "5px";
-      remainderInput.style.border = "2px solid black";
-      remainderInput.style.borderRadius = "5px";
-      document.body.appendChild(remainderInput);
+      this.remainderInput = document.createElement("input");
+      this.remainderInput.type = "text";
+      this.remainderInput.placeholder = placeholderRemainder;
+      this.remainderInput.style.position = "absolute";
+      this.remainderInput.style.left = `${rectPos.width / 2}px`;
+      this.remainderInput.style.top = `${rectPos.height / 2 + inpWidth * 1.5}px`;
+      this.remainderInput.style.width = `${inpWidth}px`;
+      this.remainderInput.style.fontSize = "18px";
+      this.remainderInput.style.padding = "5px";
+      this.remainderInput.style.border = "2px solid black";
+      this.remainderInput.style.borderRadius = "5px";
+      document.body.appendChild(this.remainderInput);
     }
 
-    const buttonWidth = 95;
+    const buttonWidth = 140;
     const buttonHeight = 35;
     const btnPadding = 20;
 
@@ -732,7 +759,7 @@ export class BattleScreenView implements View {
       y: popupHeight - buttonHeight - btnPadding,
       width: buttonWidth,
       height: buttonHeight,
-      fill: "#000080",
+      fill: "#5a0000", // dark red
       strokeLinearGradientStartPoint: { x: 0, y: 0 },
       strokeLinearGradientEndPoint: { x: 200, y: 500 },
       strokeLinearGradientColorStops: [
@@ -761,7 +788,7 @@ export class BattleScreenView implements View {
     const quitText = new Konva.Text({
       x: quitRect.x() + buttonWidth / 2,
       y: quitRect.y() + buttonHeight / 2,
-      text: "Quit",
+      text: "Close Problem",
       fontSize: 18,
       fill: "#bfa24a", // gold
       align: "center",
@@ -777,7 +804,7 @@ export class BattleScreenView implements View {
       y: popupHeight - buttonHeight - btnPadding,
       width: buttonWidth,
       height: buttonHeight,
-      fill: "#004a3a",
+      fill: "#004000", // dark green
       strokeLinearGradientStartPoint: { x: 0, y: 0 },
       strokeLinearGradientEndPoint: { x: 200, y: 500 },
       strokeLinearGradientColorStops: [
@@ -806,7 +833,7 @@ export class BattleScreenView implements View {
     const submitText = new Konva.Text({
       x: submitRect.x() + buttonWidth / 2,
       y: submitRect.y() + buttonHeight / 2,
-      text: "Submit",
+      text: "Check Answer",
       fontSize: 18,
       fill: "#bfa24a", // gold
       align: "center",
@@ -866,19 +893,19 @@ export class BattleScreenView implements View {
 
     // Button handlers
     quitBtn.on("click", () => {
-      answerInput.remove();
-      if (remainderInput) remainderInput.remove();
+      this.answerInput.remove();
+      if (this.remainderInput) this.remainderInput.remove();
       popup.destroy();
       onQuitClick();
     });
 
     submitBtn.on("click", () => {
-      const answer = parseFloat(answerInput.value.trim());
-      const remainder = remainderInput
-        ? parseFloat(remainderInput.value.trim())
+      const answer = parseFloat(this.answerInput.value.trim());
+      const remainder = this.remainderInput
+        ? parseFloat(this.remainderInput.value.trim())
         : undefined;
-      answerInput.remove();
-      if (remainderInput) remainderInput.remove();
+      this.answerInput.remove();
+      if (this.remainderInput) this.remainderInput.remove();
       onSubmitClick(answer, remainder);
       quitBtn.visible(false);
       submitBtn.visible(false);
@@ -900,8 +927,7 @@ export class BattleScreenView implements View {
     remainder?: number,
     isCorrect: boolean,
   ): void {
-    console.log("entered showfeedback");
-    console.log(`${operation}`);
+    console.log(`entered showfeedback with operation: ${operation}`);
     const prefix = isCorrect ? "Correct!" : "Incorrect.";
     switch (operation) {
       case "Addition":
@@ -957,6 +983,8 @@ export class BattleScreenView implements View {
    */
   hide(): void {
     this.group.visible(false);
+    if (this.answerInput) this.answerInput.style.display = "none";
+    if (this.remainderInput) this.remainderInput.style.display = "none";
     this.group.getLayer()?.draw();
   }
 

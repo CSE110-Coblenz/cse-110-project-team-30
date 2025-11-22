@@ -9,12 +9,13 @@ export class BattleScreenModel {
   private currentProblem: MathProblem | null = null;
 
   constructor() {}
-  /*
-  // Function to get the level and operation for a given card ID
-  public getCardData(cardId: number) {
-    return this.cardData[cardId];
+
+  /**
+   * Get card operation
+   */
+  getCardOperation(cardType): string {
+    return troops[cardType].operation;
   }
-*/
 
   /**
    * Generates each math problem
@@ -56,14 +57,14 @@ export class BattleScreenModel {
    * Reset battle state for a new game
    */
   reset(): void {
-    this.score = 0;
+    // castles = 0    this.score = 0; to do
     this.currentProblem = null;
   }
 
   /**
-   * Get current points
+   * Get current number of castles destroyed
    */
   getPoints(): number {
-    return this.points;
+    return this.points; // to do
   }
 }
