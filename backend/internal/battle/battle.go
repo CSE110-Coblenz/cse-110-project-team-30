@@ -210,6 +210,7 @@ func (b *Battle) removeDeadTroops() {
 		} else {
 			x, y := int(math.Round(t.Position.X)), int(math.Round(t.Position.Y))
 			b.removeTroopFromTile(t, x, y)
+			b.removeTroopFromBattle(t)
 		}
 	}
 	b.Troops = alive

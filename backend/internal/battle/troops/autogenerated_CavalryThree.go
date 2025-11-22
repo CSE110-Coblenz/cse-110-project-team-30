@@ -30,7 +30,7 @@ func (t *CavalryThree) CalculateAction(mv MapView) Action {
 		Damage:       0,
 	}
 
-	enemy, path := mv.FindNearestEnemyBFS(&t.Troop)
+	enemy, path := mv.FindNearestEnemyBFS(t)
 	if enemy == nil || len(path) == 0 {
 		return action
 	}
