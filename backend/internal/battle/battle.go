@@ -70,9 +70,9 @@ func (b *Battle) spawnTeamCastles(team common.Team) {
 		pos := common.NewPosition(x, y)
 		var castle troops.Entity
 		if isKing {
-			castle = troops.NewKingCastle(i+int(team)*10, team, pos)
+			castle = troops.NewKingCastle(-(i + int(team)*10), team, pos)
 		} else {
-			castle = troops.NewCastle(i+int(team)*10, team, pos)
+			castle = troops.NewCastle(-(i + int(team)*10), team, pos)
 		}
 		b.Arena.AddTroop(int(pos.X), int(pos.Y), castle.GetTroop())
 		b.Troops = append(b.Troops, castle)
