@@ -37,7 +37,7 @@ func main() {
 	enemy, path := b.Arena.FindNearestEnemyBFS(t1)
 	if enemy != nil {
 		fmt.Printf("\nNearest enemy to Troop 1 (%s at %.1f, %.1f):\n", t1.Type, t1.Position.X, t1.Position.Y)
-		fmt.Printf("Enemy: %s at (%.1f, %.1f)\n", enemy.Type, enemy.Position.X, enemy.Position.Y)
+		fmt.Printf("Enemy: %s at (%.1f, %.1f)\n", enemy.GetTroop().Type, enemy.GetTroop().Position.X, enemy.GetTroop().Position.Y)
 
 		fmt.Print("Path to enemy: ")
 		fmt.Println(b.PrintArenaWithMarkers(path))

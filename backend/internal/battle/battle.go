@@ -6,31 +6,84 @@ import (
 	"cse-110-project-team-30/backend/internal/battle/troops"
 	"errors"
 	"math"
+	"time"
 )
 
+const MaxTicks = 10000
+
 type Battle struct {
-	TickCount int
-	Arena     *arena.Map
-	Troops    []troops.Entity
+	TickCount   int
+	Arena       *arena.Map
+	Troops      []troops.Entity
+	TowerStatus map[common.Team][]bool
+	Enabled     bool
+	OnDelete    func()
 }
 
 func NewBattle() *Battle {
 	b := &Battle{
-		TickCount: 0,
-		Arena:     arena.NewMap(16, 16), // instantiate here
-		Troops:    []troops.Entity{},
+		TickCount:   0,
+		Arena:       arena.NewMap(16, 16), // instantiate here
+		Troops:      []troops.Entity{},
+		TowerStatus: make(map[common.Team][]bool),
 	}
+	// Spawn castles for team 0 (e.g., player)
+
+	b.TowerStatus = map[common.Team][]bool{
+		0: {false, false, false},
+		1: {false, false, false},
+	}
+	b.Enabled = true
+	// Spawn castles for team 1 (e.g., enemy)
+	b.spawnTeamCastles(0)
+	b.spawnTeamCastles(1)
 	return b
+}
+
+func (b *Battle) spawnTeamCastles(team common.Team) {
+	numCastles := 3 // total castles per team
+	mapWidth := b.Arena.Width
+	mapHeight := b.Arena.Height
+
+	var yFront int
+	var yKingOffset int
+	kingIndex := numCastles / 2 // middle castle
+
+	if team == 0 {
+		yFront = 3
+		yKingOffset = -1 // king tower one tile behind
+	} else {
+		yFront = mapWidth - 4
+		yKingOffset = 1
+	}
+
+	for i := 0; i < numCastles; i++ {
+		x := (mapHeight / 4) * (i + 1)
+		y := yFront
+		isKing := i == kingIndex
+
+		if isKing {
+			y += yKingOffset
+		}
+
+		b.TowerStatus[team][i] = true
+		pos := common.NewPosition(x, y)
+		var castle troops.Entity
+		if isKing {
+			castle = troops.NewKingCastle(i+int(team)*10, team, pos)
+		} else {
+			castle = troops.NewCastle(i+int(team)*10, team, pos)
+		}
+		b.Arena.AddTroop(int(pos.X), int(pos.Y), castle.GetTroop())
+		b.Troops = append(b.Troops, castle)
+	}
 }
 
 func (b *Battle) SpawnTroop(team common.Team, pos common.Position, troopType string) (*troops.Troop, error) {
 	if !b.Arena.InBounds(pos) {
 		return nil, errors.New("position out of arena bounds")
 	}
-	troopRegistry := map[string]func(team common.Team, pos common.Position) troops.Entity{
-		"knight": troops.NewKnight,
-	}
-	newTroop := troopRegistry[troopType](team, pos)
+	newTroop := troops.NewTroopByType(troopType, team, pos)
 	b.Arena.AddTroop(int(pos.X), int(pos.Y), newTroop.GetTroop())
 	b.Troops = append(b.Troops, newTroop)
 	return newTroop.GetTroop(), nil
@@ -43,12 +96,32 @@ func (b *Battle) PrintArena() string {
 func (b *Battle) PrintArenaWithMarkers(markers []common.Position) string {
 	return b.Arena.StringWithMarkers(markers)
 }
+
 func (b *Battle) Tick() {
 	b.TickCount++
+	if !b.Enabled {
+		return
+	}
 	actions := b.calculateActions()
 	b.applyMovement(actions)
 	b.applyAttacks(actions)
 	b.removeDeadTroops()
+	if b.TickCount >= MaxTicks {
+		b.EndGame()
+	}
+}
+
+func (b *Battle) EndGame() {
+	if !b.Enabled {
+		return
+	}
+	b.Enabled = false
+	go func() {
+		time.Sleep(1000 * time.Millisecond)
+		if b.OnDelete != nil {
+			b.OnDelete()
+		}
+	}()
 }
 
 // ------------------------
@@ -126,6 +199,12 @@ func (b *Battle) removeDeadTroops() {
 	alive := b.Troops[:0]
 	for _, e := range b.Troops {
 		t := e.GetTroop()
+		if t.Health <= 0 && t.Type == "Castle" {
+			b.TowerStatus[t.Team][t.ID%10] = false
+			if t.ID%10 == 1 { // king tower
+				b.EndGame()
+			}
+		}
 		if t.Health > 0 {
 			alive = append(alive, e)
 		} else {
