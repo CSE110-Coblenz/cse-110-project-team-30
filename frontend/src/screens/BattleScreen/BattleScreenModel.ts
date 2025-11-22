@@ -1,5 +1,6 @@
 import troops from "../../troops.json";
 import { generateMathProblem } from "../../mathGenerator";
+import type { Troop, WSResponse, Grid } from "../../types";
 
 /**
  * BattleScreenModel - Manages battle state
@@ -7,8 +8,57 @@ import { generateMathProblem } from "../../mathGenerator";
 export class BattleScreenModel {
   private points = 0;
   private currentProblem: MathProblem | null = null;
+  private gameId: string = "";
+  public SIZE: number = 16;
+  private tiles!: Grid;
 
-  constructor() {}
+  constructor() {
+    // Initialize tiles grid
+    this.tiles = Array.from({ length: this.SIZE }, () =>
+      Array.from({ length: this.SIZE }, () => [])
+    );
+  }
+  
+  /**
+   * Update tiles with new troop data
+   */
+  updateTiles(troops: WSResponse["troops"]): void {
+    // Clear existing tiles
+    this.tiles = Array.from({ length: this.SIZE }, () =>
+      Array.from({ length: this.SIZE }, () => [])
+    );
+
+    // Populate tiles with current troops
+    for (const troop of troops) {
+      const x = troop.Position.X;
+      const y = troop.Position.Y;
+      if (x >= 0 && x < this.SIZE && y >= 0 && y < this.SIZE) {
+        if (!this.tiles[y]) {
+          this.tiles[y] = [];
+        }
+        if (!this.tiles[y][x]) {
+          this.tiles[y][x] = [];
+        }
+        this.tiles[y][x].push(troop);
+      }
+    }
+  }
+  getTiles(): Grid {
+    return this.tiles;
+  }
+  /**
+   * Set game ID
+   */
+  setGameId(id: string): void {
+    this.gameId = id;
+  }
+
+  /**
+   * Get game ID
+   */
+  getGameId(): string {
+    return this.gameId;
+  }
 
   /**
    * Get card operation

@@ -1,12 +1,17 @@
 import Konva from "konva";
-import type { View } from "../../types.ts";
+import SpriteLookup from "./SpriteLookup.ts";
+import type { View, Grid } from "../../types.ts";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
+import type { BattleScreenModel } from "./BattleScreenModel.ts";
 
 /**
  * BattleScreenView - Renders the battle game UI using Konva
  */
 export class BattleScreenView implements View {
-  private group: Konva.Group;
+  private group: Konva.Group
+  private troopSprites: Record<string, HTMLImageElement> = {};
+  private troopMap: Map<string, Konva.Group> = new Map();
+  private troopGroup: Konva.Group;
   private answerInput: HTMLInputElement;
   private remainderInput: HTMLInputElement | null = null;
   private label: Konva.Text;
@@ -30,6 +35,7 @@ export class BattleScreenView implements View {
   ) {
     //true for testing
     this.group = new Konva.Group({ visible: true });
+    this.troopGroup = new Konva.Group();
 
     this.addBackground();
     this.addHomeButton(onHomeClick);
@@ -43,45 +49,7 @@ export class BattleScreenView implements View {
     const castleX = this.BATTLE_AREA_WIDTH / 3;
     const castleY = this.BATTLE_AREA_HEIGHT / 3;
     // Red team castles
-    this.addCastle(
-      castleX * 0.5,
-      castleY * 0.35,
-      "/battle_images/red-castle.png",
-      "Health: 0/0",
-    );
-    this.addCastle(
-      castleX * 1.5,
-      castleY * 0.35,
-      "/battle_images/red-castle.png",
-      "Health: 0/0",
-    );
-    this.addCastle(
-      castleX * 2.5,
-      castleY * 0.35,
-      "/battle_images/red-castle.png",
-      "Health: 0/0",
-    );
-    // Blue team castles
-    const blueCastleWidth = 100;
-    const blueCastleHeight = 170;
-    this.addCastle(
-      castleX * 0.5,
-      castleY * 2.65,
-      "/battle_images/blue-castle.png",
-      "Health: 0/0",
-    );
-    this.addCastle(
-      castleX * 1.5,
-      castleY * 2.65,
-      "/battle_images/blue-castle.png",
-      "Health: 0/0",
-    );
-    this.addCastle(
-      castleX * 2.5,
-      castleY * 2.65,
-      "/battle_images/blue-castle.png",
-      "Health: 0/0",
-    );
+ 
     this.addTimerDisplay();
     const paddingX = 20;
     const paddingY = 80;
@@ -317,48 +285,7 @@ export class BattleScreenView implements View {
   }
 
   // Castle for battlefield
-  private addCastle(x, y, imageURL, healthText) {
-    const castleGroup = new Konva.Group();
-    const castleImage = new Image();
-    const castleWidth = 85;
-    const castleHeight = 160;
-    castleImage.src = imageURL;
-    castleImage.onload = () => {
-      const castle = new Konva.Image({
-        x: x,
-        y: y,
-        width: castleWidth,
-        height: castleHeight,
-        image: castleImage,
-        shadowColor: "black",
-        shadowBlur: 20,
-        shadowOffset: { x: 20, y: 0 },
-        shadowOpacity: 0.5,
-      });
-      castle.offsetX(castleWidth / 2);
-      castle.offsetY(castleHeight / 2);
-      castleGroup.add(castle);
-
-      this.castleText = new Konva.Text({
-        x: x - (castleWidth / 3) * 2,
-        y: y - castleHeight / 2 - 5,
-        width: castleWidth * 2,
-        text: healthText,
-        fontSize: 16,
-        fontFamily: "Arial",
-        fill: "white",
-        wrap: "word",
-        align: "center",
-      });
-      this.castleText.offsetX(this.castleText.width() / 2);
-      this.castleText.offsetY(this.castleText.height() / 2);
-      castleGroup.add(this.castleText);
-
-      this.battleFieldGroup.add(castleGroup);
-    };
-  }
-
-  // Timer display
+   // Timer display
   private addTimerDisplay(): void {
     const timerGroup = new Konva.Group();
     const timerWidth = 105;
@@ -977,6 +904,83 @@ export class BattleScreenView implements View {
     this.group.visible(true);
     this.group.getLayer()?.draw();
   }
+  /**
+   * Draw Troop
+   */
+  private drawTroop(x, y, sameTeam: boolean, troopType: string, healthText: string) {
+    const imageURL = SpriteLookup(sameTeam, troopType);
+    const castleGroup = new Konva.Group();
+    const castleImage = new Image();
+    const castleWidth = 85;
+    const castleHeight = 160;
+    castleImage.src = imageURL;
+    castleImage.onload = () => {
+      const castle = new Konva.Image({
+        x: x,
+        y: y,
+        width: castleWidth,
+        height: castleHeight,
+        image: castleImage,
+        shadowColor: "black",
+        shadowBlur: 20,
+        shadowOffset: { x: 20, y: 0 },
+        shadowOpacity: 0.5,
+      });
+      castle.offsetX(castleWidth / 2);
+      castle.offsetY(castleHeight / 2);
+      castleGroup.add(castle);
+
+      this.castleText = new Konva.Text({
+        x: x - (castleWidth / 3) * 2,
+        y: y - castleHeight / 2 - 5,
+        width: castleWidth * 2,
+        text: healthText,
+        fontSize: 16,
+        fontFamily: "Arial",
+        fill: "white",
+        wrap: "word",
+        align: "center",
+      });
+      this.castleText.offsetX(this.castleText.width() / 2);
+      this.castleText.offsetY(this.castleText.height() / 2);
+      castleGroup.add(this.castleText);
+
+      this.troopGroup.add(castleGroup);
+    };
+  }
+
+
+  /**
+   * Rerender
+   */
+rerenderTroops(grid: Grid): void {
+  // Clear all troops from the troopGroup
+  this.troopGroup.destroyChildren();
+
+  // Iterate over the grid and draw troops
+  for (let y = 0; y < grid.length; y++) {
+    for (let x = 0; x < grid[y].length; x++) {
+      for (let j = 0; j < grid[y].length; j++) {
+        const troop = grid[y][x][j];
+        if (!troop) continue;
+        const sameTeam = troop.Team === 0; // Example team check
+        const troopType = troop.Type;
+        const healthText = `HP: ${troop.Health}`;
+        this.drawTroop(
+          x * (this.BATTLE_AREA_WIDTH / grid[0].length) +
+            (this.BATTLE_AREA_WIDTH / grid[0].length) / 2,
+          y * (this.BATTLE_AREA_HEIGHT / grid.length) +
+            (this.BATTLE_AREA_HEIGHT / grid.length) / 2,
+          sameTeam,
+          troopType,
+          healthText,
+        );
+          this.troopGroup.draw();
+      }
+    }
+  }
+  this.battleFieldGroup.add(this.troopGroup);
+}
 
   /**
    * Hide the screen

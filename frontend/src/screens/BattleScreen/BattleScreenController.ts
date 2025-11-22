@@ -1,9 +1,9 @@
 import { ScreenController } from "../../types.ts";
-import type { ScreenSwitcher } from "../../types.ts";
+import type { ScreenSwitcher, WSResponse } from "../../types.ts";
 import { BattleScreenModel } from "./BattleScreenModel.ts";
 import { BattleScreenView } from "./BattleScreenView.ts";
 import { MAX_CARDS_SELECTED, BATTLE_DURATION } from "../../constants.ts";
-
+const BACKEND_URI = "http://localhost:8080";
 /**
  * BattleScreenController - Coordinates battle logic between Model and View
  */
@@ -14,6 +14,7 @@ export class BattleScreenController extends ScreenController {
   private battleTimer: number | null = null;
   private currentCardType: string | null = null;
   private isCorrect: boolean | null = null;
+  private isBlueTeam: boolean = false;
 
   constructor(screenSwitcher: ScreenSwitcher) {
     super();
@@ -32,6 +33,57 @@ export class BattleScreenController extends ScreenController {
     );
   }
 
+  private flipBoardPosition(Position: Position) {
+    return {
+      X: Position.X,
+      Y: this.model.SIZE - 1 - Position.Y,
+    };
+  }
+  /**
+   * Marshal websocket data to match current team
+   */
+  private marshalWSData(data: WSResponse): WSResponse {
+    // Implement marshaling logic here
+    if (!this.isBlueTeam) {
+      for (const troop of data.troops) {
+        troop.Team = troop.Team === 1 ? 1 : 0;
+        troop.Position = this.flipBoardPosition(
+          troop.Position,
+        );
+      }
+    }
+    return data;
+  }
+  /** 
+   * Fetch and update battle state using ws
+   */
+  async fetchAndUpdateBattleState(): Promise<void> {
+    // Fetch game id from backend
+    fetch("http://localhost:8080/newgame", {
+      method: "POST"
+    })
+      .then(res => res.json())
+      .then(data => {
+        const roomID = data.roomID;
+
+        // asynchronously pull and update tiles
+        const ws = new WebSocket(`${BACKEND_URI}/ws/${roomID}`);
+        ws.onopen = () => {
+                ws.send(JSON.stringify({
+                  team: "red",
+                  troopType: "CavalryOne",
+                  x: 2,
+                  y: 2
+                }));
+        }
+        ws.onmessage = (event) => {
+          const data: WSResponse = this.marshalWSData(JSON.parse(event.data));
+          this.model.updateTiles(data.troops);
+          this.view.rerenderTroops(this.model.getTiles());
+        };
+      });
+  }
+
   /**
    * Start the battle
    */
@@ -39,13 +91,15 @@ export class BattleScreenController extends ScreenController {
     // Reset model state
     this.model.reset();
 
+    this.fetchAndUpdateBattleState();
     // Update view
-    //    this.view.updateScore(this.model.getPoints());
+    // this.view.updateScore(this.model.getPoints());
     this.view.updateTimer(BATTLE_DURATION);
     this.view.show();
 
     this.startTimer();
   }
+
 
   /**
    * Start the countdown timer
