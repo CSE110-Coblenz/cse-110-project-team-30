@@ -10,7 +10,6 @@ export class CardsScreenView implements View {
   private handleHomeClick: () => void;
 
 
-  // TODO: get menu Cards Button handler and insert into constructor
   constructor(handleHomeClick: () => void) {
     this.handleHomeClick = handleHomeClick; 
 
