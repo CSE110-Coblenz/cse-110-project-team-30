@@ -4,30 +4,51 @@ function append(msg) {
   log.textContent += msg + "\n";
 }
 
-// Connect to websocket
-const ws = new WebSocket("ws://localhost:8080/ws");
+// Step 1: fetch a new game room
+fetch("http://localhost:8080/newgame", {
+  method: "POST"
+})
+  .then(res => res.json())
+  .then(data => {
+    const ROOM_ID = data.roomID;
+    append("Got room ID: " + ROOM_ID);
 
-ws.onopen = () => {
-  append("Connected to server");
+    // Step 2: connect websocket for this room
+    const ws = new WebSocket(`ws://localhost:8080/ws/${ROOM_ID}`);
 
-  // Example: spawn a knight at 0,0
-  ws.send(JSON.stringify({
-    team: "red", // "red" or "blue"
-    troopType: "knight",
-    x: 0,
-    y: 0
-  }));
-  // Example: spawn a knight at 5,0
-  ws.send(JSON.stringify({
-    team: "blue", // "red" or "blue"
-    troopType: "knight",
-    x: 5,
-    y: 0
-  }));
-};
+    ws.onopen = () => {
+      append("Connected to server");
 
-ws.onmessage = (event) => append("Received: " + event.data);
+      // Example: spawn a red knight at 0,0
+      ws.send(JSON.stringify({
+        team: "red",
+        troopType: "SpearmanOne",
+        x: 0,
+        y: 0
+      }));
 
-ws.onclose = () => append("Disconnected");
+      // Example: spawn a blue archer at 5,0
+      ws.send(JSON.stringify({
+        team: "blue",
+        troopType: "ArcherTwo",
+        x: 5,
+        y: 0
+      }));
+    };
 
-ws.onerror = (err) => append("Error: " + err);
+    ws.onmessage = (event) => {
+      try {
+        const update = JSON.parse(event.data);
+        append(`Tick: ${update.tick}`);
+        update.troops.forEach(t => {
+          append(`Troop ${t.ID} (${t.Type}) - Team: ${t.Team} - Pos: (${t.Position.X}, ${t.Position.Y}) - Health: ${t.Health}`);
+        });
+      } catch (err) {
+        append("Error parsing update: " + err);
+      }
+    };
+
+    ws.onclose = () => append("Disconnected");
+    ws.onerror = (err) => append("Error: " + err);
+  })
+  .catch(err => append("Failed to get new game: " + err));

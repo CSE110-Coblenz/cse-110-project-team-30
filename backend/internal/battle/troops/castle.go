@@ -5,51 +5,66 @@ import (
 )
 
 type Castle struct {
-	ID       int
-	Index    int
-	Team     common.Team
-	Position common.Position
-	Health   int
-	Damage   int
-	Range    int
+	troop *Troop
 }
 
-// CalculateAction finds the nearest enemy in range and attacks it.
-// If no enemies are in range, it just stays put.
+func NewCastle(id int, team common.Team, pos common.Position) *Castle {
+	return &Castle{
+		troop: &Troop{
+			ID:       id,
+			Type:     "Castle",
+			Team:     team,
+			Position: pos,
+			Health:   200,
+			Damage:   1,
+			Range:    4,
+			Speed:    0,
+		},
+	}
+}
+
+func NewKingCastle(id int, team common.Team, pos common.Position) *Castle {
+	return &Castle{
+		troop: &Troop{
+			ID:       id,
+			Type:     "KingTower",
+			Team:     team,
+			Position: pos,
+			Health:   300,
+			Damage:   2,
+			Range:    5,
+			Speed:    0,
+		},
+	}
+}
+
+// CalculateAction finds nearest enemy in range and attacks it
 func (c *Castle) CalculateAction(mv MapView) Action {
+	t := c.troop
 	target, path := mv.FindNearestEnemyBFS(c)
-	if target != nil && len(path) <= c.Range {
+	if target != nil && len(path) <= t.Range {
 		return Action{
-			NextPosition: c.Position, // castles don’t move
+			NextPosition: t.Position, // castles don’t move
 			AttackTarget: target,
-			Damage:       c.Damage,
+			Damage:       t.Damage,
 		}
 	}
 
 	return Action{
-		NextPosition: c.Position,
+		NextPosition: t.Position,
 		AttackTarget: nil,
 		Damage:       0,
 	}
 }
 
 func (c *Castle) GetTroop() *Troop {
-	return &Troop{
-		ID:       c.ID,
-		Type:     "Castle",
-		Health:   c.Health,
-		Team:     c.Team,
-		Position: c.Position,
-		Damage:   c.Damage,
-		Speed:    0,
-		Range:    c.Range,
-	}
+	return c.troop
 }
 
 func (c *Castle) GetPosition() common.Position {
-	return c.Position
+	return c.troop.Position
 }
 
 func (c *Castle) GetTeam() common.Team {
-	return c.Team
+	return c.troop.Team
 }

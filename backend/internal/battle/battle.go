@@ -33,6 +33,7 @@ func NewBattle() *Battle {
 		0: {false, false, false},
 		1: {false, false, false},
 	}
+	b.Enabled = true
 	// Spawn castles for team 1 (e.g., enemy)
 	b.spawnTeamCastles(0)
 	b.spawnTeamCastles(1)
@@ -59,22 +60,19 @@ func (b *Battle) spawnTeamCastles(team common.Team) {
 	for i := 0; i < numCastles; i++ {
 		x := (mapHeight / 4) * (i + 1)
 		y := yFront
-		damage := 10
+		isKing := i == kingIndex
 
-		if i == kingIndex {
+		if isKing {
 			y += yKingOffset
-			damage = 35
 		}
 
 		b.TowerStatus[team][i] = true
 		pos := common.NewPosition(x, y)
-		castle := &troops.Castle{
-			ID:       i + int(team)*10, // watch out for collisions!
-			Team:     team,
-			Position: pos,
-			Health:   200,
-			Damage:   damage,
-			Range:    3,
+		var castle troops.Entity
+		if isKing {
+			castle = troops.NewKingCastle(i+int(team)*10, team, pos)
+		} else {
+			castle = troops.NewCastle(i+int(team)*10, team, pos)
 		}
 		b.Arena.AddTroop(int(pos.X), int(pos.Y), castle.GetTroop())
 		b.Troops = append(b.Troops, castle)
@@ -85,10 +83,7 @@ func (b *Battle) SpawnTroop(team common.Team, pos common.Position, troopType str
 	if !b.Arena.InBounds(pos) {
 		return nil, errors.New("position out of arena bounds")
 	}
-	troopRegistry := map[string]func(team common.Team, pos common.Position) troops.Entity{
-		"knight": troops.NewKnight,
-	}
-	newTroop := troopRegistry[troopType](team, pos)
+	newTroop := troops.NewTroopByType(troopType, team, pos)
 	b.Arena.AddTroop(int(pos.X), int(pos.Y), newTroop.GetTroop())
 	b.Troops = append(b.Troops, newTroop)
 	return newTroop.GetTroop(), nil
