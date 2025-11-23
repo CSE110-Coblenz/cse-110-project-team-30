@@ -1,5 +1,6 @@
 import troops from "../../troops.json";
 import { generateMathProblem } from "../../mathGenerator";
+import { ARENA_SIZE } from "../../constants";
 import type { Troop, WSResponse, Grid } from "../../types";
 
 /**
@@ -9,8 +10,9 @@ export class BattleScreenModel {
   private points = 0;
   private currentProblem: MathProblem | null = null;
   private gameId: string = "";
-  public SIZE: number = 16;
+  private readonly SIZE: number = ARENA_SIZE;
   private tiles!: Grid;
+  private troopToPlace : string | null = null;
 
   constructor() {
     // Initialize tiles grid

@@ -5,6 +5,7 @@ import (
 	"cse-110-project-team-30/backend/internal/battle/common"
 	"cse-110-project-team-30/backend/internal/battle/troops"
 	"errors"
+	"fmt"
 	"math"
 	"time"
 )
@@ -13,6 +14,7 @@ const MaxTicks = 10000
 
 type Battle struct {
 	TickCount   int
+	IDMgr       int
 	Arena       *arena.Map
 	Troops      []troops.Entity
 	TowerStatus map[common.Team][]bool
@@ -23,7 +25,8 @@ type Battle struct {
 func NewBattle() *Battle {
 	b := &Battle{
 		TickCount:   0,
-		Arena:       arena.NewMap(16, 16), // instantiate here
+		IDMgr:       1,
+		Arena:       arena.NewMap(32, 32), // instantiate here
 		Troops:      []troops.Entity{},
 		TowerStatus: make(map[common.Team][]bool),
 	}
@@ -50,11 +53,11 @@ func (b *Battle) spawnTeamCastles(team common.Team) {
 	kingIndex := numCastles / 2 // middle castle
 
 	if team == 0 {
-		yFront = 3
-		yKingOffset = -1 // king tower one tile behind
+		yFront = 6
+		yKingOffset = -2 // king tower one tile behind
 	} else {
-		yFront = mapWidth - 4
-		yKingOffset = 1
+		yFront = mapWidth - 7
+		yKingOffset = 2
 	}
 
 	for i := 0; i < numCastles; i++ {
@@ -80,13 +83,21 @@ func (b *Battle) spawnTeamCastles(team common.Team) {
 }
 
 func (b *Battle) SpawnTroop(team common.Team, pos common.Position, troopType string) (*troops.Troop, error) {
+	if !b.Enabled {
+		return nil, errors.New("battle is over")
+	}
 	if !b.Arena.InBounds(pos) {
 		return nil, errors.New("position out of arena bounds")
 	}
-	if (team == common.Team(0) && pos.Y < float64(b.Arena.Height)/2) || (team == common.Team(1) && pos.Y >= float64(b.Arena.Height)/2) {
+	if (team == common.Team(1) && pos.Y < float64(b.Arena.Height)/2) || (team == common.Team(0) && pos.Y >= float64(b.Arena.Height)/2) {
 		return nil, errors.New("cannot spawn troop in enemy territory")
 	}
 	newTroop := troops.NewTroopByType(troopType, team, pos)
+	if newTroop == nil || newTroop.GetTroop() == nil {
+		return nil, fmt.Errorf("failed to create troop of type %s", troopType)
+	}
+	b.IDMgr++
+	newTroop.GetTroop().ID = b.IDMgr
 	b.Arena.AddTroop(int(pos.X), int(pos.Y), newTroop.GetTroop())
 	b.Troops = append(b.Troops, newTroop)
 	return newTroop.GetTroop(), nil
@@ -203,8 +214,8 @@ func (b *Battle) removeDeadTroops() {
 	for _, e := range b.Troops {
 		t := e.GetTroop()
 		if t.Health <= 0 && t.Type == "Castle" {
-			b.TowerStatus[t.Team][t.ID%10] = false
-			if t.ID%10 == 1 { // king tower
+			b.TowerStatus[t.Team][(-t.ID)%10-1] = false
+			if (-t.ID)%10 == 2 { // king tower
 				b.EndGame()
 			}
 		}

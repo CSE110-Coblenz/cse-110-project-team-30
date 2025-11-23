@@ -1,7 +1,7 @@
 import Konva from "konva";
 import { SpriteLookup, preloadSprites } from "./SpriteLookup.ts";
 import type { View, Grid } from "../../types.ts";
-import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
+import { STAGE_WIDTH, STAGE_HEIGHT, ARENA_SIZE } from "../../constants.ts";
 import type { BattleScreenModel } from "./BattleScreenModel.ts";
 
 /**
@@ -15,6 +15,8 @@ export class BattleScreenView implements View {
   private answerInput: HTMLInputElement;
   private remainderInput: HTMLInputElement | null = null;
   private label: Konva.Text;
+  private previewNode: Konva.Group | null = null;
+  private previewTroopNode: Konva.Group | null = null;
   private timerText: Konva.Text;
   private crownText: Konva.Text;
   private selectedCardImages: Konva.Image[] = [];
@@ -23,6 +25,7 @@ export class BattleScreenView implements View {
   private readonly CARD_AREA_WIDTH: number =
     STAGE_WIDTH - this.BATTLE_AREA_WIDTH;
   private readonly CARD_AREA_HEIGHT: number = STAGE_HEIGHT;
+  private callSpawnTroop?: (x: number, y: number) => void;
 
   constructor(
     onHomeClick: () => void,
@@ -181,6 +184,66 @@ export class BattleScreenView implements View {
     });
   }
 
+  setCallSpawnTroop(callSpawnTroop: (x: number, y: number) => void) {
+    this.callSpawnTroop = callSpawnTroop;
+  }
+
+  private async subscribeTileHover(config: {
+    group: Konva.Group;
+    margin: number;
+    gridWidth: number;
+    gridHeight: number;
+    tileWidth: number;
+    tileHeight: number;
+  }): void {
+    const { group, margin, gridWidth, gridHeight, tileWidth, tileHeight } = config;
+    group.on("mousemove", () => {
+      const pointer = group.getRelativePointerPosition();
+      if (!pointer) return;
+
+      const localX = pointer.x - margin;
+      const localY = pointer.y - margin;
+
+      if (
+        localX < 0 ||
+        localY < 0 ||
+        localX >= gridWidth ||
+        localY >= gridHeight
+      ) {
+        return;
+      }
+
+      const tileX = Math.floor(localX / tileWidth);
+      const tileY = Math.floor(localY / tileHeight);
+
+      if (tileY >= 16) {
+        // players side of the arena
+        this.drawPreviewTroop(tileX, tileY, true, "SpearmanOne"); // -999 is an impossible troop id
+      }
+    });
+    group.on("click", () => {
+      const pointer = group.getRelativePointerPosition();
+      if (!pointer) return;
+
+      const localX = pointer.x - margin;
+      const localY = pointer.y - margin;
+
+      if (
+        localX < 0 ||
+        localY < 0 ||
+        localX >= gridWidth ||
+        localY >= gridHeight
+      ) {
+        return;
+      }
+
+      const tileX = Math.floor(localX / tileWidth);
+      const tileY = Math.floor(localY / tileHeight);
+      this.callSpawnTroop(tileX, tileY);
+    });
+  }
+
+
   private addBattleField(): void {
     const margin = 25;
     const gridWidth = this.BATTLE_AREA_WIDTH - margin * 2;
@@ -221,8 +284,8 @@ export class BattleScreenView implements View {
       field.add(bg);
     };
 
-    const cols = 16;
-    const rows = 16;
+    const cols = ARENA_SIZE;
+    const rows = ARENA_SIZE;
     const tileWidth = gridWidth / cols;
     const tileHeight = gridHeight / rows;
 
@@ -240,10 +303,25 @@ export class BattleScreenView implements View {
           strokeWidth: 1,
           cornerRadius: 5,
         });
+
+        tile.on("mouseenter", () => {
+          document.body.style.cursor = "pointer";
+        });
+        tile.on("mouseleave", () => {
+          document.body.style.cursor = "default";
+        });
         field.add(tile);
       }
     }
     this.battleFieldGroup.add(field);
+    this.subscribeTileHover({
+      group: this.battleFieldGroup,
+      margin,
+      gridWidth,
+      gridHeight,
+      tileWidth: tileWidth,
+      tileHeight: tileHeight
+    });
   }
 
   // Score display as crowns
@@ -909,14 +987,21 @@ export class BattleScreenView implements View {
    */
  private drawTroop(
   id: number,
-  x: number,
-  y: number,
+  px: number,
+  py: number,
   sameTeam: boolean,
   troopType: string,
-  healthText: string
+  healthText: string,
 ) {
-  const existing = this.troopNodes.get(id);
+  var existing = this.troopNodes.get(id);
 
+  const x =
+    px * (this.BATTLE_AREA_WIDTH / ARENA_SIZE) +
+    (this.BATTLE_AREA_WIDTH / ARENA_SIZE) / 2;
+
+  const y =
+    py * (this.BATTLE_AREA_HEIGHT / ARENA_SIZE) +
+    (this.BATTLE_AREA_HEIGHT / ARENA_SIZE) / 2;
   if (existing) {
     // Update position
     existing.x(x);
@@ -943,6 +1028,7 @@ export class BattleScreenView implements View {
   const castle = new Konva.Image({
     width: 85,
     height: 160,
+    opacity: 1,
     image: troopSprite,
     shadowColor: "black",
     shadowBlur: 10,
@@ -973,6 +1059,37 @@ export class BattleScreenView implements View {
   this.battleFieldGroup.add(this.troopGroup);
 }
 
+private drawPreviewTroop(px: number, py: number, sameTeam: boolean, troopType: string) {
+  const x =
+    px * (this.BATTLE_AREA_WIDTH / ARENA_SIZE) +
+    (this.BATTLE_AREA_WIDTH / ARENA_SIZE) / 2;
+  const y =
+    py * (this.BATTLE_AREA_HEIGHT / ARENA_SIZE) +
+    (this.BATTLE_AREA_HEIGHT / ARENA_SIZE) / 2;
+
+  if (!this.previewTroopNode) {
+    const troopSprite: HTMLImageElement = SpriteLookup(sameTeam, troopType);
+    const group = new Konva.Group({ x, y, offsetX: 85/2, offsetY: 160/2 });
+
+    const sprite = new Konva.Image({
+      width: 85,
+      height: 160,
+      image: troopSprite,
+      opacity: 0.5,
+      shadowColor: "black",
+      shadowBlur: 10,
+      shadowOffset: { x: 10, y: 0 },
+      shadowOpacity: 0.5
+    });
+    group.add(sprite);
+
+    this.troopGroup.add(group);
+    this.previewTroopNode = group;
+  } else {
+    this.previewTroopNode.x(x);
+    this.previewTroopNode.y(y);
+  }
+}
 
 
   /**
@@ -990,18 +1107,12 @@ rerenderTroops(grid: Grid): void {
         const id = troop.ID; // You MUST have a stable ID from backend
         seenIds.add(id);
 
-        const px =
-          x * (this.BATTLE_AREA_WIDTH / grid[0].length) +
-          (this.BATTLE_AREA_WIDTH / grid[0].length) / 2;
 
-        const py =
-          y * (this.BATTLE_AREA_HEIGHT / grid.length) +
-          (this.BATTLE_AREA_HEIGHT / grid.length) / 2;
 
         this.drawTroop(
           id,
-          px,
-          py,
+          x,
+          y,
           troop.Team === 0,
           troop.Type,
           `HP: ${troop.Health}`
