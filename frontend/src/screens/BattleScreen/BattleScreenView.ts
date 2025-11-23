@@ -1,5 +1,5 @@
 import Konva from "konva";
-import SpriteLookup from "./SpriteLookup.ts";
+import { SpriteLookup, preloadSprites } from "./SpriteLookup.ts";
 import type { View, Grid } from "../../types.ts";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
 import type { BattleScreenModel } from "./BattleScreenModel.ts";
@@ -10,7 +10,7 @@ import type { BattleScreenModel } from "./BattleScreenModel.ts";
 export class BattleScreenView implements View {
   private group: Konva.Group
   private troopSprites: Record<string, HTMLImageElement> = {};
-  private troopMap: Map<string, Konva.Group> = new Map();
+  private troopNodes: Map<number, Konva.Group> = new Map();
   private troopGroup: Konva.Group;
   private answerInput: HTMLInputElement;
   private remainderInput: HTMLInputElement | null = null;
@@ -36,7 +36,7 @@ export class BattleScreenView implements View {
     //true for testing
     this.group = new Konva.Group({ visible: true });
     this.troopGroup = new Konva.Group();
-
+    preloadSprites();
     this.addBackground();
     this.addHomeButton(onHomeClick);
 
@@ -907,79 +907,117 @@ export class BattleScreenView implements View {
   /**
    * Draw Troop
    */
-  private drawTroop(x, y, sameTeam: boolean, troopType: string, healthText: string) {
-    const imageURL = SpriteLookup(sameTeam, troopType);
-    const castleGroup = new Konva.Group();
-    const castleImage = new Image();
-    const castleWidth = 85;
-    const castleHeight = 160;
-    castleImage.src = imageURL;
-    castleImage.onload = () => {
-      const castle = new Konva.Image({
-        x: x,
-        y: y,
-        width: castleWidth,
-        height: castleHeight,
-        image: castleImage,
-        shadowColor: "black",
-        shadowBlur: 20,
-        shadowOffset: { x: 20, y: 0 },
-        shadowOpacity: 0.5,
-      });
-      castle.offsetX(castleWidth / 2);
-      castle.offsetY(castleHeight / 2);
-      castleGroup.add(castle);
+ private drawTroop(
+  id: number,
+  x: number,
+  y: number,
+  sameTeam: boolean,
+  troopType: string,
+  healthText: string
+) {
+  const existing = this.troopNodes.get(id);
 
-      this.castleText = new Konva.Text({
-        x: x - (castleWidth / 3) * 2,
-        y: y - castleHeight / 2 - 5,
-        width: castleWidth * 2,
-        text: healthText,
-        fontSize: 16,
-        fontFamily: "Arial",
-        fill: "white",
-        wrap: "word",
-        align: "center",
-      });
-      this.castleText.offsetX(this.castleText.width() / 2);
-      this.castleText.offsetY(this.castleText.height() / 2);
-      castleGroup.add(this.castleText);
+  if (existing) {
+    // Update position
+    existing.x(x);
+    existing.y(y);
 
-      this.troopGroup.add(castleGroup);
-    };
+    // Update health text
+    const textNode = existing.findOne(".troopHealth") as Konva.Text;
+    if (textNode) {
+      textNode.text(healthText);
+    }
+
+    return;
   }
+
+  // Otherwise create new troop
+  const troopSprite: HTMLImageElement = SpriteLookup(sameTeam, troopType);
+  const group = new Konva.Group({
+    x,
+    y,
+    offsetX: 85 / 2,
+    offsetY: 160 / 2
+  });
+
+  const castle = new Konva.Image({
+    width: 85,
+    height: 160,
+    image: troopSprite,
+    shadowColor: "black",
+    shadowBlur: 10,
+    shadowOffset: { x: 10, y: 0 },
+    shadowOpacity: 0.5
+  });
+
+  group.add(castle);
+
+  const health = new Konva.Text({
+    name: "troopHealth",
+    x: -85 / 1.5,
+    y: -160 / 2 - 5,
+    width: 85 * 2,
+    text: healthText,
+    fontSize: 16,
+    fontFamily: "Arial",
+    fill: "white",
+    wrap: "word",
+    align: "center",
+    offsetX: (85) / 2,
+    offsetY: -80
+  });
+
+  group.add(health);
+  this.troopGroup.add(group);
+  this.troopNodes.set(id, group);
+  this.battleFieldGroup.add(this.troopGroup);
+}
+
 
 
   /**
    * Rerender
    */
 rerenderTroops(grid: Grid): void {
-  // Clear all troops from the troopGroup
-  this.troopGroup.destroyChildren();
+  const seenIds = new Set<int>();
 
-  // Iterate over the grid and draw troops
   for (let y = 0; y < grid.length; y++) {
     for (let x = 0; x < grid[y].length; x++) {
-      for (let j = 0; j < grid[y].length; j++) {
+      for (let j = 0; j < grid[y][x].length; j++) {
         const troop = grid[y][x][j];
         if (!troop) continue;
-        const sameTeam = troop.Team === 0; // Example team check
-        const troopType = troop.Type;
-        const healthText = `HP: ${troop.Health}`;
-        this.drawTroop(
+
+        const id = troop.ID; // You MUST have a stable ID from backend
+        seenIds.add(id);
+
+        const px =
           x * (this.BATTLE_AREA_WIDTH / grid[0].length) +
-            (this.BATTLE_AREA_WIDTH / grid[0].length) / 2,
+          (this.BATTLE_AREA_WIDTH / grid[0].length) / 2;
+
+        const py =
           y * (this.BATTLE_AREA_HEIGHT / grid.length) +
-            (this.BATTLE_AREA_HEIGHT / grid.length) / 2,
-          sameTeam,
-          troopType,
-          healthText,
+          (this.BATTLE_AREA_HEIGHT / grid.length) / 2;
+
+        this.drawTroop(
+          id,
+          px,
+          py,
+          troop.Team === 0,
+          troop.Type,
+          `HP: ${troop.Health}`
         );
-          this.troopGroup.draw();
       }
     }
+    this.troopGroup.getLayer()?.batchDraw();
   }
-  this.battleFieldGroup.add(this.troopGroup);
+
+  // Remove troops that disappeared
+  for (const [id, node] of this.troopNodes) {
+    if (!seenIds.has(id)) {
+      node.destroy();
+      this.troopNodes.delete(id);
+    }
+  }
 }
 
   /**

@@ -70,9 +70,9 @@ func (b *Battle) spawnTeamCastles(team common.Team) {
 		pos := common.NewPosition(x, y)
 		var castle troops.Entity
 		if isKing {
-			castle = troops.NewKingCastle(-(i + int(team)*10), team, pos)
+			castle = troops.NewKingCastle(-(i + 1 + int(team)*10), team, pos)
 		} else {
-			castle = troops.NewCastle(-(i + int(team)*10), team, pos)
+			castle = troops.NewCastle(-(i + 1 + int(team)*10), team, pos)
 		}
 		b.Arena.AddTroop(int(pos.X), int(pos.Y), castle.GetTroop())
 		b.Troops = append(b.Troops, castle)
@@ -82,6 +82,9 @@ func (b *Battle) spawnTeamCastles(team common.Team) {
 func (b *Battle) SpawnTroop(team common.Team, pos common.Position, troopType string) (*troops.Troop, error) {
 	if !b.Arena.InBounds(pos) {
 		return nil, errors.New("position out of arena bounds")
+	}
+	if (team == common.Team(0) && pos.Y < float64(b.Arena.Height)/2) || (team == common.Team(1) && pos.Y >= float64(b.Arena.Height)/2) {
+		return nil, errors.New("cannot spawn troop in enemy territory")
 	}
 	newTroop := troops.NewTroopByType(troopType, team, pos)
 	b.Arena.AddTroop(int(pos.X), int(pos.Y), newTroop.GetTroop())
