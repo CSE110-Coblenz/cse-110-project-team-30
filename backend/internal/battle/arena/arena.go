@@ -8,7 +8,7 @@ import (
 )
 
 type Tile struct {
-	Troops []*troops.Troop
+	Troops []troops.Entity
 }
 
 type Map struct {
@@ -22,7 +22,7 @@ func NewMap(width, height int) *Map {
 		tiles[y] = make([]*Tile, width)
 		for x := range tiles[y] {
 			tiles[y][x] = &Tile{
-				Troops: []*troops.Troop{}, // Tiles are empty to start
+				Troops: []troops.Entity{}, // Tiles are empty to start
 			}
 		}
 	}
@@ -84,8 +84,8 @@ func (m *Map) StringWithMarkers(markers []common.Position) string {
 
 // FindNearestEnemyBFS finds the nearest enemy troop using BFS
 // and returns both the troop and the path (list of positions).
-func (m *Map) FindNearestEnemyBFS(t *troops.Troop) (*troops.Troop, []common.Position) {
-	start := common.NewPosition(int(t.Position.X), int(t.Position.Y))
+func (m *Map) FindNearestEnemyBFS(t troops.Entity) (troops.Entity, []common.Position) {
+	start := common.NewPosition(int(t.GetPosition().X), int(t.GetPosition().Y))
 
 	type Node struct {
 		pos  common.Position
@@ -115,7 +115,7 @@ func (m *Map) FindNearestEnemyBFS(t *troops.Troop) (*troops.Troop, []common.Posi
 
 		// Check for enemies on this tile
 		for _, other := range m.Tiles[y][x].Troops {
-			if other.Team != t.Team {
+			if other.GetTeam() != t.GetTeam() {
 				// Found the nearest enemy — return both troop and path
 				return other, current.path
 			}

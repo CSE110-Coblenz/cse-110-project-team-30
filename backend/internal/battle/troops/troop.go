@@ -6,14 +6,18 @@ import (
 )
 
 type MapView interface {
-	FindNearestEnemyBFS(t *Troop) (*Troop, []common.Position)
+	FindNearestEnemyBFS(t Entity) (Entity, []common.Position)
 }
 type Entity interface {
 	CalculateAction(mv MapView) Action
+	GetTroop() *Troop
+	GetPosition() common.Position
+	GetTeam() common.Team
 }
 type Action struct {
 	NextPosition common.Position // where the entity wants to move
 	AttackTarget Entity          // who to attack (nil if none)
+	Damage       int             // damage to deal (0 if none)
 }
 type Troop struct {
 	ID       int
@@ -33,4 +37,15 @@ func (t *Troop) CalculateAction(mv MapView) Action {
 		NextPosition: t.Position,
 		AttackTarget: nil,
 	}
+}
+
+func (t *Troop) GetPosition() common.Position {
+	return t.Position
+}
+func (t *Troop) GetTeam() common.Team {
+	return t.Team
+}
+
+func (t *Troop) GetTroop() *Troop {
+	return t
 }
