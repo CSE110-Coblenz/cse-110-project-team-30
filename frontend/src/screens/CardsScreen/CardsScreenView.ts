@@ -266,146 +266,166 @@ private showCardStatsPopup(stats: { name: string; hp: number; damage: number; le
 }
 
 
-  /**
- * Create four horizontal operation buttons aligned to the left of each row of cards
- * Top row: Addition, 2nd: Subtraction, 3rd: Multiplication, 4th: Division
- */
+    /**
+   * Create four horizontal operation buttons aligned to the left of each row of cards
+   */
   private createOperationButtons(): void {
-    const rows = 4; // number of rows of cards
-    const cardHeight = 100; // height of each card (matches your card grid)
-    const gap = 10; // vertical gap between rows
-
-    // Calculate starting Y position for the first row
-    const startY = (STAGE_HEIGHT - (rows * cardHeight + (rows - 1) * gap)) / 2 + 60;
-
-    const buttonWidth = 200; // width of each operation button
-    const buttonHeight = cardHeight / 2; // match button height to card height
-    const buttonX = 300; // X position for all buttons (distance from left stage edge)
-
-    // Text for each button, corresponding to each row
     const operations = ["Addition", "Subtraction", "Multiplication", "Division"];
+    operations.forEach((op, index) => {
+      const buttonGroup = this.createButtonGroup(op, index);
+      this.group.add(buttonGroup);
+    });
+  }
 
-    // Loop over each row to create a button
-    for (let row = 0; row < rows; row++) {
-      // Y position for this button, aligned with its row
-      const y = (startY + 25) + row * (cardHeight + gap);
+  /**
+   * Create a Konva.Group for a single operation button
+   */
+  private createButtonGroup(operation: string, row: number): Konva.Group {
+    const buttonWidth = 200;
+    const buttonHeight = 50;
+    const buttonX = 300;
 
-      // Create a group to hold the button rectangle and text
-      const buttonGroup = new Konva.Group({
-        x: buttonX,
-        y,
-        cursor: 'pointer', // cursor changes on hover
+    const y = this.calculateButtonY(row);
+
+    const group = new Konva.Group({
+      x: buttonX,
+      y,
+      cursor: 'pointer',
+    });
+
+    const rect = this.createButtonRect(buttonWidth, buttonHeight);
+    const text = this.createButtonText(operation, buttonWidth, buttonHeight);
+
+    group.add(rect);
+    group.add(text);
+
+    this.addButtonHoverEffect(group, rect);
+    this.addButtonClickHandler(group, operation);
+
+    return group;
+  }
+
+  /**
+   * Calculate Y position for a button based on row index
+   */
+  private calculateButtonY(row: number): number {
+    const rows = 4;
+    const cardHeight = 100;
+    const gap = 10;
+    const startY = (STAGE_HEIGHT - (rows * cardHeight + (rows - 1) * gap)) / 2 + 60;
+    return startY + 25 + row * (cardHeight + gap);
+  }
+
+  /**
+   * Create the rectangular Konva button
+   */
+  private createButtonRect(width: number, height: number): Konva.Rect {
+    return new Konva.Rect({
+      width,
+      height,
+      fill: '#4a90e2',
+      cornerRadius: 8,
+      shadowColor: 'black',
+      shadowBlur: 5,
+      shadowOffset: { x: 2, y: 2 },
+      shadowOpacity: 0.2,
+    });
+  }
+
+  /**
+   * Create the button text
+   */
+  private createButtonText(text: string, width: number, height: number): Konva.Text {
+    const buttonText = new Konva.Text({
+      text,
+      fontSize: 18,
+      fontFamily: 'Arial',
+      fill: 'white',
+      width,
+      height,
+      align: 'center',
+      verticalAlign: 'middle',
+    });
+    buttonText.offsetY(-4);
+    return buttonText;
+  }
+
+  /**
+   * Add hover effect to a button
+   */
+  private addButtonHoverEffect(group: Konva.Group, rect: Konva.Rect): void {
+    group.on('mouseover', () => {
+      rect.fill('#3a7bd5');
+      group.getLayer()?.draw();
+    });
+    group.on('mouseout', () => {
+      rect.fill('#4a90e2');
+      group.getLayer()?.draw();
+    });
+  }
+
+  /**
+   * Add click handler to show video tutorial
+   */
+  private addButtonClickHandler(group: Konva.Group, operation: string): void {
+    group.on('click', () => {
+      const layer = this.group.getLayer();
+      if (!layer) return;
+
+      const videoSrc = this.getVideoSrc(operation);
+
+      const video = document.createElement('video');
+      video.src = videoSrc;
+      video.crossOrigin = 'anonymous';
+      video.autoplay = true;
+      video.controls = true;
+
+      const videoImage = new Konva.Image({
+        image: video,
+        x: STAGE_WIDTH / 2 - 280,
+        y: STAGE_HEIGHT / 2 - 157,
+        width: 560,
+        height: 315,
       });
 
-      // Create the rectangular button
-      const buttonRect = new Konva.Rect({
-        width: buttonWidth,
-        height: buttonHeight,
-        fill: '#4a90e2', // default blue
-        cornerRadius: 8, // rounded corners
-        shadowColor: 'black',
-        shadowBlur: 5,
-        shadowOffset: { x: 2, y: 2 },
-        shadowOpacity: 0.2,
+      const overlay = new Konva.Rect({
+        x: 0,
+        y: 0,
+        width: STAGE_WIDTH,
+        height: STAGE_HEIGHT,
+        fill: 'rgba(0,0,0,0.2)',
       });
 
-      // Create the button text
-      const buttonText = new Konva.Text({
-        text: operations[row], // text for this row
-        fontSize: 18,
-        fontFamily: 'Arial',
-        fill: 'white',
-        width: buttonWidth,
-        height: buttonHeight,
-        align: 'center', // horizontally centered
-        verticalAlign: 'middle', // vertically centered
-      });
-
-      // Slight vertical adjustment
-      buttonText.offsetY(-4);
-
-      // Add rectangle and text to the button group
-      buttonGroup.add(buttonRect);
-      buttonGroup.add(buttonText);
-
-      // Hover effects
-      buttonGroup.on('mouseover', () => {
-        buttonRect.fill('#3a7bd5'); // darker blue on hover
-        buttonGroup.getLayer()?.draw();
-      });
-      buttonGroup.on('mouseout', () => {
-        buttonRect.fill('#4a90e2'); // revert color
-        buttonGroup.getLayer()?.draw();
-      });
-
-      buttonGroup.on('click', () => {
-        const layer = this.group.getLayer();
-        if (!layer) return;
-
-        // Determine which video to play based on operation
-        let videoSrc = '';
-        switch (operations[row]) {
-          case 'Addition':
-            videoSrc = '/tutorial_videos/tutorial_addition.mp4';
-            break;
-          case 'Subtraction':
-            videoSrc = '/tutorial_videos/tutorial_subtraction.mp4';
-            break;
-          case 'Multiplication':
-            videoSrc = '/tutorial_videos/tutorial_multiplication.mp4';
-            break;
-          case 'Division':
-            videoSrc = '/tutorial_videos/tutorial_divison.mp4';
-            break;
-        }
-
-        // Create video element
-        const video = document.createElement('video');
-        video.src = videoSrc;
-        video.crossOrigin = 'anonymous';
-        video.autoplay = true;
-        video.controls = true;
-
-        // Create Konva.Image with video
-        const videoImage = new Konva.Image({
-          image: video,
-          x: STAGE_WIDTH / 2 - 280, // center horizontally (560 width)
-          y: STAGE_HEIGHT / 2 - 157, // center vertically (315 height)
-          width: 560,
-          height: 315,
-        });
-
-        // add a semi-transparent background behind video
-        const overlay = new Konva.Rect({
-          x: 0,
-          y: 0,
-          width: STAGE_WIDTH,
-          height: STAGE_HEIGHT,
-          fill: 'rgba(0,0,0,0.2)',
-        });
-
-        // Remove video and overlay on click
-        overlay.on('click', () => {
-          video.pause();
-          videoImage.destroy();
-          overlay.destroy();
-          layer.draw();
-        });
-
-        layer.add(overlay);
-        layer.add(videoImage);
-
-        // Start animation to refresh video frame
-        const anim = new Konva.Animation(() => {}, layer);
-        anim.start();
-        video.play();
+      overlay.on('click', () => {
+        video.pause();
+        videoImage.destroy();
+        overlay.destroy();
         layer.draw();
       });
 
-      // Add the button group to the main group
-      this.group.add(buttonGroup);
+      layer.add(overlay);
+      layer.add(videoImage);
+
+      const anim = new Konva.Animation(() => {}, layer);
+      anim.start();
+      video.play();
+      layer.draw();
+    });
+  }
+
+  /**
+   * Return video path based on operation
+   */
+  private getVideoSrc(operation: string): string {
+    switch (operation) {
+      case 'Addition': return '/tutorial_videos/tutorial_addition.mp4';
+      case 'Subtraction': return '/tutorial_videos/tutorial_subtraction.mp4';
+      case 'Multiplication': return '/tutorial_videos/tutorial_multiplication.mp4';
+      case 'Division': return '/tutorial_videos/tutorial_divison.mp4';
+      default: return '';
     }
   }
+
 
   private getTroopsArray(): { name: string; operation: string; hp: number; damage: number; level: number }[] {
     return Object.entries(this.troopsData).map(([name, stats]) => ({ name, ...stats }));
