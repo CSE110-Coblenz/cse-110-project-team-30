@@ -21,7 +21,7 @@ export class CardsScreenView implements View {
     this.group = new Konva.Group({visible: false});
 
     const backgroundImage = new Image();
-    backgroundImage.src = "card_images/library_background.png";
+    backgroundImage.src = "card_images/wizard_background.png";
     backgroundImage.onload = () => {
       const bg = new Konva.Image({
         x: 0,
@@ -33,6 +33,8 @@ export class CardsScreenView implements View {
       });
       this.group.add(bg);
       bg.moveToBottom();
+      this.createWizardBubble(1100, 275, "Click a button to learn more")
+
     };
 
     this.createTitle();
@@ -344,16 +346,16 @@ private showCardStatsPopup(stats: { name: string; hp: number; damage: number; le
         let videoSrc = '';
         switch (operations[row]) {
           case 'Addition':
-            videoSrc = '/tutorial_videos/addition.mp4';
+            videoSrc = '/tutorial_videos/tutorial_addition.mp4';
             break;
           case 'Subtraction':
-            videoSrc = '/tutorial_videos/subtraction.mp4';
+            videoSrc = '/tutorial_videos/tutorial_subtraction.mp4';
             break;
           case 'Multiplication':
-            videoSrc = '/tutorial_videos/multiplication.mp4';
+            videoSrc = '/tutorial_videos/tutorial_multiplication.mp4';
             break;
           case 'Division':
-            videoSrc = '/tutorial_videos/division.mp4';
+            videoSrc = '/tutorial_videos/tutorial_division.mp4';
             break;
         }
 
@@ -407,6 +409,55 @@ private showCardStatsPopup(stats: { name: string; hp: number; damage: number; le
 
   private getTroopsArray(): { name: string; operation: string; hp: number; damage: number; level: number }[] {
     return Object.entries(this.troopsData).map(([name, stats]) => ({ name, ...stats }));
+  }
+
+
+    /**
+   * Adds a speech bubble above the wizard's head, sized to fit the text
+   */
+  private createWizardBubble(wizardX: number, wizardY: number, text: string): void {
+    const padding = 10;
+    const fontSize = 16;
+
+    // Create text first
+    const bubbleText = new Konva.Text({
+      text,
+      fontSize,
+      fontFamily: 'Arial',
+      fill: '#000',
+      align: 'center',
+      verticalAlign: 'middle',
+    });
+
+    // Create bubble background sized to fit text + padding
+    const bubbleRect = new Konva.Rect({
+      width: bubbleText.width() + padding * 2,
+      height: bubbleText.height() + padding * 2,
+      fill: '#fff',
+      stroke: '#333',
+      strokeWidth: 2,
+      cornerRadius: 10,
+      shadowColor: 'black',
+      shadowBlur: 5,
+      shadowOffset: { x: 2, y: 2 },
+      shadowOpacity: 0.2,
+    });
+
+    // Center the text inside the bubble
+    bubbleText.x(padding);
+    bubbleText.y(padding);
+
+    // Group them together
+    const bubbleGroup = new Konva.Group({
+      x: wizardX - bubbleRect.width() / 2,
+      y: wizardY - bubbleRect.height() - 10, // above wizard
+    });
+
+    bubbleGroup.add(bubbleRect);
+    bubbleGroup.add(bubbleText);
+
+    this.group.add(bubbleGroup);
+    bubbleGroup.getLayer()?.draw();
   }
 
 
