@@ -995,7 +995,7 @@ export class BattleScreenView implements View {
   /**
    * Draw Troop
    */
- private drawTroop(
+ private drawOrUpdateTroop(
   id: number,
   px: number,
   py: number,
@@ -1119,7 +1119,7 @@ rerenderTroops(grid: Grid): void {
 
 
 
-        this.drawTroop(
+        this.drawOrUpdateTroop(
           id,
           x,
           y,
@@ -1129,8 +1129,8 @@ rerenderTroops(grid: Grid): void {
         );
       }
     }
-    this.troopGroup.getLayer()?.batchDraw();
   }
+  this.troopGroup.getLayer()?.batchDraw();
 
   // Remove troops that disappeared
   for (const [id, node] of this.troopNodes) {
