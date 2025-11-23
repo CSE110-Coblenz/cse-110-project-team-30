@@ -3,6 +3,7 @@ import type { View } from "../../types.ts";
 import { STAGE_WIDTH, STAGE_HEIGHT } from '../../constants';
 import troopsData from '../../troops.json';
 
+//TODO: Use Nathan's Troop type in type.ts when that gets pushed
 /**
  * Displays a 4x4 grid of image cards with title and home button
  */
@@ -337,7 +338,6 @@ private showCardStatsPopup(stats: { name: string; hp: number; damage: number; le
         buttonGroup.getLayer()?.draw();
       });
 
-      // Optional click behavior: log operation name
       buttonGroup.on('click', () => {
         const layer = this.group.getLayer();
         if (!layer) return;
@@ -355,7 +355,7 @@ private showCardStatsPopup(stats: { name: string; hp: number; damage: number; le
             videoSrc = '/tutorial_videos/tutorial_multiplication.mp4';
             break;
           case 'Division':
-            videoSrc = '/tutorial_videos/tutorial_division.mp4';
+            videoSrc = '/tutorial_videos/tutorial_divison.mp4';
             break;
         }
 
@@ -375,7 +375,7 @@ private showCardStatsPopup(stats: { name: string; hp: number; damage: number; le
           height: 315,
         });
 
-        // Optional: add a semi-transparent background behind video
+        // add a semi-transparent background behind video
         const overlay = new Konva.Rect({
           x: 0,
           y: 0,

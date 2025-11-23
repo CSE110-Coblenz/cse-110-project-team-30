@@ -29,7 +29,7 @@ export class MenuScreenController extends ScreenController {
         this.screenSwitcher.switchToScreen({ type: "leaderboard" });
         break;
       case "battle":
-        this.screenSwitcher.switchToScreen({ type: "battle" });
+        this.screenSwitcher.switchToScreen({ type: "selection" });
         break;
       case "cards":
         this.screenSwitcher.switchToScreen({ type: "cards" });
