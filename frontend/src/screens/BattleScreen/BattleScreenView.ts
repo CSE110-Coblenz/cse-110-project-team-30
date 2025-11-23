@@ -25,9 +25,11 @@ export class BattleScreenView implements View {
   private readonly CARD_AREA_WIDTH: number =
     STAGE_WIDTH - this.BATTLE_AREA_WIDTH;
   private readonly CARD_AREA_HEIGHT: number = STAGE_HEIGHT;
-  private callSpawnTroop?: (x: number, y: number) => void;
+  private callSpawnTroop?: (troop: string, x: number, y: number) => void;
+  private model: BattleScreenModel;
 
   constructor(
+    model: BattleScreenModel,
     onHomeClick: () => void,
     onContinueClick: () => void,
     onLeaveClick: () => void,
@@ -37,6 +39,7 @@ export class BattleScreenView implements View {
     onOkayClick: () => void,
   ) {
     //true for testing
+    this.model = model;
     this.group = new Konva.Group({ visible: true });
     this.troopGroup = new Konva.Group();
     preloadSprites();
@@ -184,7 +187,7 @@ export class BattleScreenView implements View {
     });
   }
 
-  setCallSpawnTroop(callSpawnTroop: (x: number, y: number) => void) {
+  setCallSpawnTroop(callSpawnTroop: (troop: string, x: number, y: number) => void) {
     this.callSpawnTroop = callSpawnTroop;
   }
 
@@ -198,6 +201,7 @@ export class BattleScreenView implements View {
   }): void {
     const { group, margin, gridWidth, gridHeight, tileWidth, tileHeight } = config;
     group.on("mousemove", () => {
+      if (!this.model.getTroopToPlace()) return;
       const pointer = group.getRelativePointerPosition();
       if (!pointer) return;
 
@@ -218,7 +222,7 @@ export class BattleScreenView implements View {
 
       if (tileY >= 16) {
         // players side of the arena
-        this.drawPreviewTroop(tileX, tileY, true, "SpearmanOne"); // -999 is an impossible troop id
+        this.drawPreviewTroop(tileX, tileY, true, this.model.getTroopToPlace()!);
       }
     });
     group.on("click", () => {
@@ -236,10 +240,16 @@ export class BattleScreenView implements View {
       ) {
         return;
       }
-
+      if (!this.callSpawnTroop) return;
+      if (!this.model.getTroopToPlace()) return;
       const tileX = Math.floor(localX / tileWidth);
       const tileY = Math.floor(localY / tileHeight);
-      this.callSpawnTroop(tileX, tileY);
+      this.callSpawnTroop(this.model.getTroopToPlace()!, tileX, tileY);
+      if (this.previewTroopNode) {
+        this.previewTroopNode.destroy();
+        this.previewTroopNode = null;
+      }
+      this.model.setTroopToPlace(null);
     });
   }
 

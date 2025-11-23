@@ -15,7 +15,7 @@ export class BattleScreenController extends ScreenController {
   private currentCardType: string | null = null;
   private isCorrect: boolean | null = null;
   private isBlueTeam: boolean = false;
-  private callSpawnTroop?: (x: number, y: number) => void;
+  private callSpawnTroop?: (troop: string, x: number, y: number) => void;
 
   constructor(screenSwitcher: ScreenSwitcher) {
     super();
@@ -23,6 +23,7 @@ export class BattleScreenController extends ScreenController {
 
     this.model = new BattleScreenModel();
     this.view = new BattleScreenView(
+      this.model,
       () => this.handleHomeClick(),
       () => this.handleLeaveClick(),
       () => this.handleContinueClick(),
@@ -70,11 +71,11 @@ export class BattleScreenController extends ScreenController {
         // asynchronously pull and update tiles
         const ws = new WebSocket(`${BACKEND_URI}/ws/${roomID}`);
         ws.onopen = () => {
-              this.callSpawnTroop = (x: number, y: number) => {
+              this.callSpawnTroop = (troop:string, x: number, y: number) => {
                 const position = this.isBlueTeam ? { X: x, Y: y } : this.flipBoardPosition({ X: x, Y: y });
                 ws.send(JSON.stringify({
-                  team: "red",
-                  troopType: this.currentCardType,
+                  team: this.isBlueTeam ? "blue" : "red",
+                  troopType: troop,
                   x: position.X,
                   y: position.Y
                 }));
@@ -210,6 +211,7 @@ export class BattleScreenController extends ScreenController {
 
     if (this.isCorrect) {
       console.log("correct!");
+      this.model.setTroopToPlace(this.currentCardType);
       /*
       this.model.spawnTroop(this.currentCardType, 0, 2, 7);
       this.view.renderTroop(this.currentCardType);*/

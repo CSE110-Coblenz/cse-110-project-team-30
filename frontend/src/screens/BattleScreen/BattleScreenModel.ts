@@ -10,7 +10,7 @@ export class BattleScreenModel {
   private points = 0;
   private currentProblem: MathProblem | null = null;
   private gameId: string = "";
-  private readonly SIZE: number = ARENA_SIZE;
+  public readonly SIZE: number = ARENA_SIZE;
   private tiles!: Grid;
   private troopToPlace : string | null = null;
 
@@ -103,6 +103,14 @@ export class BattleScreenModel {
       isCorrect = userAnswer === this.currentProblem.answer;
     }
     return isCorrect;
+  }
+
+  setTroopToPlace(troopType: string | null): void {
+    this.troopToPlace = troopType;
+  }
+
+  getTroopToPlace(): string | null {
+    return this.troopToPlace;
   }
 
   /**
