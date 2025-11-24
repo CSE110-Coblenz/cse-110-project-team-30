@@ -15,9 +15,9 @@ const pool = db.getPool();
  */
 async function getLeaderboardData() {
     const query = `
-        SELECT username, points 
-        FROM leaderboard 
-        ORDER BY points DESC 
+        SELECT Username, Points
+        FROM Users 
+        ORDER BY Points DESC 
         LIMIT 10;
     `;
 
@@ -25,7 +25,10 @@ async function getLeaderboardData() {
         // Execute the query. The result is an array of rows and field data.
         const [rows] = await pool.execute(query);
         console.log("Database query successful.");
-        return rows;
+         return rows.map(row => ({
+            username: row.Username || row.username,
+            points: row.Points !== undefined ? row.Points : row.points
+        }));
     } catch (error) {
         console.error("Error executing MySQL query:", error);
         // Throw an error to be caught by the Controller

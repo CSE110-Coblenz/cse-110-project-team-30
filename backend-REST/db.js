@@ -60,6 +60,9 @@ function getPool() {
       throw new Error(`CA certificate file not found! Ensure 'ca.pem' and 'db.js' are in the same folder ('backend-REST').`);
     }
 
+    console.log("正在连接的主机:", process.env.DB_HOST || '没有读取到环境变量，使用默认值');
+    console.log("SSL 配置变量:", process.env.DB_SSL_MODE); // 或者你用的任何SSL相关变量名称
+
     //
     // Key fix: Use 'DB_' variables from .env file
     //
