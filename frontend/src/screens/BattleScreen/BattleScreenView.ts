@@ -1004,7 +1004,8 @@ export class BattleScreenView implements View {
   healthText: string,
 ) {
   var existing = this.troopNodes.get(id);
-
+  const castleWidth = 85;
+  const castleHeight = 160;
   const x =
     px * (this.BATTLE_AREA_WIDTH / ARENA_SIZE) +
     (this.BATTLE_AREA_WIDTH / ARENA_SIZE) / 2;
@@ -1031,13 +1032,13 @@ export class BattleScreenView implements View {
   const group = new Konva.Group({
     x,
     y,
-    offsetX: 85 / 2,
-    offsetY: 160 / 2
+    offsetX: castleWidth / 2,
+    offsetY: castleHeight / 2
   });
 
   const castle = new Konva.Image({
-    width: 85,
-    height: 160,
+    width: castleWidth,
+    height: castleHeight,
     opacity: 1,
     image: troopSprite,
     shadowColor: "black",
@@ -1050,17 +1051,17 @@ export class BattleScreenView implements View {
 
   const health = new Konva.Text({
     name: "troopHealth",
-    x: -85 / 1.5,
-    y: -160 / 2 - 5,
-    width: 85 * 2,
+    x: -castleWidth / 1.5,
+    y: -castleHeight / 2 - 5,
+    width: castleWidth * 2,
     text: healthText,
     fontSize: 16,
     fontFamily: "Arial",
     fill: "white",
     wrap: "word",
     align: "center",
-    offsetX: (85) / 2,
-    offsetY: -80
+    offsetX: (castleWidth) / 2,
+    offsetY: -(castleHeight) / 2
   });
 
   group.add(health);
@@ -1070,6 +1071,8 @@ export class BattleScreenView implements View {
 }
 
 private drawPreviewTroop(px: number, py: number, sameTeam: boolean, troopType: string) {
+  const troopWidth = 85;
+  const troopHeight = 160;
   const x =
     px * (this.BATTLE_AREA_WIDTH / ARENA_SIZE) +
     (this.BATTLE_AREA_WIDTH / ARENA_SIZE) / 2;
@@ -1082,8 +1085,8 @@ private drawPreviewTroop(px: number, py: number, sameTeam: boolean, troopType: s
     const group = new Konva.Group({ x, y, offsetX: 85/2, offsetY: 160/2 });
 
     const sprite = new Konva.Image({
-      width: 85,
-      height: 160,
+      width: troopWidth,
+      height: troopHeight,
       image: troopSprite,
       opacity: 0.5,
       shadowColor: "black",
@@ -1106,7 +1109,7 @@ private drawPreviewTroop(px: number, py: number, sameTeam: boolean, troopType: s
    * Rerender
    */
 rerenderTroops(grid: Grid): void {
-  const seenIds = new Set<int>();
+  const seenIds = new Set<number>();
 
   for (let y = 0; y < grid.length; y++) {
     for (let x = 0; x < grid[y].length; x++) {
