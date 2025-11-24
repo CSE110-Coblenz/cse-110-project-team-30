@@ -79,6 +79,7 @@ async fetchAndUpdateBattleState(): Promise<void> {
       ws.onopen = () => {
         // setup troop spawning callback
         this.callSpawnTroop = (troop: string, x: number, y: number) => {
+          this.model.setTroopToPlace(null);
           const position = this.model.isBlueTeam ? { X: x, Y: y } : this.flipBoardPosition({ X: x, Y: y });
           ws.send(JSON.stringify({
             team: this.model.isBlueTeam ? "blue" : "red",

@@ -249,7 +249,6 @@ export class BattleScreenView implements View {
         this.previewTroopNode.destroy();
         this.previewTroopNode = null;
       }
-      this.model.setTroopToPlace(null);
     });
   }
 
