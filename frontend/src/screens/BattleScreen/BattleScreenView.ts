@@ -12,7 +12,6 @@ export class BattleScreenView implements View {
   private label: Konva.Text;
   private timerText: Konva.Text;
   private crownText: Konva.Text;
-  private selectedCardImages: Konva.Image[] = [];
   private readonly BATTLE_AREA_WIDTH: number = (STAGE_WIDTH / 3) * 2;
   private readonly BATTLE_AREA_HEIGHT: number = STAGE_HEIGHT;
   private readonly CARD_AREA_WIDTH: number =
@@ -104,7 +103,6 @@ export class BattleScreenView implements View {
       y: 0,
     });
 
-    this.loadPlaceholderCards(() => onCardClick("CavalryFour"));
     this.group.add(this.cardsGroup);
   }
 
@@ -120,19 +118,8 @@ export class BattleScreenView implements View {
     this.group.add(bg);
   }
 
-  // only for testing
-  private loadPlaceholderCards(onCardClick: (cardType: string) => void) {
-    const cardsIds = [
-      "spearmanOne",
-      "spearmanTwo",
-      "spearmanThree",
-      "spearmanFour",
-    ];
-    this.addCards(cardsIds, onCardClick);
-  }
-
-  private addCards(
-    cardTypes: string[] | number[],
+  private renderCards(
+    cardTypes: string[],
     onCardClick: (cardType: string) => void,
   ) {
     const cols = 2;
@@ -140,7 +127,7 @@ export class BattleScreenView implements View {
     const padding = 60;
 
     const cardWidth = this.CARD_AREA_WIDTH / 4;
-    const cardHeight = this.CARD_AREA_HEIGHT / 5;
+    const cardHeight = this.CARD_AREA_HEIGHT / 5.5;
 
     const gridWidth = cols * cardWidth + (cols - 1) * padding;
     const gridHeight = rows * cardHeight + (rows - 1) * padding;
@@ -149,10 +136,10 @@ export class BattleScreenView implements View {
 
     // Map from card types to image paths
     const cardTypeToImage: Record<string, string> = {
-      swordsman: "/card_images/swordsman.png",
-      archer: "/card_images/archer.png",
-      spearman: "/card_images/spearman.png",
-      cavalry: "/card_images/cavalry.png",
+      Swordsman: "/card_images/swordsman.png",
+      Archer: "/card_images/archer.png",
+      Spearman: "/card_images/spearman.png",
+      Cavalry: "/card_images/cavalry.png",
     };
 
     const suffixes = ["One", "Two", "Three", "Four"];
@@ -195,7 +182,6 @@ export class BattleScreenView implements View {
           cornerRadius: 10,
         });
         card.add(cardImage);
-        this.card.getLayer()?.draw();
       };
 
       const label = new Konva.Text({
@@ -208,7 +194,7 @@ export class BattleScreenView implements View {
       });
       card.add(label);
 
-      card.on("click", (cardType: string) => onCardClick(cardType));
+      card.on("click", () => onCardClick(name));
       this.cardsGroup.add(card);
     });
   }

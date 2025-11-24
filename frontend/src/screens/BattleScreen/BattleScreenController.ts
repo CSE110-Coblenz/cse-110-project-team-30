@@ -2,7 +2,7 @@ import { ScreenController } from "../../types.ts";
 import type { ScreenSwitcher } from "../../types.ts";
 import { BattleScreenModel } from "./BattleScreenModel.ts";
 import { BattleScreenView } from "./BattleScreenView.ts";
-import { MAX_CARDS_SELECTED, BATTLE_DURATION } from "../../constants.ts";
+import { BATTLE_DURATION } from "../../constants.ts";
 
 /**
  * BattleScreenController - Coordinates battle logic between Model and View
@@ -11,6 +11,7 @@ export class BattleScreenController extends ScreenController {
   private model: BattleScreenModel;
   private view: BattleScreenView;
   private screenSwitcher: ScreenSwitcher;
+  private selectedCards: string[] = [];
   private battleTimer: number | null = null;
   private currentCardType: string | null = null;
   private isCorrect: boolean | null = null;
@@ -18,7 +19,6 @@ export class BattleScreenController extends ScreenController {
   constructor(screenSwitcher: ScreenSwitcher) {
     super();
     this.screenSwitcher = screenSwitcher;
-
     this.model = new BattleScreenModel();
     this.view = new BattleScreenView(
       () => this.handleHomeClick(),
@@ -52,8 +52,10 @@ export class BattleScreenController extends ScreenController {
    */
   private startTimer(): void {
     let timeRemaining = BATTLE_DURATION;
+    console.log("Starting timer with seconds:", timeRemaining);
     this.battleTimer = setInterval(() => {
       timeRemaining -= 1;
+      console.log("Starting timer with seconds:", timeRemaining);
       this.view.updateTimer(timeRemaining);
       if (timeRemaining <= 0) {
         this.endBattle("complete");
@@ -69,6 +71,22 @@ export class BattleScreenController extends ScreenController {
       clearInterval(this.battleTimer);
       this.battleTimer = null;
     }
+  }
+
+  /**
+   * Sets the cards the user selected
+   */
+  private setCards(cards: string[]) {
+    this.selectedCards = cards;
+    this.view.renderCards(
+      [
+        "SpearmanOne",
+        "SpearmanTwo",
+        "SpearmanThree",
+        "CavalryFour",
+      ] /*this.selectedCards*/,
+      (cardType) => this.handleCardClick(cardType),
+    );
   }
 
   /**
@@ -101,7 +119,7 @@ export class BattleScreenController extends ScreenController {
    * Handle card click
    */
   private handleCardClick(cardType: string): void {
-    console.log("entered card click handler");
+    console.log(`entered card click handler ${cardType}`);
     this.currentCardType = cardType;
     const problem = this.model.generateProblem(cardType);
     const operation = this.model.getCardOperation(cardType);
@@ -158,20 +176,6 @@ export class BattleScreenController extends ScreenController {
 
     this.isCorrect = null;
     this.currentCardType = null;
-  }
-
-  /**
-   * Sets the cards the user selected
-   */
-  private setCards(cards: string[] | number[]) {
-    if (cards.length !== MAX_CARDS_SELECTED) {
-      console.error(
-        `BattleScreenController: Expected ${MAX_CARDS_SELECTED} cards, got ${cards.length}`,
-      );
-      return;
-    }
-
-    this.view.addCards(cards);
   }
 
   /**
