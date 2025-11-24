@@ -8,7 +8,7 @@ import type { BattleScreenModel } from "./BattleScreenModel.ts";
  * BattleScreenView - Renders the battle game UI using Konva
  */
 export class BattleScreenView implements View {
-  private group: Konva.Group
+  private group: Konva.Group;
   private troopSprites: Record<string, HTMLImageElement> = {};
   private troopNodes: Map<number, Konva.Group> = new Map();
   private troopGroup: Konva.Group;
