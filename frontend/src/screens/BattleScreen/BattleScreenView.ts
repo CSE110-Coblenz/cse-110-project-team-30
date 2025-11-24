@@ -1116,6 +1116,7 @@ rerenderTroops(grid: Grid): void {
 
         const id = troop.ID; // You MUST have a stable ID from backend
         seenIds.add(id);
+        const sameTeam = troop.Team === (this.model.isBlueTeam ? 1 : 0);
 
 
 
@@ -1123,7 +1124,7 @@ rerenderTroops(grid: Grid): void {
           id,
           x,
           y,
-          troop.Team === 0,
+          sameTeam,
           troop.Type,
           `HP: ${troop.Health}`
         );

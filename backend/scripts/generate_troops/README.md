@@ -8,3 +8,7 @@ Run using:
 -o flag sets output directory
 
 pass in json file as argument
+
+Example Troops.json input:
+``json
+todo```

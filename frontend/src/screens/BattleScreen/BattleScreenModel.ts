@@ -13,6 +13,7 @@ export class BattleScreenModel {
   public readonly SIZE: number = ARENA_SIZE;
   private tiles!: Grid;
   private troopToPlace : string | null = null;
+  public isBlueTeam: boolean = false;
 
   constructor() {
     // Initialize tiles grid

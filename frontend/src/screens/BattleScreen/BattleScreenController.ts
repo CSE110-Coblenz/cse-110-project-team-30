@@ -14,7 +14,6 @@ export class BattleScreenController extends ScreenController {
   private battleTimer: number | null = null;
   private currentCardType: string | null = null;
   private isCorrect: boolean | null = null;
-  private isBlueTeam: boolean = false;
   private callSpawnTroop?: (troop: string, x: number, y: number) => void;
 
   constructor(screenSwitcher: ScreenSwitcher) {
@@ -46,7 +45,7 @@ export class BattleScreenController extends ScreenController {
    */
   private marshalWSData(data: WSResponse): WSResponse {
     // Implement marshaling logic here
-    if (!this.isBlueTeam) {
+    if (!this.model.isBlueTeam) {
       for (const troop of data.troops) {
         troop.Team = troop.Team === 1 ? 1 : 0;
         troop.Position = this.flipBoardPosition(
@@ -59,36 +58,50 @@ export class BattleScreenController extends ScreenController {
   /** 
    * Fetch and update battle state using ws
    */
-  async fetchAndUpdateBattleState(): Promise<void> {
-    // Fetch game id from backend
-    fetch("http://localhost:8080/newgame", {
-      method: "POST"
-    })
-      .then(res => res.json())
-      .then(data => {
-        const roomID = data.roomID;
+async fetchAndUpdateBattleState(): Promise<void> {
+  // Connect to matchmaking WebSocket
+  const matchWS = new WebSocket(`${BACKEND_URI}/newgamews`);
 
-        // asynchronously pull and update tiles
-        const ws = new WebSocket(`${BACKEND_URI}/ws/${roomID}`);
-        ws.onopen = () => {
-              this.callSpawnTroop = (troop:string, x: number, y: number) => {
-                const position = this.isBlueTeam ? { X: x, Y: y } : this.flipBoardPosition({ X: x, Y: y });
-                ws.send(JSON.stringify({
-                  team: this.isBlueTeam ? "blue" : "red",
-                  troopType: troop,
-                  x: position.X,
-                  y: position.Y
-                }));
-              }
-              this.view.setCallSpawnTroop(this.callSpawnTroop!);
-        }
-        ws.onmessage = (event) => {
-          const data: WSResponse = this.marshalWSData(JSON.parse(event.data));
-          this.model.updateTiles(data.troops);
-          this.view.rerenderTroops(this.model.getTiles());
+  matchWS.onopen = () => {
+    console.log("Connected to matchmaking server...");
+  };
+
+  matchWS.onmessage = (event) => {
+    const msg = JSON.parse(event.data) as { type: string; roomID: string; team: string };
+
+    if (msg.type === "matched") {
+      // Save team info
+      this.model.isBlueTeam = msg.team === "blue";
+
+      // Open the actual battle WebSocket
+      const ws = new WebSocket(`${BACKEND_URI}/ws/${msg.roomID}`);
+
+      ws.onopen = () => {
+        // setup troop spawning callback
+        this.callSpawnTroop = (troop: string, x: number, y: number) => {
+          const position = this.model.isBlueTeam ? { X: x, Y: y } : this.flipBoardPosition({ X: x, Y: y });
+          ws.send(JSON.stringify({
+            team: this.model.isBlueTeam ? "blue" : "red",
+            troopType: troop,
+            x: position.X,
+            y: position.Y
+          }));
         };
-      });
-  }
+        this.view.setCallSpawnTroop(this.callSpawnTroop!);
+      };
+
+      ws.onmessage = (event) => {
+        const data: WSResponse = this.marshalWSData(JSON.parse(event.data));
+        this.model.updateTiles(data.troops);
+        this.view.rerenderTroops(this.model.getTiles());
+      };
+
+      // Close matchmaking WS after match
+      matchWS.close();
+    }
+  };
+}
+
 
   /**
    * Start the battle
