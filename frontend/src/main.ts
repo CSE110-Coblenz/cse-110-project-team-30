@@ -107,7 +107,8 @@ class App implements ScreenSwitcher {
         break;
 
       case "battle":
-        this.battleController.show();
+        // Start the battle (which also shows the battle screen)
+        this.battleController.startBattle();
         this.battleController.setCards(screen.cards);
         break;
 
