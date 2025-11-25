@@ -115,7 +115,6 @@ async fetchAndUpdateBattleState(): Promise<void> {
 
     this.fetchAndUpdateBattleState();
     // Update view
-    // this.view.updateScore(this.model.getPoints());
     this.view.updateTimer(BATTLE_DURATION);
     this.view.show();
 
@@ -154,14 +153,8 @@ async fetchAndUpdateBattleState(): Promise<void> {
    */
   private setCards(cards: string[]) {
     this.selectedCards = cards;
-    this.view.renderCards(
-      [
-        "SpearmanOne",
-        "SpearmanTwo",
-        "SpearmanThree",
-        "CavalryFour",
-      ] /*this.selectedCards*/,
-      (cardType) => this.handleCardClick(cardType),
+    this.view.renderCards(this.selectedCards, (cardType) =>
+      this.handleCardClick(cardType),
     );
   }
 
@@ -246,9 +239,6 @@ async fetchAndUpdateBattleState(): Promise<void> {
     if (this.isCorrect) {
       console.log("correct!");
       this.model.setTroopToPlace(this.currentCardType);
-      /*
-      this.model.spawnTroop(this.currentCardType, 0, 2, 7);
-      this.view.renderTroop(this.currentCardType);*/
     }
 
     this.isCorrect = null;
@@ -260,6 +250,9 @@ async fetchAndUpdateBattleState(): Promise<void> {
    */
   private endBattle(reason: "leave" | "complete"): void {
     this.stopTimer();
+
+    this.isCorrect = null;
+    this.currentCardType = null;
 
     if (reason === "leave") {
       console.log("Now going to menu screen");
