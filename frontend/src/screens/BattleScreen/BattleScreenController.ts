@@ -2,9 +2,8 @@ import { ScreenController } from "../../types.ts";
 import type { ScreenSwitcher, WSResponse } from "../../types.ts";
 import { BattleScreenModel } from "./BattleScreenModel.ts";
 import { BattleScreenView } from "./BattleScreenView.ts";
-import { MAX_CARDS_SELECTED, BATTLE_DURATION } from "../../constants.ts";
-const BACKEND_URI = "http://localhost:8080";
 import { BATTLE_DURATION } from "../../constants.ts";
+const BACKEND_URI = "http://localhost:8080";
 
 /**
  * BattleScreenController - Coordinates battle logic between Model and View
@@ -151,7 +150,7 @@ async fetchAndUpdateBattleState(): Promise<void> {
   /**
    * Sets the cards the user selected
    */
-  private setCards(cards: string[]) {
+  public setCards(cards: string[]) {
     this.selectedCards = cards;
     this.view.renderCards(this.selectedCards, (cardType) =>
       this.handleCardClick(cardType),
