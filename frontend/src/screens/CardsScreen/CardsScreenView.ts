@@ -94,7 +94,6 @@ export class CardsScreenView implements View {
       verticalAlign: 'middle',
     });
 
-    buttonText.offsetY(-4);
 
     buttonGroup.add(buttonRect);
     buttonGroup.add(buttonText);
@@ -346,7 +345,6 @@ private showCardStatsPopup(stats: { name: string; hp: number; damage: number; le
       align: 'center',
       verticalAlign: 'middle',
     });
-    buttonText.offsetY(-4);
     return buttonText;
   }
 

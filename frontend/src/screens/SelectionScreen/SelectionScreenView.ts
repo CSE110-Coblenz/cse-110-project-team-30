@@ -42,7 +42,7 @@ export class SelectionScreenView implements View {
             });
             this.group.add(bg);
             bg.moveToBottom();
-            this.createWizardBubble(1100, 275, "Select your cards")
+            this.createWizardBubble(1100, 275, "Select your cards. Click again to unselect")
 
         };
 
@@ -74,7 +74,7 @@ export class SelectionScreenView implements View {
             fontFamily: 'Arial',
             fill: '#000',
             padding: bubblePadding,
-            width: bubbleWidth - bubblePadding*2,
+            width: bubbleWidth - bubblePadding*2 + 50,
             wrap: 'char',
         });
 
@@ -120,7 +120,6 @@ export class SelectionScreenView implements View {
             verticalAlign: 'middle',
         });
 
-        buttonText.offsetY(-4);
 
         buttonGroup.add(buttonRect);
         buttonGroup.add(buttonText);
@@ -308,7 +307,6 @@ export class SelectionScreenView implements View {
             fill: "white",
         });
 
-        buttonText.offsetY(-6);
 
         buttonGroup.add(buttonRect);
         buttonGroup.add(buttonText);
