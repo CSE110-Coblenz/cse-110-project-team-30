@@ -1,6 +1,8 @@
 import { ScreenController } from "../../types.ts";
 import type { ScreenSwitcher } from "../../types.ts";
 import { SelectionScreenView } from "./SelectionScreenView.ts";
+import { BattleScreenController } from "../BattleScreen/BattleScreenController.ts";
+
 
 
 
@@ -48,11 +50,6 @@ export class SelectionScreenController extends ScreenController {
         console.log("Selected cards:", this.selectedCards); //Test to see if cards are saved
     }
 
-    /** Expose selected cards for other screens to use*/
-    getSelectedCards() {
-        return this.selectedCards;
-    }
-
     /**
      * Handle home button click
      */
@@ -70,7 +67,8 @@ export class SelectionScreenController extends ScreenController {
         this.view.hide();
 
         // Switch to the battle screen
-        this.screenSwitcher.switchToScreen({ type: "battle" });
+        this.screenSwitcher.switchToScreen({ type: "battle", cards: this.selectedCards});
+        //
     }
 
     /**
