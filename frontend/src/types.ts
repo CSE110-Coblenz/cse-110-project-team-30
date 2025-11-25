@@ -23,6 +23,7 @@ export type Screen =
   | { type: "cards" }
   | { type: "battle" }
   | { type: "selection" }
+  | { type: "minigame" }
   | { type: "results"; pointsUpdate: number }
   | { type: "leaderboard" };
 
