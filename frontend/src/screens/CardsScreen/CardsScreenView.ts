@@ -269,7 +269,7 @@ private showCardStatsPopup(stats: { name: string; hp: number; damage: number; le
    * Create four horizontal operation buttons aligned to the left of each row of cards
    */
   private createOperationButtons(): void {
-    const operations = ["Addition", "Subtraction", "Multiplication", "Division"];
+    const operations = ["Addition", "Subtraction", "Multiplication", "Division", "Order of Operations"];
     operations.forEach((op, index) => {
       const buttonGroup = this.createButtonGroup(op, index);
       this.group.add(buttonGroup);
@@ -308,7 +308,7 @@ private showCardStatsPopup(stats: { name: string; hp: number; damage: number; le
    * Calculate Y position for a button based on row index
    */
   private calculateButtonY(row: number): number {
-    const rows = 4;
+    const rows = 5;
     const cardHeight = 100;
     const gap = 10;
     const startY = (STAGE_HEIGHT - (rows * cardHeight + (rows - 1) * gap)) / 2 + 60;
@@ -420,6 +420,7 @@ private showCardStatsPopup(stats: { name: string; hp: number; damage: number; le
       case 'Subtraction': return '/tutorial_videos/tutorial_subtraction.mp4';
       case 'Multiplication': return '/tutorial_videos/tutorial_multiplication.mp4';
       case 'Division': return '/tutorial_videos/tutorial_divison.mp4';
+      case 'Order of Operations': return '/tutorial_videos/tutorial_order.mp4';
       default: return '';
     }
   }
