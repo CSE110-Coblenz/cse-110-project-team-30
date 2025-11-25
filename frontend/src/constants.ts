@@ -1,3 +1,6 @@
+// API Configuration
+export const API_BASE_URL = "http://localhost:3000/api";
+
 // Stage dimensions
 export const STAGE_WIDTH = window.innerWidth;
 export const STAGE_HEIGHT = window.innerHeight;
