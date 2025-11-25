@@ -42,3 +42,26 @@ export abstract class ScreenController {
 export interface ScreenSwitcher {
   switchToScreen(screen: Screen): void;
 }
+
+export interface WSResponse {
+  tick: number;
+  troops: Troop[];
+}
+
+export interface Troop {
+  ID: number;
+  Type: string;
+  Health: number;
+  Team: number;
+  Position: Position;
+  Damage: number;
+  Speed: number;
+  Range: number;
+}
+
+export interface Position {
+  X: number;
+  Y: number;
+}
+
+export type Grid = Troop[][][];

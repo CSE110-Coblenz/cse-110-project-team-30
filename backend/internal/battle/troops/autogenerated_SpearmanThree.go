@@ -1,0 +1,48 @@
+package troops
+
+import (
+	"cse-110-project-team-30/backend/internal/battle/common"
+	"cse-110-project-team-30/backend/internal/util"
+)
+
+type SpearmanThree struct {
+	Troop
+}
+
+func NewSpearmanThree(team common.Team, pos common.Position) Entity {
+	return &SpearmanThree{
+		Troop: Troop{
+			Type:     "SpearmanThree",
+			Health:   18,
+			Damage:   6,
+			Speed:    1,
+			Range:    1,
+			Position: pos,
+			Team:     team,
+		},
+	}
+}
+
+func (t *SpearmanThree) CalculateAction(mv MapView) Action {
+	action := Action{
+		NextPosition: t.Position,
+		AttackTarget: nil,
+		Damage:       0,
+	}
+
+	enemy, path := mv.FindNearestEnemyBFS(t)
+	if enemy == nil || len(path) == 0 {
+		return action
+	}
+
+	if len(path) == 1 || util.GetDistance(t.Position, enemy.GetPosition()) <= float64(t.Range) {
+		action.AttackTarget = enemy
+		action.Damage = t.Damage
+		return action
+	}
+
+	if len(path) > 1 {
+		action.NextPosition = path[1]
+	}
+	return action
+}
