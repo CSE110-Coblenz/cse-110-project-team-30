@@ -127,7 +127,7 @@ export class BattleScreenView implements View {
     const padding = 60;
 
     const cardWidth = this.CARD_AREA_WIDTH / 4;
-    const cardHeight = this.CARD_AREA_HEIGHT / 5.5;
+    const cardHeight = this.CARD_AREA_HEIGHT / 6;
 
     const gridWidth = cols * cardWidth + (cols - 1) * padding;
     const gridHeight = rows * cardHeight + (rows - 1) * padding;
@@ -650,9 +650,9 @@ export class BattleScreenView implements View {
 
     const txtPadding = 20;
     const problem = new Konva.Text({
-      x: txtPadding,
+      x: 0,
       y: txtPadding * 2,
-      width: popupWidth - txtPadding * 2,
+      width: popupWidth,
       text: problemText,
       fontSize: 20,
       fontFamily: "Arial",
@@ -691,9 +691,9 @@ export class BattleScreenView implements View {
     }
 
     this.label = new Konva.Text({
-      x: txtPadding * 2,
+      x: 0,
       y: problem.y() + problem.height() + txtPadding * 2,
-      width: popupWidth - txtPadding * 5,
+      width: popupWidth,
       text: labelText,
       fontSize: 18,
       fontFamily: "Arial",
@@ -703,15 +703,14 @@ export class BattleScreenView implements View {
     popup.add(this.label);
 
     const inpWidth = popupWidth / 4;
-    const inpPading = 20;
     // HTML input for answer
+    const rectPos = popupRect.getClientRect();
     this.answerInput = document.createElement("input");
     this.answerInput.type = "text";
     this.answerInput.placeholder = placeholderAnswer;
     this.answerInput.style.position = "absolute";
-    const rectPos = popupRect.getClientRect();
-    this.answerInput.style.left = `${rectPos.width / 2}px`;
-    this.answerInput.style.top = `${rectPos.height / 2 + inpWidth}px`;
+    this.answerInput.style.left = `${rectPos.x + rectPos.width / 2 - inpWidth / 2}px`;
+    this.answerInput.style.top = `${rectPos.y + rectPos.height * 0.45}px`;
     this.answerInput.style.width = `${inpWidth}px`;
     this.answerInput.style.fontSize = "18px";
     this.answerInput.style.padding = "5px";
@@ -724,8 +723,8 @@ export class BattleScreenView implements View {
       this.remainderInput.type = "text";
       this.remainderInput.placeholder = placeholderRemainder;
       this.remainderInput.style.position = "absolute";
-      this.remainderInput.style.left = `${rectPos.width / 2}px`;
-      this.remainderInput.style.top = `${rectPos.height / 2 + inpWidth * 1.5}px`;
+      this.remainderInput.style.left = `${rectPos.x + rectPos.width / 2 - inpWidth / 2}px`;
+      this.remainderInput.style.top = `${rectPos.y + rectPos.height * 0.65}px`;
       this.remainderInput.style.width = `${inpWidth}px`;
       this.remainderInput.style.fontSize = "18px";
       this.remainderInput.style.padding = "5px";
