@@ -5,6 +5,7 @@ import { MenuScreenController } from "./screens/MenuScreen/MenuScreenController.
 import { CardsScreenController } from "./screens/CardsScreen/CardsScreenController.ts";
 import { BattleScreenController } from "./screens/BattleScreen/BattleScreenController.ts";
 import { ResultsScreenController } from "./screens/ResultsScreen/ResultsScreenController.ts";
+import { SelectionScreenController } from "./screens/SelectionScreen/SelectionScreenController.ts";
 import { LeaderboardScreenController } from "./screens/LeaderboardScreen/LeaderboardScreenController.ts";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "./constants.ts";
 
@@ -27,6 +28,7 @@ class App implements ScreenSwitcher {
   private cardsController: CardsScreenController;
   private battleController: BattleScreenController;
   private resultsController: ResultsScreenController;
+  private selectionController: SelectionScreenController;
   private leaderboardController: LeaderboardScreenController;
 
   constructor(container: string) {
@@ -48,6 +50,7 @@ class App implements ScreenSwitcher {
     this.cardsController = new CardsScreenController(this);
     this.battleController = new BattleScreenController(this);
     this.resultsController = new ResultsScreenController(this);
+    this.selectionController = new SelectionScreenController(this);
     this.leaderboardController = new LeaderboardScreenController(this);
 
     // Add all screen groups to the layer
@@ -57,6 +60,7 @@ class App implements ScreenSwitcher {
     this.layer.add(this.cardsController.getView().getGroup());
     this.layer.add(this.battleController.getView().getGroup());
     this.layer.add(this.resultsController.getView().getGroup());
+    this.layer.add(this.selectionController.getView().getGroup());
     this.layer.add(this.leaderboardController.getView().getGroup());
 
     // Draw the layer (render everything to the canvas)
@@ -82,6 +86,7 @@ class App implements ScreenSwitcher {
     this.cardsController.hide();
     this.battleController.hide();
     this.resultsController.hide();
+    this.selectionController.hide();
     this.leaderboardController.hide();
 
     switch (screen.type) {
@@ -97,8 +102,8 @@ class App implements ScreenSwitcher {
         this.cardsController.show();
         break;
 
-      case "battle":
-        this.battleController.startGame();
+      case "selection":
+        this.selectionController.show()
         break;
 
       case "results":

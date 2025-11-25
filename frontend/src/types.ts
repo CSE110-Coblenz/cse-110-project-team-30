@@ -22,6 +22,7 @@ export type Screen =
   | { type: "menu" }
   | { type: "cards" }
   | { type: "battle" }
+  | { type: "selection" }
   | { type: "results"; pointsUpdate: number }
   | { type: "leaderboard" };
 
