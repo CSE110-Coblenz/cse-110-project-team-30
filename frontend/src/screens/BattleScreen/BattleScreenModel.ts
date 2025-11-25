@@ -1,7 +1,23 @@
-import troops from "../../troops.json";
+import troopsJson from "../../troops.json";
 import { generateMathProblem } from "../../mathGenerator";
 import { ARENA_SIZE } from "../../constants";
 import type { Troop, WSResponse, Grid } from "../../types";
+
+/**
+ * Defines the structure of a single troop/card
+ */
+interface Troop {
+  operation: "Addition" | "Subtraction" | "Multiplication" | "Division";
+  hp: number;
+  damage: number;
+  level: number;
+}
+
+// Cast troopsJson to Record<string, Troop> for type safety and editor autocomplete
+const troops: Record<string, Troop> = troopsJson as unknown as Record<
+  string,
+  Troop
+>;
 
 /**
  * BattleScreenModel - Manages battle state
@@ -66,14 +82,15 @@ export class BattleScreenModel {
   /**
    * Get card operation
    */
-  getCardOperation(cardType): string {
+  getCardOperation(cardType: string): string {
     return troops[cardType].operation;
   }
 
   /**
    * Generates each math problem
    */
-  generateProblem(cardType) {
+  generateProblem(cardType: string) {
+    console.log(`${troops[cardType].level}`);
     const problem = generateMathProblem(
       troops[cardType].operation,
       troops[cardType].level,
