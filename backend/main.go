@@ -28,7 +28,7 @@ func main() {
 
 	mgr := socket.NewBattleManager()
 	routes.RegisterBattleSocket(mux, mgr)
-	routes.RegisterNewGameEndpoint(mux, mgr)
+	routes.RegisterNewGameWS(mux, mgr)
 	fmt.Print("Starting server on :8080\n")
 	http.ListenAndServe(":8080", withCORS(mux))
 }
