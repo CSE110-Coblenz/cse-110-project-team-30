@@ -23,28 +23,27 @@ const troops: Record<string, Troop> = troopsJson as unknown as Record<
  * BattleScreenModel - Manages battle state
  */
 export class BattleScreenModel {
-  private points = 0;
   private currentProblem: MathProblem | null = null;
   private gameId: string = "";
   public readonly SIZE: number = ARENA_SIZE;
   private tiles!: Grid;
-  private troopToPlace : string | null = null;
+  private troopToPlace: string | null = null;
   public isBlueTeam: boolean = false;
 
   constructor() {
     // Initialize tiles grid
     this.tiles = Array.from({ length: this.SIZE }, () =>
-      Array.from({ length: this.SIZE }, () => [])
+      Array.from({ length: this.SIZE }, () => []),
     );
   }
-  
+
   /**
    * Update tiles with new troop data
    */
   updateTiles(troops: WSResponse["troops"]): void {
     // Clear existing tiles
     this.tiles = Array.from({ length: this.SIZE }, () =>
-      Array.from({ length: this.SIZE }, () => [])
+      Array.from({ length: this.SIZE }, () => []),
     );
 
     // Populate tiles with current troops
@@ -135,14 +134,6 @@ export class BattleScreenModel {
    * Reset battle state for a new game
    */
   reset(): void {
-    // castles = 0    this.score = 0; to do
     this.currentProblem = null;
-  }
-
-  /**
-   * Get current number of castles destroyed
-   */
-  getPoints(): number {
-    return this.points; // to do
   }
 }

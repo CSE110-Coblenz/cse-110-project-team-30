@@ -3,6 +3,7 @@ import type { ScreenSwitcher, WSResponse } from "../../types.ts";
 import { BattleScreenModel } from "./BattleScreenModel.ts";
 import { BattleScreenView } from "./BattleScreenView.ts";
 import { BATTLE_DURATION } from "../../constants.ts";
+
 const BACKEND_URI = "http://localhost:8080";
 
 /**
@@ -16,6 +17,7 @@ export class BattleScreenController extends ScreenController {
   private battleTimer: number | null = null;
   private currentCardType: string | null = null;
   private isCorrect: boolean | null = null;
+  private isMatchReady: boolean = false;
   private callSpawnTroop?: (troop: string, x: number, y: number) => void;
 
   constructor(screenSwitcher: ScreenSwitcher) {
@@ -49,61 +51,71 @@ export class BattleScreenController extends ScreenController {
     if (!this.model.isBlueTeam) {
       for (const troop of data.troops) {
         troop.Team = troop.Team === 1 ? 1 : 0;
-        troop.Position = this.flipBoardPosition(
-          troop.Position,
-        );
+        troop.Position = this.flipBoardPosition(troop.Position);
       }
     }
     return data;
   }
-  /** 
+  /**
    * Fetch and update battle state using ws
    */
-async fetchAndUpdateBattleState(): Promise<void> {
-  // Connect to matchmaking WebSocket
-  const matchWS = new WebSocket(`${BACKEND_URI}/newgamews`);
+  async fetchAndUpdateBattleState(): Promise<void> {
+    // Connect to matchmaking WebSocket
+    const matchWS = new WebSocket(`${BACKEND_URI}/newgamews`);
 
-  matchWS.onopen = () => {
-    console.log("Connected to matchmaking server...");
-  };
+    matchWS.onopen = () => {
+      console.log("Connected to matchmaking server...");
+    };
 
-  matchWS.onmessage = (event) => {
-    const msg = JSON.parse(event.data) as { type: string; roomID: string; team: string };
+    matchWS.onmessage = (event) => {
+      const msg = JSON.parse(event.data) as {
+        type: string;
+        roomID: string;
+        team: string;
+      };
 
-    if (msg.type === "matched") {
-      // Save team info
-      this.model.isBlueTeam = msg.team === "blue";
+      if (msg.type === "matched") {
+        // Save team info
+        this.model.isBlueTeam = msg.team === "blue";
 
-      // Open the actual battle WebSocket
-      const ws = new WebSocket(`${BACKEND_URI}/ws/${msg.roomID}`);
+        this.isMatchReady = true;
 
-      ws.onopen = () => {
-        // setup troop spawning callback
-        this.callSpawnTroop = (troop: string, x: number, y: number) => {
-          this.model.setTroopToPlace(null);
-          const position = this.model.isBlueTeam ? { X: x, Y: y } : this.flipBoardPosition({ X: x, Y: y });
-          ws.send(JSON.stringify({
-            team: this.model.isBlueTeam ? "blue" : "red",
-            troopType: troop,
-            x: position.X,
-            y: position.Y
-          }));
+        // Start the timer ONLY when both players matched
+        this.startTimer();
+
+        // Open the actual battle WebSocket
+        const ws = new WebSocket(`${BACKEND_URI}/ws/${msg.roomID}`);
+
+        ws.onopen = () => {
+          // setup troop spawning callback
+          this.callSpawnTroop = (troop: string, x: number, y: number) => {
+            this.model.setTroopToPlace(null);
+            const position = this.model.isBlueTeam
+              ? { X: x, Y: y }
+              : this.flipBoardPosition({ X: x, Y: y });
+            ws.send(
+              JSON.stringify({
+                team: this.model.isBlueTeam ? "blue" : "red",
+                troopType: troop,
+                x: position.X,
+                y: position.Y,
+              }),
+            );
+          };
+          this.view.setCallSpawnTroop(this.callSpawnTroop!);
         };
-        this.view.setCallSpawnTroop(this.callSpawnTroop!);
-      };
 
-      ws.onmessage = (event) => {
-        const data: WSResponse = this.marshalWSData(JSON.parse(event.data));
-        this.model.updateTiles(data.troops);
-        this.view.rerenderTroops(this.model.getTiles());
-      };
+        ws.onmessage = (event) => {
+          const data: WSResponse = this.marshalWSData(JSON.parse(event.data));
+          this.model.updateTiles(data.troops);
+          this.view.rerenderTroops(this.model.getTiles());
+        };
 
-      // Close matchmaking WS after match
-      matchWS.close();
-    }
-  };
-}
-
+        // Close matchmaking WS after match
+        matchWS.close();
+      }
+    };
+  }
 
   /**
    * Start the battle
@@ -116,10 +128,7 @@ async fetchAndUpdateBattleState(): Promise<void> {
     // Update view
     this.view.updateTimer(BATTLE_DURATION);
     this.view.show();
-
-    this.startTimer();
   }
-
 
   /**
    * Start the countdown timer
@@ -187,7 +196,14 @@ async fetchAndUpdateBattleState(): Promise<void> {
    * Handle card click
    */
   private handleCardClick(cardType: string): void {
-    console.log(`entered card click handler ${cardType}`);
+    console.log(`entered card click handler with ${cardType}`);
+
+    // Only allow cards to be clicked when both players are available
+    if (!this.isMatchReady) {
+      console.log("Cannot click cards yet — waiting for second player");
+      return;
+    }
+
     this.currentCardType = cardType;
     const problem = this.model.generateProblem(cardType);
     const operation = this.model.getCardOperation(cardType);
@@ -252,6 +268,7 @@ async fetchAndUpdateBattleState(): Promise<void> {
 
     this.isCorrect = null;
     this.currentCardType = null;
+    this.isMatchReady = false;
 
     if (reason === "leave") {
       console.log("Now going to menu screen");
@@ -262,7 +279,6 @@ async fetchAndUpdateBattleState(): Promise<void> {
     console.log("Now going to results screen");
     this.screenSwitcher.switchToScreen({
       type: "result",
-      points: this.model.getPoints(),
     });
   }
 

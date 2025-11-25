@@ -51,25 +51,7 @@ export class BattleScreenView implements View {
     });
 
     this.addBattleField();
-    const castleX = this.BATTLE_AREA_WIDTH / 3;
-    const castleY = this.BATTLE_AREA_HEIGHT / 3;
-    // Red team castles
- 
     this.addTimerDisplay();
-    const paddingX = 20;
-    const paddingY = 80;
-    this.addCrown(
-      -paddingX,
-      this.BATTLE_AREA_HEIGHT / 2 - paddingY,
-      "/results_images/red-crown.png",
-      "0",
-    );
-    this.addCrown(
-      -paddingX,
-      this.BATTLE_AREA_HEIGHT / 2 + paddingY,
-      "/results_images/teal-crown.png",
-      "0",
-    );
     this.group.add(this.battleFieldGroup);
 
     this.cardsGroup = new Konva.Group({
@@ -173,7 +155,9 @@ export class BattleScreenView implements View {
     });
   }
 
-  setCallSpawnTroop(callSpawnTroop: (troop: string, x: number, y: number) => void) {
+  setCallSpawnTroop(
+    callSpawnTroop: (troop: string, x: number, y: number) => void,
+  ) {
     this.callSpawnTroop = callSpawnTroop;
   }
 
@@ -185,7 +169,8 @@ export class BattleScreenView implements View {
     tileWidth: number;
     tileHeight: number;
   }): void {
-    const { group, margin, gridWidth, gridHeight, tileWidth, tileHeight } = config;
+    const { group, margin, gridWidth, gridHeight, tileWidth, tileHeight } =
+      config;
     group.on("mousemove", () => {
       if (!this.model.getTroopToPlace()) return;
       const pointer = group.getRelativePointerPosition();
@@ -208,7 +193,12 @@ export class BattleScreenView implements View {
 
       if (tileY >= 16) {
         // players side of the arena
-        this.drawPreviewTroop(tileX, tileY, true, this.model.getTroopToPlace()!);
+        this.drawPreviewTroop(
+          tileX,
+          tileY,
+          true,
+          this.model.getTroopToPlace()!,
+        );
       }
     });
     group.on("click", () => {
@@ -237,7 +227,6 @@ export class BattleScreenView implements View {
       }
     });
   }
-
 
   private addBattleField(): void {
     const margin = 25;
@@ -315,50 +304,11 @@ export class BattleScreenView implements View {
       gridWidth,
       gridHeight,
       tileWidth: tileWidth,
-      tileHeight: tileHeight
+      tileHeight: tileHeight,
     });
   }
 
-  // Score display as crowns
-  private addCrown(x, y, imageURL, labelText) {
-    const crownGroup = new Konva.Group();
-    const crownWidth = 75;
-    const crownHeight = 50;
-    const crownImage = new Image();
-    crownImage.src = imageURL;
-    crownImage.onload = () => {
-      const crown = new Konva.Image({
-        x: x,
-        y: y,
-        width: crownWidth,
-        height: crownHeight,
-        image: crownImage,
-      });
-      crown.offsetX(crownWidth / 2);
-      crown.offsetY(crownHeight / 2);
-      crownGroup.add(crown);
-
-      this.crownText = new Konva.Text({
-        x: x,
-        y: y + crownHeight / 2 + 5,
-        width: crownWidth,
-        text: labelText,
-        fontSize: 20,
-        fontFamily: "Arial",
-        fill: "black",
-        wrap: "word",
-        align: "center",
-      });
-      this.crownText.offsetX(this.crownText.width() / 2);
-      this.crownText.offsetY(this.crownText.height() / 2);
-      crownGroup.add(this.crownText);
-
-      this.battleFieldGroup.add(crownGroup);
-    };
-  }
-
-  // Castle for battlefield
-   // Timer display
+  // Timer display
   private addTimerDisplay(): void {
     const timerGroup = new Konva.Group();
     const timerWidth = 105;
@@ -948,14 +898,6 @@ export class BattleScreenView implements View {
   }
 
   /**
-   * Update crowns display
-   */
-  /*updateScore(score: number): void {
-    this.scoreText.text(`Score: ${score}`);
-    this.group.getLayer()?.draw();
-  }*/
-
-  /**
    * Update timer display
    */
   updateTimer(timeRemaining: number): void {
@@ -970,164 +912,172 @@ export class BattleScreenView implements View {
   }
 
   /**
+   * Draw Troop
+   */
+  private drawOrUpdateTroop(
+    id: number,
+    px: number,
+    py: number,
+    sameTeam: boolean,
+    troopType: string,
+    healthText: string,
+  ) {
+    var existing = this.troopNodes.get(id);
+    const castleWidth = 85;
+    const castleHeight = 160;
+    const x =
+      px * (this.BATTLE_AREA_WIDTH / ARENA_SIZE) +
+      this.BATTLE_AREA_WIDTH / ARENA_SIZE / 2;
+
+    const y =
+      py * (this.BATTLE_AREA_HEIGHT / ARENA_SIZE) +
+      this.BATTLE_AREA_HEIGHT / ARENA_SIZE / 2;
+    if (existing) {
+      // Update position
+      existing.x(x);
+      existing.y(y);
+
+      // Update health text
+      const textNode = existing.findOne(".troopHealth") as Konva.Text;
+      if (textNode) {
+        textNode.text(healthText);
+      }
+
+      return;
+    }
+
+    // Otherwise create new troop
+    const troopSprite: HTMLImageElement = SpriteLookup(sameTeam, troopType);
+    const group = new Konva.Group({
+      x,
+      y,
+      offsetX: castleWidth / 2,
+      offsetY: castleHeight / 2,
+    });
+
+    const castle = new Konva.Image({
+      width: castleWidth,
+      height: castleHeight,
+      opacity: 1,
+      image: troopSprite,
+      shadowColor: "black",
+      shadowBlur: 10,
+      shadowOffset: { x: 10, y: 0 },
+      shadowOpacity: 0.5,
+    });
+
+    group.add(castle);
+
+    const health = new Konva.Text({
+      name: "troopHealth",
+      x: -castleWidth / 1.5,
+      y: -castleHeight / 2 - 5,
+      width: castleWidth * 2,
+      text: healthText,
+      fontSize: 16,
+      fontFamily: "Arial",
+      fill: "white",
+      wrap: "word",
+      align: "center",
+      offsetX: castleWidth / 2,
+      offsetY: -castleHeight / 2,
+    });
+
+    group.add(health);
+    this.troopGroup.add(group);
+    this.troopNodes.set(id, group);
+    this.battleFieldGroup.add(this.troopGroup);
+  }
+
+  private drawPreviewTroop(
+    px: number,
+    py: number,
+    sameTeam: boolean,
+    troopType: string,
+  ) {
+    const troopWidth = 70;
+    const troopHeight = 100;
+    const x =
+      px * (this.BATTLE_AREA_WIDTH / ARENA_SIZE) +
+      this.BATTLE_AREA_WIDTH / ARENA_SIZE / 2;
+    const y =
+      py * (this.BATTLE_AREA_HEIGHT / ARENA_SIZE) +
+      this.BATTLE_AREA_HEIGHT / ARENA_SIZE / 2;
+
+    if (!this.previewTroopNode) {
+      const troopSprite: HTMLImageElement = SpriteLookup(sameTeam, troopType);
+      const group = new Konva.Group({
+        x,
+        y,
+        offsetX: 85 / 2,
+        offsetY: 160 / 2,
+      });
+
+      const sprite = new Konva.Image({
+        width: troopWidth,
+        height: troopHeight,
+        image: troopSprite,
+        opacity: 0.5,
+        shadowColor: "black",
+        shadowBlur: 10,
+        shadowOffset: { x: 10, y: 0 },
+        shadowOpacity: 0.5,
+      });
+      group.add(sprite);
+
+      this.troopGroup.add(group);
+      this.previewTroopNode = group;
+    } else {
+      this.previewTroopNode.x(x);
+      this.previewTroopNode.y(y);
+    }
+  }
+
+  /**
+   * Rerender
+   */
+  rerenderTroops(grid: Grid): void {
+    const seenIds = new Set<number>();
+
+    for (let y = 0; y < grid.length; y++) {
+      for (let x = 0; x < grid[y].length; x++) {
+        for (let j = 0; j < grid[y][x].length; j++) {
+          const troop = grid[y][x][j];
+          if (!troop) continue;
+
+          const id = troop.ID; // You MUST have a stable ID from backend
+          seenIds.add(id);
+          const sameTeam = troop.Team === (this.model.isBlueTeam ? 1 : 0);
+
+          this.drawOrUpdateTroop(
+            id,
+            x,
+            y,
+            sameTeam,
+            troop.Type,
+            `HP: ${troop.Health}`,
+          );
+        }
+      }
+    }
+    this.troopGroup.getLayer()?.batchDraw();
+
+    // Remove troops that disappeared
+    for (const [id, node] of this.troopNodes) {
+      if (!seenIds.has(id)) {
+        node.destroy();
+        this.troopNodes.delete(id);
+      }
+    }
+  }
+
+  /**
    * Show the screen
    */
   show(): void {
     this.group.visible(true);
     this.group.getLayer()?.draw();
   }
-  /**
-   * Draw Troop
-   */
- private drawOrUpdateTroop(
-  id: number,
-  px: number,
-  py: number,
-  sameTeam: boolean,
-  troopType: string,
-  healthText: string,
-) {
-  var existing = this.troopNodes.get(id);
-  const castleWidth = 85;
-  const castleHeight = 160;
-  const x =
-    px * (this.BATTLE_AREA_WIDTH / ARENA_SIZE) +
-    (this.BATTLE_AREA_WIDTH / ARENA_SIZE) / 2;
-
-  const y =
-    py * (this.BATTLE_AREA_HEIGHT / ARENA_SIZE) +
-    (this.BATTLE_AREA_HEIGHT / ARENA_SIZE) / 2;
-  if (existing) {
-    // Update position
-    existing.x(x);
-    existing.y(y);
-
-    // Update health text
-    const textNode = existing.findOne(".troopHealth") as Konva.Text;
-    if (textNode) {
-      textNode.text(healthText);
-    }
-
-    return;
-  }
-
-  // Otherwise create new troop
-  const troopSprite: HTMLImageElement = SpriteLookup(sameTeam, troopType);
-  const group = new Konva.Group({
-    x,
-    y,
-    offsetX: castleWidth / 2,
-    offsetY: castleHeight / 2
-  });
-
-  const castle = new Konva.Image({
-    width: castleWidth,
-    height: castleHeight,
-    opacity: 1,
-    image: troopSprite,
-    shadowColor: "black",
-    shadowBlur: 10,
-    shadowOffset: { x: 10, y: 0 },
-    shadowOpacity: 0.5
-  });
-
-  group.add(castle);
-
-  const health = new Konva.Text({
-    name: "troopHealth",
-    x: -castleWidth / 1.5,
-    y: -castleHeight / 2 - 5,
-    width: castleWidth * 2,
-    text: healthText,
-    fontSize: 16,
-    fontFamily: "Arial",
-    fill: "white",
-    wrap: "word",
-    align: "center",
-    offsetX: (castleWidth) / 2,
-    offsetY: -(castleHeight) / 2
-  });
-
-  group.add(health);
-  this.troopGroup.add(group);
-  this.troopNodes.set(id, group);
-  this.battleFieldGroup.add(this.troopGroup);
-}
-
-private drawPreviewTroop(px: number, py: number, sameTeam: boolean, troopType: string) {
-  const troopWidth = 85;
-  const troopHeight = 160;
-  const x =
-    px * (this.BATTLE_AREA_WIDTH / ARENA_SIZE) +
-    (this.BATTLE_AREA_WIDTH / ARENA_SIZE) / 2;
-  const y =
-    py * (this.BATTLE_AREA_HEIGHT / ARENA_SIZE) +
-    (this.BATTLE_AREA_HEIGHT / ARENA_SIZE) / 2;
-
-  if (!this.previewTroopNode) {
-    const troopSprite: HTMLImageElement = SpriteLookup(sameTeam, troopType);
-    const group = new Konva.Group({ x, y, offsetX: 85/2, offsetY: 160/2 });
-
-    const sprite = new Konva.Image({
-      width: troopWidth,
-      height: troopHeight,
-      image: troopSprite,
-      opacity: 0.5,
-      shadowColor: "black",
-      shadowBlur: 10,
-      shadowOffset: { x: 10, y: 0 },
-      shadowOpacity: 0.5
-    });
-    group.add(sprite);
-
-    this.troopGroup.add(group);
-    this.previewTroopNode = group;
-  } else {
-    this.previewTroopNode.x(x);
-    this.previewTroopNode.y(y);
-  }
-}
-
-
-  /**
-   * Rerender
-   */
-rerenderTroops(grid: Grid): void {
-  const seenIds = new Set<number>();
-
-  for (let y = 0; y < grid.length; y++) {
-    for (let x = 0; x < grid[y].length; x++) {
-      for (let j = 0; j < grid[y][x].length; j++) {
-        const troop = grid[y][x][j];
-        if (!troop) continue;
-
-        const id = troop.ID; // You MUST have a stable ID from backend
-        seenIds.add(id);
-        const sameTeam = troop.Team === (this.model.isBlueTeam ? 1 : 0);
-
-
-
-        this.drawOrUpdateTroop(
-          id,
-          x,
-          y,
-          sameTeam,
-          troop.Type,
-          `HP: ${troop.Health}`
-        );
-      }
-    }
-  }
-  this.troopGroup.getLayer()?.batchDraw();
-
-  // Remove troops that disappeared
-  for (const [id, node] of this.troopNodes) {
-    if (!seenIds.has(id)) {
-      node.destroy();
-      this.troopNodes.delete(id);
-    }
-  }
-}
 
   /**
    * Hide the screen
