@@ -101,7 +101,8 @@ export class LeaderboardScreenView implements View {
       }
 
       const data: LeaderboardEntry[] = await response.json();
-      this.entries = data;
+      // Ensure data is an array and has valid format
+      this.entries = Array.isArray(data) ? data : [];
       this.renderLeaderboard();
     } catch (error) {
       console.error("Failed to fetch leaderboard:", error);
@@ -203,7 +204,7 @@ export class LeaderboardScreenView implements View {
       const nameText = new Konva.Text({
         x: 200,
         y: y,
-        text: entry.username,
+        text: entry.username || "Unknown",
         fontSize: 18,
         fontFamily: "Arial",
         fill: "#ffffff",
@@ -215,7 +216,7 @@ export class LeaderboardScreenView implements View {
       const pointsText = new Konva.Text({
         x: STAGE_WIDTH - 150,
         y: y,
-        text: entry.points.toString(),
+        text: (entry.points ?? 0).toString(),
         fontSize: 18,
         fontFamily: "Arial",
         fontStyle: index < 3 ? "bold" : "normal",

@@ -14,7 +14,7 @@ export class MenuScreenController extends ScreenController {
   constructor(screenSwitcher: ScreenSwitcher) {
     super();
     this.screenSwitcher = screenSwitcher;
-    this.playerModel = new PlayerModel();
+    this.playerModel = PlayerModel.getInstance();
     this.view = new MenuScreenView(this.playerModel, (id: string) =>
       this.handleClick(id),
     );
@@ -35,6 +35,7 @@ export class MenuScreenController extends ScreenController {
         this.screenSwitcher.switchToScreen({ type: "cards" });
         break;
       case "logout":
+        this.playerModel.clear();
         this.screenSwitcher.switchToScreen({ type: "login" });
         break;
     }

@@ -2,6 +2,7 @@ import { ScreenController } from "../../types.ts";
 import type { ScreenSwitcher } from "../../types.ts";
 import { LoginScreenView } from "./LoginScreenView.ts";
 import { API_BASE_URL } from "../../constants.ts";
+import { PlayerModel } from "../../PlayerModel.ts";
 
 /**
  * LoginScreenController - Handles login interactions
@@ -9,10 +10,12 @@ import { API_BASE_URL } from "../../constants.ts";
 export class LoginScreenController extends ScreenController {
   private view: LoginScreenView;
   private screenSwitcher: ScreenSwitcher;
+  private playerModel: PlayerModel;
 
   constructor(screenSwitcher: ScreenSwitcher) {
     super();
     this.screenSwitcher = screenSwitcher;
+    this.playerModel = PlayerModel.getInstance();
     this.view = new LoginScreenView((id: string) => this.handleButtonClick(id));
   }
 
@@ -63,9 +66,23 @@ export class LoginScreenController extends ScreenController {
       const data = await response.json();
 
       if (response.ok) {
-        // 2. 登录/注册成功！
-        // 你可以在这里保存用户信息 (比如 data.id)
-        // TODO: 保存 'data' 到 PlayerModel (如果需要)
+        if (endpoint === "login") {
+          this.playerModel.setPlayerData({
+            id: data.id,
+            username: data.username,
+            points: data.points ?? 0,
+            careerWins: data.careerWins ?? 0,
+            careerLosses: data.careerLosses ?? 0,
+          });
+        } else {
+          this.playerModel.setPlayerData({
+            id: data.id,
+            username: data.username,
+            points: 0,
+            careerWins: 0,
+            careerLosses: 0,
+          });
+        }
         
         // 切换到主菜单
         this.screenSwitcher.switchToScreen({ type: "menu" });
