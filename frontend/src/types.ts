@@ -22,13 +22,13 @@ export type Screen =
   | { type: "login" }
   | { type: "menu" }
   | { type: "cards" }
-  | { type: "selection" }
-  | { type: "battle"; cards: string[] }
   | { 
       type: "results"; 
       playerCrowns: number; 
       enemyCrowns: number 
     } 
+  | { type: "battle" }
+  | { type: "selection" }
   | { type: "leaderboard" };
 
 export abstract class ScreenController {
