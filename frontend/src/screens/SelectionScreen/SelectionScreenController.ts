@@ -12,6 +12,7 @@ export class SelectionScreenController extends ScreenController {
     constructor(screenSwitcher: ScreenSwitcher) {
         super();
         this.screenSwitcher = screenSwitcher;
+        this.selectedCards = [];
 
         // Pass a callback to handle the "Home" button
         this.view = new SelectionScreenView({
