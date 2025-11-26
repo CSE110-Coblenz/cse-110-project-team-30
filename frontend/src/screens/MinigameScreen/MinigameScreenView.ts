@@ -9,8 +9,8 @@ import type { MinigameScreenModel } from "./MinigameScreenModel.ts";
 export class MinigameScreenView implements View {
   private group: Konva.Group;
   private answerInput: HTMLInputElement;
-  private remainderInput: HTMLInputElement | null = null;
   private label: Konva.Text;
+  private correctProblems: Konva.Text;
   private timerText: Konva.Text;
   private readonly MINIGAME_AREA_WIDTH: number = (STAGE_WIDTH / 3) * 2;
   private readonly MINIGAME_AREA_HEIGHT: number = STAGE_HEIGHT;
@@ -24,7 +24,7 @@ export class MinigameScreenView implements View {
     onLeaveClick: () => void,
     onCardClick: (cardType: string) => void,
     onSubmitClick: (answer: number, remainder?: number) => void,
-    onOkayClick: () => void,
+    onOkayClick: (location: string) => void,
   ) {
     //true for testing
     this.group = new Konva.Group({ visible: true });
@@ -166,7 +166,6 @@ export class MinigameScreenView implements View {
 
     homeButton.on("click", () => {
       if (this.answerInput) this.answerInput.style.display = "none";
-      if (this.remainderInput) this.remainderInput.style.display = "none";
       onHomeClick();
     });
     this.group.add(homeButton);
@@ -333,7 +332,6 @@ export class MinigameScreenView implements View {
     noBtn.on("click", () => {
       console.log("Continue button clicked");
       if (this.answerInput) this.answerInput.style.display = "block";
-      if (this.remainderInput) this.remainderInput.style.display = "block";
       popupGroup.destroy();
       onContinueClick();
     });
@@ -342,17 +340,21 @@ export class MinigameScreenView implements View {
   // Popup for math problem
   private showMathPopup(
     problemText: string,
-    onSubmitClick: (answer: number, remainder: number) => void,
+    onSubmitClick: (answer: number) => void,
     onOkayClick: (location: string) => void,
+    problemNumber: number,
+    correctAnswers: number,
+    totalProblems: number,
+    minCorrectAnswers: number,
   ): void {
     if (this.group.findOne(".math-popup")) return;
 
     const popupWidth = (this.CARD_AREA_WIDTH / 4) * 3;
     const popupHeight = this.CARD_AREA_HEIGHT / 3;
-    const popup = new Konva.Group({
+    const mathPopup = new Konva.Group({
       name: "math-popup",
       x: this.CARD_AREA_WIDTH / 2 - popupWidth / 2,
-      y: this.CARD_AREA_HEIGHT / 3.5 - popupHeight / 2,
+      y: this.CARD_AREA_HEIGHT / 1.75 - popupHeight / 2,
     });
 
     const popupRect = new Konva.Rect({
@@ -363,7 +365,7 @@ export class MinigameScreenView implements View {
       strokeWidth: 1,
       cornerRadius: 10,
     });
-    popup.add(popupRect);
+    mathPopup.add(popupRect);
 
     const txtPadding = 20;
     const problem = new Konva.Text({
@@ -376,10 +378,9 @@ export class MinigameScreenView implements View {
       fill: "black",
       align: "center",
     });
-    popup.add(problem);
+    mathPopup.add(problem);
 
-    let labelText =
-      "Enter the answer and remainder (0 if none) for the expression: ";
+    let labelText = "Enter the answer for the expression: ";
     let placeholderAnswer = "Answer";
     let placeholderRemainder = "Remainder";
 
@@ -393,7 +394,7 @@ export class MinigameScreenView implements View {
       fill: "black",
       align: "center",
     });
-    popup.add(this.label);
+    mathPopup.add(this.label);
 
     const inpWidth = popupWidth / 4;
     // HTML input for answer
@@ -410,19 +411,6 @@ export class MinigameScreenView implements View {
     this.answerInput.style.border = "2px solid black";
     this.answerInput.style.borderRadius = "5px";
     document.body.appendChild(this.answerInput);
-
-    this.remainderInput = document.createElement("input");
-    this.remainderInput.type = "text";
-    this.remainderInput.placeholder = placeholderRemainder;
-    this.remainderInput.style.position = "absolute";
-    this.remainderInput.style.left = `${rectPos.x + rectPos.width / 2 - inpWidth / 2}px`;
-    this.remainderInput.style.top = `${rectPos.y + rectPos.height * 0.65}px`;
-    this.remainderInput.style.width = `${inpWidth}px`;
-    this.remainderInput.style.fontSize = "18px";
-    this.remainderInput.style.padding = "5px";
-    this.remainderInput.style.border = "2px solid black";
-    this.remainderInput.style.borderRadius = "5px";
-    document.body.appendChild(this.remainderInput);
 
     const buttonWidth = 140;
     const buttonHeight = 35;
@@ -519,50 +507,48 @@ export class MinigameScreenView implements View {
     okayBtn.add(okayRect, okayText);
     okayBtn.visible(false);
 
-    popup.add(submitBtn, okayBtn);
-    this.group.add(popup);
+    const statusPopup = this.showStatusPopup(
+      problemNumber,
+      correctAnswers,
+      totalProblems,
+      minCorrectAnswers,
+    );
+    mathPopup.add(submitBtn, okayBtn, statusPopup);
+    this.group.add(mathPopup);
 
     // Button handlers
     submitBtn.on("click", () => {
       const answer = parseFloat(this.answerInput.value.trim());
-      const remainder = parseFloat(this.remainderInput.value.trim());
       this.answerInput.remove();
-      this.remainderInput.remove();
-      onSubmitClick(answer, remainder);
+      onSubmitClick(answer);
       submitBtn.visible(false);
       okayBtn.visible(true);
     });
 
     okayBtn.on("click", () => {
-      popup.destroy();
+      mathPopup.destroy();
       onOkayClick("problem");
     });
   }
 
   /**
-   * Update math problem label as feedback
+   * Shows the user the current problem they're at
+   * and the number of problems they got correct
    */
-  showFeedback(answer: number, remainder: number, isCorrect: boolean): void {
-    console.log(`entered showfeedback with operation: ${operation}`);
-    const prefix = isCorrect ? "Correct!" : "Incorrect.";
-    this.label.text(
-      `${prefix} The answer is ${answer}, and the remainder is ${remainder}.`,
-    );
-    this.group.getLayer()?.draw();
-  }
-
-  private showResultsPopup(
-    outcome: string = "win" | "lose",
-    onOkayClick: (location: string) => void,
-  ): void {
-    if (this.group.findOne(".results-popup")) return;
+  private showStatusPopup(
+    problemNumber: number,
+    correctAnswers: number,
+    totalProblems: number,
+    minCorrectAnswers: number,
+  ) {
+    if (this.group.findOne(".status-popup")) return;
 
     const popupWidth = (this.CARD_AREA_WIDTH / 4) * 3;
-    const popupHeight = this.CARD_AREA_HEIGHT / 3;
+    const popupHeight = this.CARD_AREA_HEIGHT / 8;
     const popup = new Konva.Group({
-      name: "results-popup",
-      x: this.CARD_AREA_WIDTH / 2 - popupWidth / 2,
-      y: this.CARD_AREA_HEIGHT / 3.5 - popupHeight / 2,
+      name: "status-popup",
+      x: 0,
+      y: (-popupHeight / 2) * 3,
     });
 
     const popupRect = new Konva.Rect({
@@ -575,44 +561,136 @@ export class MinigameScreenView implements View {
     });
     popup.add(popupRect);
 
-    const txtPadding = 20;
-    const problem = new Konva.Text({
+    const txtPadding = 30;
+    const currentProblem = new Konva.Text({
       x: 0,
-      y: txtPadding * 2,
+      y: popupHeight / 2 - txtPadding,
       width: popupWidth,
-      text: problemText,
-      fontSize: 20,
+      text: `Current problem: #${problemNumber}`,
+      fontSize: 18,
       fontFamily: "Arial",
       fill: "black",
       align: "center",
     });
-    popup.add(problem);
+    currentProblem.offsetY(currentProblem.height() / 2);
+
+    this.correctProblems = new Konva.Text({
+      x: 0,
+      y: popupHeight / 2 + txtPadding / 2,
+      width: popupWidth,
+      text: `Questions answered correctly: ${correctAnswers} out of ${totalProblems}`,
+      fontSize: 18,
+      fontFamily: "Arial",
+      fill: "black",
+      align: "center",
+    });
+    this.correctProblems.offsetY(this.correctProblems.height() / 2);
+
+    const message = new Konva.Text({
+      x: 0,
+      y: this.correctProblems.y() + txtPadding / 1.5,
+      width: popupWidth,
+      text: `*Must get ${minCorrectAnswers} out of ${totalProblems} correct to tame the dragon.`,
+      fontSize: 14,
+      fontFamily: "Arial",
+      fill: "red",
+      align: "center",
+    });
+    message.offsetY(message.height() / 2);
+    popup.add(currentProblem, this.correctProblems, message);
+
+    return popup;
+  }
+
+  /**
+   * Update math problem label as feedback
+   */
+  showFeedback(answer: number, isCorrect: boolean): void {
+    console.log("entered showfeedback");
+    const prefix = isCorrect ? "Correct!" : "Incorrect.";
+    this.label.text(`${prefix} The answer is ${answer}.`);
+    this.group.getLayer()?.draw();
+  }
+
+  /**
+   * Update status label with new info
+   */
+  showStatusUpdate(totalProblems: number, correctAnswers: number): void {
+    console.log("entered showStatusUpdate");
+    this.correctProblems.text(
+      `Questions answered correctly: ${correctAnswers} out of ${totalProblems}`,
+    );
+    this.group.getLayer()?.draw();
+  }
+
+  private showResultsPopup(
+    outcome: string = "win" | "lose",
+    onOkayClick: (location: string) => void,
+    totalProblems: number,
+    minCorrectAnswers: number,
+  ): void {
+    if (this.group.findOne(".results-popup")) return;
+
+    const popupWidth = 420;
+    const popupHeight = 200;
+    const popup = new Konva.Group({
+      name: "results-popup",
+    });
+
+    const overlay = new Konva.Rect({
+      x: 0,
+      y: 0,
+      width: STAGE_WIDTH,
+      height: STAGE_HEIGHT,
+      fill: "black",
+      opacity: 0.4,
+    });
+    popup.add(overlay);
+
+    const popupRect = new Konva.Rect({
+      x: STAGE_WIDTH / 2 - popupWidth / 2,
+      y: STAGE_HEIGHT / 2 - popupHeight / 2,
+      width: popupWidth,
+      height: popupHeight,
+      fill: "white",
+      cornerRadius: 10,
+      shadowBlur: 10,
+    });
+    popup.add(popupRect);
 
     let labelText = "";
-    if (outcome === "win") {
-      labelText = "You tamed the dragon! Good job!";
-    } else {
-      labelText =
-        "You were not able to tame the dragon. You needed to get 5 out of 8 questions correct.";
+    switch (outcome) {
+      case "win":
+        labelText = "You tamed the dragon! Good job!";
+        break;
+      case "lose":
+        labelText = `You were not able to tame the dragon. You needed to get ${minCorrectAnswers} out of ${totalProblems} questions correct before time runs out.`;
+        break;
     }
 
-    this.label = new Konva.Text({
-      x: 0,
-      y: problem.y() + problem.height() + txtPadding * 2,
-      width: popupWidth,
+    const label = new Konva.Text({
+      x: popupRect.x() + popupWidth / 2,
+      y: popupRect.y() + 80,
+      width: (popupWidth / 4) * 3.5,
       text: labelText,
       fontSize: 18,
       fontFamily: "Arial",
       fill: "black",
       align: "center",
     });
-    popup.add(this.label);
+    label.offsetX(label.width() / 2);
+    label.offsetY(label.height() / 2);
+    popup.add(label);
+
+    const buttonWidth = 100;
+    const buttonHeight = 35;
+    const btnPadding = 20;
 
     // Okay button
     const okayBtn = new Konva.Group();
     const okayRect = new Konva.Rect({
-      x: popupWidth / 2 - buttonWidth / 2,
-      y: popupHeight - buttonHeight - btnPadding,
+      x: popupRect.x() + popupWidth / 2 - buttonWidth / 2,
+      y: popupRect.y() + popupHeight - buttonHeight - btnPadding,
       width: buttonWidth,
       height: buttonHeight,
       fill: "#000080",
@@ -652,22 +730,10 @@ export class MinigameScreenView implements View {
     okayText.offsetX(okayText.width() / 2);
     okayText.offsetY(okayText.height() / 2);
     okayBtn.add(okayRect, okayText);
-    okayBtn.visible(false);
-
-    popup.add(submitBtn, okayBtn);
+    popup.add(okayBtn);
     this.group.add(popup);
 
-    // Button handlers
-    submitBtn.on("click", () => {
-      const answer = parseFloat(this.answerInput.value.trim());
-      const remainder = parseFloat(this.remainderInput.value.trim());
-      this.answerInput.remove();
-      this.remainderInput.remove();
-      onSubmitClick(answer, remainder);
-      submitBtn.visible(false);
-      okayBtn.visible(true);
-    });
-
+    // Button handler
     okayBtn.on("click", () => {
       popup.destroy();
       onOkayClick("results");

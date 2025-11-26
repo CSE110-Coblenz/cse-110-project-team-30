@@ -4,12 +4,41 @@ import { generateOrderOfOperationsProblem } from "../../mathGenerator";
  * MinigameScreenModel - Manages minigame state
  */
 export class MinigameScreenModel {
+  private minCorrectAnswers: number = 5;
   private totalQuestions: number = 7;
   private questionsAsked: number = 0;
   private correctAnswers: number = 0;
   private currentProblem: MathProblem | null = null;
 
   constructor() {}
+
+  /**
+   * Get the total number of questions offered
+   */
+  getTotalQuestions(): number {
+    return this.totalQuestions;
+  }
+
+  /**
+   * Get the number of questions asked so far
+   */
+  getQuestionsAsked(): number {
+    return this.questionsAsked;
+  }
+
+  /**
+   * Get the number of correct answers so far
+   */
+  getCorrectAnswers(): number {
+    return this.correctAnswers;
+  }
+
+  /**
+   * Get the number of questions that must be correct to win
+   */
+  getMinCorrectAnswers(): number {
+    return this.minCorrectAnswers;
+  }
 
   /**
    * Generates each math problem
@@ -31,13 +60,11 @@ export class MinigameScreenModel {
   /**
    * Check answer correctness
    */
-  checkAnswer(userAnswer: number, userRemainder: number): boolean {
+  checkAnswer(userAnswer: number): boolean {
     if (!this.currentProblem) return false;
 
-    let isCorrect =
-      userAnswer === this.currentProblem.answer &&
-      userRemainder === this.currentProblem.remainder;
-    if (isCorrect) correctAnswers++;
+    let isCorrect = userAnswer === this.currentProblem.answer;
+    if (isCorrect) this.correctAnswers++;
     return isCorrect;
   }
 
@@ -45,14 +72,17 @@ export class MinigameScreenModel {
    * Check if the user answered enough questions correctly
    */
   hasEnoughCorrect(): boolean {
-    return this.correctAnswers >= 5;
+    return this.correctAnswers >= this.minCorrectAnswers;
   }
 
   /**
    * Check if the user has enough questions left to still win
    */
   canStillWin(): boolean {
-    return this.totalQuestions - this.questionsAsked + this.correctAnswers >= 5;
+    return (
+      this.totalQuestions - this.questionsAsked + this.correctAnswers >=
+      this.minCorrectAnswers
+    );
   }
 
   /**
@@ -66,9 +96,9 @@ export class MinigameScreenModel {
    * Reset minigame state for a new game
    */
   reset(): void {
-    totalQuestions: number = 7;
-    questionsAsked: number = 0;
-    correctAnswers: number = 0;
+    this.totalQuestions = 7;
+    this.questionsAsked = 0;
+    this.correctAnswers = 0;
     this.currentProblem = null;
   }
 }

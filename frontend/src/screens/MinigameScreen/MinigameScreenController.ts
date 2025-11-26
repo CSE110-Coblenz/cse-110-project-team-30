@@ -22,8 +22,7 @@ export class MinigameScreenController extends ScreenController {
       () => this.handleHomeClick(),
       () => this.handleLeaveClick(),
       () => this.handleContinueClick(),
-      (answer: number, remainder: number) =>
-        this.handleSubmitClick(answer, remainder),
+      (answer: number) => this.handleSubmitClick(answer),
       (location: string) => this.handleOkayClick(location),
     );
   }
@@ -77,8 +76,12 @@ export class MinigameScreenController extends ScreenController {
 
     this.view.showMathPopup(
       problem.question,
-      (answer, remainder) => this.handleSubmitClick(answer, remainder),
+      (answer) => this.handleSubmitClick(answer),
       (location) => this.handleOkayClick(location),
+      this.model.getQuestionsAsked(),
+      this.model.getCorrectAnswers(),
+      this.model.getTotalQuestions(),
+      this.model.getMinCorrectAnswers(),
     );
   }
 
@@ -111,14 +114,18 @@ export class MinigameScreenController extends ScreenController {
   /**
    * Handle submit button click for math problem
    */
-  private handleSubmitClick(userAnswer: number, userRemainder: number): void {
+  private handleSubmitClick(userAnswer: number): void {
     console.log("entered submit click handler for math problem");
     const problem = this.model.getCurrentProblem();
     if (!problem) return;
 
-    this.isCorrect = this.model.checkAnswer(userAnswer, userRemainder);
+    this.isCorrect = this.model.checkAnswer(userAnswer);
     console.log("checked answer");
-    this.view.showFeedback(problem.answer, problem.remainder, this.isCorrect);
+    this.view.showFeedback(problem.answer, this.isCorrect);
+    this.view.showStatusUpdate(
+      this.model.getTotalQuestions(),
+      this.model.getCorrectAnswers(),
+    );
   }
 
   /**
@@ -173,7 +180,12 @@ export class MinigameScreenController extends ScreenController {
     }
 
     console.log("Now showing the results popup");
-    this.view.showResultsPopup(outcome);
+    this.view.showResultsPopup(
+      outcome,
+      (location) => this.handleOkayClick(location),
+      this.model.getTotalQuestions(),
+      this.model.getMinCorrectAnswers(),
+    );
   }
 
   /**
