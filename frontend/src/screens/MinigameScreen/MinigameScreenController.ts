@@ -58,7 +58,10 @@ export class MinigameScreenController extends ScreenController {
       console.log("Starting timer with seconds:", timeRemaining);
       this.view.updateTimer(timeRemaining);
       if (timeRemaining <= 0) {
-        this.endMinigame("complete");
+        this.endMinigame(
+          "complete",
+          this.model.hasEnoughCorrect() ? "win" : "lose",
+        );
       }
     }, 1000);
   }
@@ -178,6 +181,7 @@ export class MinigameScreenController extends ScreenController {
     outcome: "win" | "lose",
   ): void {
     this.stopTimer();
+    this.view.removeInputs();
 
     switch (reason) {
       case "leave":
