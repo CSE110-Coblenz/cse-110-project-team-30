@@ -39,7 +39,7 @@ export class MinigameScreenView implements View {
         };
     this.addHomeButton(onHomeClick);
     this.addTimerDisplay();
-    //this.addDragon();
+    this.addDragon();
   }
 
   // Timer display
@@ -582,6 +582,9 @@ export class MinigameScreenView implements View {
   showFeedback(answer: number, isCorrect: boolean): void {
     console.log("entered showfeedback");
     const prefix = isCorrect ? "Correct!" : "Incorrect.";
+    if (isCorrect){
+      this.updateDragonOnCorrect();
+    }
     this.label.text(`${prefix} The answer is ${answer}.`);
     this.group.getLayer()?.draw();
   }
@@ -636,6 +639,7 @@ export class MinigameScreenView implements View {
     switch (outcome) {
       case "win":
         labelText = "You tamed the dragon! Good job!";
+        this.playDragonSound();
         break;
       case "lose":
         labelText = `You were not able to tame the dragon. You needed to get ${minCorrectAnswers} out of ${totalProblems} questions correct before time runs out.`;
@@ -727,6 +731,72 @@ export class MinigameScreenView implements View {
     this.timerText.offsetY(this.timerText.height() / 2);
     this.group.getLayer()?.draw();
   }
+
+  private dragonImages = [
+    "minigame_images/dragonOne.png",
+    "minigame_images/dragonTwo.png",
+    "minigame_images/dragonThree.png",
+    "minigame_images/dragonFour.png",
+    "minigame_images/dragonFive.png",
+    "minigame_images/dragonSix.png",
+  ];
+  private currentDragonIndex = 0;
+  private dragon: Konva.Image | null = null;
+  private dragonScale = 1; //initial
+  private scaleStep = 0.85; // reduce to 85% each change
+
+  private addDragon(): void {
+    const img = new Image();
+    img.src = this.dragonImages[this.currentDragonIndex]!;
+
+    img.onload = () => {
+      this.dragon = new Konva.Image({
+        x: STAGE_WIDTH - 400,
+        y: STAGE_HEIGHT - 400,
+        width: 600,
+        height: STAGE_HEIGHT,
+        image: img,
+        opacity: 1,
+      });
+      //create offsets to help with scaling around center
+      this.dragon.offsetX(this.dragon.width() / 2);
+      this.dragon.offsetY(this.dragon.height() / 2);
+
+      this.group.add(this.dragon);
+      this.dragon.moveToBottom();
+      console.log("dragon opacity:", this.dragon.opacity());
+    };
+  }
+
+  public updateDragonOnCorrect(): void {
+    if (!this.dragon) return; // Not created yet
+
+    // Move to the next dragon image
+    this.currentDragonIndex++;
+
+    const newImg = new Image();
+    newImg.src = this.dragonImages[this.currentDragonIndex]!;
+
+    newImg.onload = () => {
+      // Rescale dragon each time it changes
+      this.dragonScale *= this.scaleStep;
+      this.dragon!.scale({ x: this.dragonScale, y: this.dragonScale });
+
+
+      this.dragon!.image(newImg);
+      this.dragon!.opacity(1);
+      this.dragon!.getLayer()?.batchDraw();
+    };
+  }
+
+  private playDragonSound(): void {
+    const audio = new Audio("minigame_images/baby-dragon.mp3");
+    audio.volume = 0.8; //adjust volume 0.0–1.0
+    audio.play().catch(err => {
+      console.error("Error playing dragon sound:", err);
+    });
+  }
+
 
   /**
    * Show the screen
