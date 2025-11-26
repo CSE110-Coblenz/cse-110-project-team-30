@@ -88,7 +88,7 @@ export class BattleScreenModel {
   /**
    * Generates each math problem
    */
-  generateProblem(cardType: string) {
+  generateProblem(cardType: string): MathProblem {
     console.log(`${troops[cardType].level}`);
     const problem = generateMathProblem(
       troops[cardType].operation,

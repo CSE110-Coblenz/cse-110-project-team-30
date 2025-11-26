@@ -7,6 +7,10 @@ export function preloadSprites(): Promise<void> {
   const imageDirectory = "/battle_images/";
 
   const PlayerURIs: { [key: string]: string } = {
+    SwordsmanOne: "blue-swordsman.png",
+    SwordsmanTwo: "blue-swordsman.png",
+    SwordsmanThree: "blue-swordsman.png",
+    SwordsmanFour: "blue-swordsman.png",
     SpearmanOne: "blue-spearman.png",
     SpearmanTwo: "blue-spearman.png",
     SpearmanThree: "blue-spearman.png",
@@ -24,6 +28,10 @@ export function preloadSprites(): Promise<void> {
   };
 
   const EnemyURIs: { [key: string]: string } = {
+    SwordsmanOne: "red-swordsman.png",
+    SwordsmanTwo: "red-swordsman.png",
+    SwordsmanThree: "red-swordsman.png",
+    SwordsmanFour: "red-swordsman.png",
     SpearmanOne: "red-spearman.png",
     SpearmanTwo: "red-spearman.png",
     SpearmanThree: "red-spearman.png",
@@ -42,7 +50,10 @@ export function preloadSprites(): Promise<void> {
 
   const promises: Promise<void>[] = [];
 
-  const loadMap = (map: { [key: string]: string }, outputMap: { [key: string]: HTMLImageElement }) => {
+  const loadMap = (
+    map: { [key: string]: string },
+    outputMap: { [key: string]: HTMLImageElement },
+  ) => {
     for (const key in map) {
       const img = new Image();
       img.src = imageDirectory + map[key];
@@ -63,7 +74,10 @@ export function preloadSprites(): Promise<void> {
 }
 
 // Then your lookup function becomes simple:
-export function SpriteLookup(sameTeam: boolean, troopType: string): HTMLImageElement {
+export function SpriteLookup(
+  sameTeam: boolean,
+  troopType: string,
+): HTMLImageElement {
   const spriteMap = sameTeam ? playerSpriteMap : enemySpriteMap;
   if (!(troopType in spriteMap)) {
     throw new Error(`SpriteLookup: Unknown troop type ${troopType}`);
