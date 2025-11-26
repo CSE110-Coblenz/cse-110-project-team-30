@@ -108,11 +108,12 @@ class App implements ScreenSwitcher {
         break;
 
       case "selection":
-        this.selectionController.show()
+        this.selectionController.show();
         break;
-      
+
       case "minigame":
-        this.minigameController.show()
+        this.minigameController.startMinigame();
+        this.minigameController.askProblem();
         break;
 
       case "results":

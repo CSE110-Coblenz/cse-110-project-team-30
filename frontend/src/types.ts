@@ -12,19 +12,20 @@ export interface View {
  * - "login": Login screen
  * - "menu": Main menu screen
  * - "cards": Cards screen
+ * - "selection": Cards selection screen
  * - "battle": Battle screen
  * - "results": Results screen
  * - "leaderboard": Leaderboard screen
- * - pointsUpdate: Points earned/lost to display on results screen
+ * - cards: cards the user selects from the selection screen
  */
 export type Screen =
   | { type: "login" }
   | { type: "menu" }
   | { type: "cards" }
-  | { type: "battle" }
   | { type: "selection" }
+  | { type: "battle"; cards: string[] }
   | { type: "minigame" }
-  | { type: "results"; pointsUpdate: number }
+  | { type: "results" }
   | { type: "leaderboard" };
 
 export abstract class ScreenController {
