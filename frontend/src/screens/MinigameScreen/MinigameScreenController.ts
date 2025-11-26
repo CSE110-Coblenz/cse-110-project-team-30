@@ -14,6 +14,9 @@ export class MinigameScreenController extends ScreenController {
   private minigameTimer: number | null = null;
   private isCorrect: boolean | null = null;
 
+  private dragonRoarSound: HTMLAudioElement;
+  private babyDragonSound: HTMLAudioElement;
+
   constructor(screenSwitcher: ScreenSwitcher) {
     super();
     this.screenSwitcher = screenSwitcher;
@@ -25,6 +28,9 @@ export class MinigameScreenController extends ScreenController {
       (answer: number) => this.handleSubmitClick(answer),
       (location: string) => this.handleOkayClick(location),
     );
+
+    this.dragonRoarSound = new Audio("/dragonRoar.mp3");
+    this.babyDragonSound = new Audio("/babyDragon.mp3");
   }
 
   /**
