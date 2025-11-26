@@ -1,7 +1,6 @@
 import { ScreenController } from "../../types.ts";
 import type { ScreenSwitcher } from "../../types.ts";
 import { SelectionScreenView } from "./SelectionScreenView.ts";
-import { BattleScreenController } from "../BattleScreen/BattleScreenController.ts";
 
 
 
@@ -14,7 +13,8 @@ export class SelectionScreenController extends ScreenController {
     constructor(screenSwitcher: ScreenSwitcher) {
         super();
         this.screenSwitcher = screenSwitcher;
-        this.selectedCards = [];
+        this.resetSelection();
+
 
         // Pass a callback to handle the "Home" button
         this.view = new SelectionScreenView({
@@ -57,7 +57,7 @@ export class SelectionScreenController extends ScreenController {
     private handleHomeClick(): void {
         // Hide this selection screen
         this.view.hide();
-
+        this.resetSelection();
         // Switch back to menu screen
         this.screenSwitcher.switchToScreen({ type: "menu" });
 
@@ -70,6 +70,10 @@ export class SelectionScreenController extends ScreenController {
         // Switch to the battle screen
         this.screenSwitcher.switchToScreen({ type: "battle", cards: this.selectedCards});
         //
+    }
+
+    private resetSelection() {
+        this.selectedCards = [];
     }
 
     /**
