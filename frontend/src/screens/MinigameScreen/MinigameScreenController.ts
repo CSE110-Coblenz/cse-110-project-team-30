@@ -179,19 +179,22 @@ export class MinigameScreenController extends ScreenController {
   ): void {
     this.stopTimer();
 
-    if (reason === "leave") {
-      console.log("Now going to menu screen");
-      this.screenSwitcher.switchToScreen({ type: "menu" });
-      return;
-    }
+    switch (reason) {
+      case "leave":
+        console.log("Now going to menu screen");
+        this.screenSwitcher.switchToScreen({ type: "menu" });
+        break;
 
-    console.log("Now showing the results popup");
-    this.view.showResultsPopup(
-      outcome,
-      (location) => this.handleOkayClick(location),
-      this.model.getTotalQuestions(),
-      this.model.getMinCorrectAnswers(),
-    );
+      case "complete":
+        console.log("Now showing the results popup");
+        this.view.showResultsPopup(
+          outcome,
+          (location) => this.handleOkayClick(location),
+          this.model.getTotalQuestions(),
+          this.model.getMinCorrectAnswers(),
+        );
+        break;
+    }
   }
 
   /**

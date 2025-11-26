@@ -12,11 +12,6 @@ export class MinigameScreenView implements View {
   private label: Konva.Text;
   private correctProblems: Konva.Text;
   private timerText: Konva.Text;
-  private readonly MINIGAME_AREA_WIDTH: number = (STAGE_WIDTH / 3) * 2;
-  private readonly MINIGAME_AREA_HEIGHT: number = STAGE_HEIGHT;
-  private readonly CARD_AREA_WIDTH: number =
-    STAGE_WIDTH - this.MINIGAME_AREA_WIDTH;
-  private readonly CARD_AREA_HEIGHT: number = STAGE_HEIGHT;
 
   constructor(
     onHomeClick: () => void,
@@ -26,42 +21,10 @@ export class MinigameScreenView implements View {
     onSubmitClick: (answer: number, remainder?: number) => void,
     onOkayClick: (location: string) => void,
   ) {
-    //true for testing
-    this.group = new Konva.Group({ visible: true });
-    this.addBackground();
+    this.group = new Konva.Group({ visible: false });
     this.addHomeButton(onHomeClick);
-
-    this.minigameFieldGroup = new Konva.Group({
-      x: this.CARD_AREA_WIDTH,
-      y: 0,
-    });
-
     this.addTimerDisplay();
-    this.addDragon();
-    this.group.add(this.minigameFieldGroup);
-
-    this.cardsGroup = new Konva.Group({
-      x: 0,
-      y: 0,
-    });
-
-    this.group.add(this.cardsGroup);
-  }
-
-  // Background
-  private addBackground(): void {
-    const bg = new Konva.Rect({
-      x: 0,
-      y: 0,
-      width: STAGE_WIDTH,
-      height: STAGE_HEIGHT,
-      fill: "#C8F0F0", // pastel cyan
-    });
-    this.group.add(bg);
-  }
-
-  private addDragon() {
-    console.log("Adding dragon...");
+    //this.addDragon();
   }
 
   // Timer display
@@ -70,7 +33,7 @@ export class MinigameScreenView implements View {
     const timerWidth = 105;
     const timerHeight = 50;
     const timerRect = new Konva.Rect({
-      x: -timerWidth,
+      x: STAGE_WIDTH - timerWidth - 20,
       y: 20,
       width: timerWidth,
       height: timerHeight,
@@ -113,7 +76,7 @@ export class MinigameScreenView implements View {
     this.timerText.offsetY(this.timerText.height() / 2);
     timerGroup.add(this.timerText);
 
-    this.minigameFieldGroup.add(timerGroup);
+    this.group.add(timerGroup);
   }
 
   // Home button
@@ -171,7 +134,7 @@ export class MinigameScreenView implements View {
     this.group.add(homeButton);
   }
 
-  // Pop-up for confirmation
+  // Home pop-up for confirmation
   private showConfirmPopup(
     onLeaveClick: () => void,
     onContinueClick: () => void,
@@ -192,7 +155,7 @@ export class MinigameScreenView implements View {
       opacity: 0.7,
     });
 
-    const popupWidth = 300;
+    const popupWidth = 320;
     const popupHeight = 160;
     const popup = new Konva.Group();
 
@@ -219,7 +182,7 @@ export class MinigameScreenView implements View {
     popupText.offsetX(popupText.width() / 2);
     popupText.offsetY(popupText.height() / 2);
 
-    const btnWidth = 120;
+    const btnWidth = 135;
     const btnHeight = 35;
     const padding = 15;
 
@@ -349,12 +312,12 @@ export class MinigameScreenView implements View {
   ): void {
     if (this.group.findOne(".math-popup")) return;
 
-    const popupWidth = (this.CARD_AREA_WIDTH / 4) * 3;
-    const popupHeight = this.CARD_AREA_HEIGHT / 3;
+    const popupWidth = (STAGE_WIDTH / 9) * 2;
+    const popupHeight = STAGE_HEIGHT / 3;
     const mathPopup = new Konva.Group({
       name: "math-popup",
-      x: this.CARD_AREA_WIDTH / 2 - popupWidth / 2,
-      y: this.CARD_AREA_HEIGHT / 1.75 - popupHeight / 2,
+      x: (STAGE_WIDTH / 3) * 0.5 - popupWidth / 2,
+      y: STAGE_HEIGHT / 1.75 - popupHeight / 2,
     });
 
     const popupRect = new Konva.Rect({
@@ -380,15 +343,11 @@ export class MinigameScreenView implements View {
     });
     mathPopup.add(problem);
 
-    let labelText = "Enter the answer for the expression: ";
-    let placeholderAnswer = "Answer";
-    let placeholderRemainder = "Remainder";
-
     this.label = new Konva.Text({
       x: 0,
       y: problem.y() + problem.height() + txtPadding * 2,
       width: popupWidth,
-      text: labelText,
+      text: "Enter the answer for the expression: ",
       fontSize: 18,
       fontFamily: "Arial",
       fill: "black",
@@ -401,7 +360,7 @@ export class MinigameScreenView implements View {
     const rectPos = popupRect.getClientRect();
     this.answerInput = document.createElement("input");
     this.answerInput.type = "text";
-    this.answerInput.placeholder = placeholderAnswer;
+    this.answerInput.placeholder = "Answer";
     this.answerInput.style.position = "absolute";
     this.answerInput.style.left = `${rectPos.x + rectPos.width / 2 - inpWidth / 2}px`;
     this.answerInput.style.top = `${rectPos.y + rectPos.height * 0.45}px`;
@@ -543,8 +502,8 @@ export class MinigameScreenView implements View {
   ) {
     if (this.group.findOne(".status-popup")) return;
 
-    const popupWidth = (this.CARD_AREA_WIDTH / 4) * 3;
-    const popupHeight = this.CARD_AREA_HEIGHT / 8;
+    const popupWidth = (STAGE_WIDTH / 9) * 2;
+    const popupHeight = STAGE_HEIGHT / 8;
     const popup = new Konva.Group({
       name: "status-popup",
       x: 0,
@@ -768,7 +727,6 @@ export class MinigameScreenView implements View {
   hide(): void {
     this.group.visible(false);
     if (this.answerInput) this.answerInput.style.display = "none";
-    if (this.remainderInput) this.remainderInput.style.display = "none";
     this.group.getLayer()?.draw();
   }
 
