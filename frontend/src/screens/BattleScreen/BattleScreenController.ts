@@ -43,6 +43,7 @@ export class BattleScreenController extends ScreenController {
       Y: this.model.SIZE - 1 - Position.Y,
     };
   }
+
   /**
    * Marshal websocket data to match current team
    */
@@ -56,6 +57,7 @@ export class BattleScreenController extends ScreenController {
     }
     return data;
   }
+
   /**
    * Fetch and update battle state using ws
    */
@@ -265,21 +267,24 @@ export class BattleScreenController extends ScreenController {
    */
   private endBattle(reason: "leave" | "complete"): void {
     this.stopTimer();
+    this.view.removeInputs();
 
     this.isCorrect = null;
     this.currentCardType = null;
     this.isMatchReady = false;
 
-    if (reason === "leave") {
-      console.log("Now going to menu screen");
-      this.screenSwitcher.switchToScreen({ type: "menu" });
-      return;
+    switch (reason) {
+      case "leave":
+        console.log("Now going to menu screen");
+        this.screenSwitcher.switchToScreen({ type: "menu" });
+        break;
+      case "complete":
+        console.log("Now going to results screen");
+        this.screenSwitcher.switchToScreen({
+          type: "result",
+        });
+        break;
     }
-
-    console.log("Now going to results screen");
-    this.screenSwitcher.switchToScreen({
-      type: "result",
-    });
   }
 
   /**

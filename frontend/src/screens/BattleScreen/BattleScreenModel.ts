@@ -61,9 +61,11 @@ export class BattleScreenModel {
       }
     }
   }
+
   getTiles(): Grid {
     return this.tiles;
   }
+
   /**
    * Set game ID
    */

@@ -12,7 +12,7 @@ export class BattleScreenView implements View {
   private troopSprites: Record<string, HTMLImageElement> = {};
   private troopNodes: Map<number, Konva.Group> = new Map();
   private troopGroup: Konva.Group;
-  private answerInput: HTMLInputElement;
+  private answerInput: HTMLInputElement | null = null;
   private remainderInput: HTMLInputElement | null = null;
   private label: Konva.Text;
   private previewNode: Konva.Group | null = null;
@@ -37,9 +37,8 @@ export class BattleScreenView implements View {
     onSubmitClick: (answer: number, remainder?: number) => void,
     onOkayClick: () => void,
   ) {
-    //true for testing
     this.model = model;
-    this.group = new Konva.Group({ visible: true });
+    this.group = new Konva.Group({ visible: false });
     this.troopGroup = new Konva.Group();
     preloadSprites();
     this.addBackground();
@@ -413,7 +412,6 @@ export class BattleScreenView implements View {
       if (this.remainderInput) this.remainderInput.style.display = "none";
       onHomeClick();
     });
-    //    homeButton.on("click", onHomeClick);
     this.group.add(homeButton);
   }
 
@@ -842,8 +840,7 @@ export class BattleScreenView implements View {
 
     // Button handlers
     quitBtn.on("click", () => {
-      this.answerInput.remove();
-      if (this.remainderInput) this.remainderInput.remove();
+      this.removeInputs();
       popup.destroy();
       onQuitClick();
     });
@@ -853,8 +850,7 @@ export class BattleScreenView implements View {
       const remainder = this.remainderInput
         ? parseFloat(this.remainderInput.value.trim())
         : undefined;
-      this.answerInput.remove();
-      if (this.remainderInput) this.remainderInput.remove();
+      this.removeInputs();
       onSubmitClick(answer, remainder);
       quitBtn.visible(false);
       submitBtn.visible(false);
@@ -865,6 +861,18 @@ export class BattleScreenView implements View {
       popup.destroy();
       onOkayClick();
     });
+  }
+
+  public removeInputs(): void {
+    if (this.answerInput) {
+      this.answerInput.remove();
+      this.answerInput = null;
+    }
+
+    if (this.remainderInput) {
+      this.remainderInput.remove();
+      this.remainderInput = null;
+    }
   }
 
   /**
@@ -923,8 +931,6 @@ export class BattleScreenView implements View {
     healthText: string,
   ) {
     var existing = this.troopNodes.get(id);
-    const castleWidth = 85;
-    const castleHeight = 160;
     const x =
       px * (this.BATTLE_AREA_WIDTH / ARENA_SIZE) +
       this.BATTLE_AREA_WIDTH / ARENA_SIZE / 2;
@@ -947,17 +953,27 @@ export class BattleScreenView implements View {
     }
 
     // Otherwise create new troop
+    const castleWidth = 85;
+    const castleHeight = 160;
+    const troopWidth = 70;
+    const troopHeight = 85;
+
     const troopSprite: HTMLImageElement = SpriteLookup(sameTeam, troopType);
+
+    const isCastle = ["Castle", "KingTower"].includes(troopType);
+    const width = isCastle ? castleWidth : troopWidth;
+    const height = isCastle ? castleHeight : troopHeight;
+
     const group = new Konva.Group({
       x,
       y,
-      offsetX: castleWidth / 2,
-      offsetY: castleHeight / 2,
+      offsetX: width / 2,
+      offsetY: height / 2,
     });
 
-    const castle = new Konva.Image({
-      width: castleWidth,
-      height: castleHeight,
+    const sprite = new Konva.Image({
+      width: width,
+      height: height,
       opacity: 1,
       image: troopSprite,
       shadowColor: "black",
@@ -965,24 +981,22 @@ export class BattleScreenView implements View {
       shadowOffset: { x: 10, y: 0 },
       shadowOpacity: 0.5,
     });
-
-    group.add(castle);
+    group.add(sprite);
 
     const health = new Konva.Text({
       name: "troopHealth",
-      x: -castleWidth / 1.5,
-      y: -castleHeight / 2 - 5,
-      width: castleWidth * 2,
+      x: -width / 1.5,
+      y: -height / 2 - 5,
+      width: width * 2,
       text: healthText,
       fontSize: 16,
       fontFamily: "Arial",
       fill: "white",
       wrap: "word",
       align: "center",
-      offsetX: castleWidth / 2,
-      offsetY: -castleHeight / 2,
+      offsetX: width / 2,
+      offsetY: -height / 2,
     });
-
     group.add(health);
     this.troopGroup.add(group);
     this.troopNodes.set(id, group);
@@ -995,8 +1009,8 @@ export class BattleScreenView implements View {
     sameTeam: boolean,
     troopType: string,
   ) {
-    const troopWidth = 70;
-    const troopHeight = 100;
+    const troopWidth = 60;
+    const troopHeight = 85;
     const x =
       px * (this.BATTLE_AREA_WIDTH / ARENA_SIZE) +
       this.BATTLE_AREA_WIDTH / ARENA_SIZE / 2;
@@ -1009,8 +1023,8 @@ export class BattleScreenView implements View {
       const group = new Konva.Group({
         x,
         y,
-        offsetX: 85 / 2,
-        offsetY: 160 / 2,
+        offsetX: troopWidth / 2,
+        offsetY: troopHeight / 2,
       });
 
       const sprite = new Konva.Image({
