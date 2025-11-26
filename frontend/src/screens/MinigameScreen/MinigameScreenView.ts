@@ -731,34 +731,14 @@ export class MinigameScreenView implements View {
   /**
    * Show the screen
    */
-<<<<<<< HEAD
     show(): void {
         this.group.visible(true);
         this.group.getLayer()?.draw();
     }
-=======
-  show(): void {
-    this.group.visible(true);
-    this.group.getLayer()?.draw();
-  }
->>>>>>> minigame-screen
 
   /**
    * Hide the screen
    */
-<<<<<<< HEAD
-    hide(): void {
-        this.group.visible(false);
-        this.group.getLayer()?.draw();
-    }
-
-  /**
-     * Return the main group
-     */
-    getGroup(): Konva.Group {
-      return this.group;
-    }
-=======
   hide(): void {
     this.group.visible(false);
     if (this.answerInput) this.answerInput.style.display = "none";
@@ -768,5 +748,4 @@ export class MinigameScreenView implements View {
   getGroup(): Konva.Group {
     return this.group;
   }
->>>>>>> minigame-screen
 }

@@ -116,6 +116,12 @@ class App implements ScreenSwitcher {
         this.minigameController.askProblem();
         break;
 
+      case "battle":
+        // Start the battle (which also shows the battle screen)
+        this.battleController.startBattle();
+        this.battleController.setCards(screen.cards);
+        break;
+
       case "results":
         this.resultsController.show();
         break;

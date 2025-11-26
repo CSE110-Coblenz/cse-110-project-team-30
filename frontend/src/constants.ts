@@ -7,6 +7,7 @@ export const STAGE_HEIGHT = window.innerHeight;
 
 // Battle settings
 export const BATTLE_DURATION = 420; // seconds
+export const ARENA_SIZE = 32; // 32x32 grid
 
 // Minigame settings
 export const MINIGAME_DURATION = 210; // seconds

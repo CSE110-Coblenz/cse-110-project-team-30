@@ -1,8 +1,9 @@
 import { ScreenController } from "../../types.ts";
-import type { ScreenSwitcher } from "../../types.ts";
+import type { ScreenSwitcher, WSResponse } from "../../types.ts";
 import { BattleScreenModel } from "./BattleScreenModel.ts";
 import { BattleScreenView } from "./BattleScreenView.ts";
 import { BATTLE_DURATION } from "../../constants.ts";
+const BACKEND_URI = "http://localhost:8080";
 
 /**
  * BattleScreenController - Coordinates battle logic between Model and View
@@ -15,12 +16,14 @@ export class BattleScreenController extends ScreenController {
   private battleTimer: number | null = null;
   private currentCardType: string | null = null;
   private isCorrect: boolean | null = null;
+  private callSpawnTroop?: (troop: string, x: number, y: number) => void;
 
   constructor(screenSwitcher: ScreenSwitcher) {
     super();
     this.screenSwitcher = screenSwitcher;
     this.model = new BattleScreenModel();
     this.view = new BattleScreenView(
+      this.model,
       () => this.handleHomeClick(),
       () => this.handleLeaveClick(),
       () => this.handleContinueClick(),
@@ -32,6 +35,76 @@ export class BattleScreenController extends ScreenController {
     );
   }
 
+  private flipBoardPosition(Position: Position) {
+    return {
+      X: Position.X,
+      Y: this.model.SIZE - 1 - Position.Y,
+    };
+  }
+  /**
+   * Marshal websocket data to match current team
+   */
+  private marshalWSData(data: WSResponse): WSResponse {
+    // Implement marshaling logic here
+    if (!this.model.isBlueTeam) {
+      for (const troop of data.troops) {
+        troop.Team = troop.Team === 1 ? 1 : 0;
+        troop.Position = this.flipBoardPosition(
+          troop.Position,
+        );
+      }
+    }
+    return data;
+  }
+  /** 
+   * Fetch and update battle state using ws
+   */
+async fetchAndUpdateBattleState(): Promise<void> {
+  // Connect to matchmaking WebSocket
+  const matchWS = new WebSocket(`${BACKEND_URI}/newgamews`);
+
+  matchWS.onopen = () => {
+    console.log("Connected to matchmaking server...");
+  };
+
+  matchWS.onmessage = (event) => {
+    const msg = JSON.parse(event.data) as { type: string; roomID: string; team: string };
+
+    if (msg.type === "matched") {
+      // Save team info
+      this.model.isBlueTeam = msg.team === "blue";
+
+      // Open the actual battle WebSocket
+      const ws = new WebSocket(`${BACKEND_URI}/ws/${msg.roomID}`);
+
+      ws.onopen = () => {
+        // setup troop spawning callback
+        this.callSpawnTroop = (troop: string, x: number, y: number) => {
+          this.model.setTroopToPlace(null);
+          const position = this.model.isBlueTeam ? { X: x, Y: y } : this.flipBoardPosition({ X: x, Y: y });
+          ws.send(JSON.stringify({
+            team: this.model.isBlueTeam ? "blue" : "red",
+            troopType: troop,
+            x: position.X,
+            y: position.Y
+          }));
+        };
+        this.view.setCallSpawnTroop(this.callSpawnTroop!);
+      };
+
+      ws.onmessage = (event) => {
+        const data: WSResponse = this.marshalWSData(JSON.parse(event.data));
+        this.model.updateTiles(data.troops);
+        this.view.rerenderTroops(this.model.getTiles());
+      };
+
+      // Close matchmaking WS after match
+      matchWS.close();
+    }
+  };
+}
+
+
   /**
    * Start the battle
    */
@@ -39,13 +112,14 @@ export class BattleScreenController extends ScreenController {
     // Reset model state
     this.model.reset();
 
+    this.fetchAndUpdateBattleState();
     // Update view
-    //    this.view.updateScore(this.model.getPoints());
     this.view.updateTimer(BATTLE_DURATION);
     this.view.show();
 
     this.startTimer();
   }
+
 
   /**
    * Start the countdown timer
@@ -76,16 +150,10 @@ export class BattleScreenController extends ScreenController {
   /**
    * Sets the cards the user selected
    */
-  private setCards(cards: string[]) {
+  public setCards(cards: string[]) {
     this.selectedCards = cards;
-    this.view.renderCards(
-      [
-        "SpearmanOne",
-        "SpearmanTwo",
-        "SpearmanThree",
-        "CavalryFour",
-      ] /*this.selectedCards*/,
-      (cardType) => this.handleCardClick(cardType),
+    this.view.renderCards(this.selectedCards, (cardType) =>
+      this.handleCardClick(cardType),
     );
   }
 
@@ -169,9 +237,7 @@ export class BattleScreenController extends ScreenController {
 
     if (this.isCorrect) {
       console.log("correct!");
-      /*
-      this.model.spawnTroop(this.currentCardType, 0, 2, 7);
-      this.view.renderTroop(this.currentCardType);*/
+      this.model.setTroopToPlace(this.currentCardType);
     }
 
     this.isCorrect = null;
@@ -183,6 +249,9 @@ export class BattleScreenController extends ScreenController {
    */
   private endBattle(reason: "leave" | "complete"): void {
     this.stopTimer();
+
+    this.isCorrect = null;
+    this.currentCardType = null;
 
     if (reason === "leave") {
       console.log("Now going to menu screen");
