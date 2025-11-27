@@ -61,8 +61,9 @@ export class PlayerModel {
         headers: {
           "Content-Type": "application/json",
         },
+        // [修改] 发送 username 而不是 userId
         body: JSON.stringify({
-          userId: this.data.id,
+          username: this.data.username,
           pointsChange: pointsChange,
         }),
       });
@@ -98,8 +99,9 @@ export class PlayerModel {
         headers: {
           "Content-Type": "application/json",
         },
+        // [修改] 发送 username 而不是 userId
         body: JSON.stringify({
-          userId: this.data.id,
+          username: this.data.username,
           points: points,
         }),
       });
@@ -129,7 +131,8 @@ export class PlayerModel {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/user/points/${this.data.id}`);
+      // [修改] URL 使用 username
+      const response = await fetch(`${API_BASE_URL}/user/points/${this.data.username}`);
 
       if (!response.ok) {
         const error = await response.json();
@@ -169,4 +172,3 @@ export class PlayerModel {
     this.subscribers.forEach((cb) => cb());
   }
 }
-

@@ -22,10 +22,14 @@ export type Screen =
   | { type: "login" }
   | { type: "menu" }
   | { type: "cards" }
-  | { type: "selection" }
+  | { 
+      type: "results"; 
+      playerCrowns: number; 
+      enemyCrowns: number 
+    } 
   | { type: "battle"; cards: string[] }
   | { type: "minigame" }
-  | { type: "results" }
+  | { type: "selection" }
   | { type: "leaderboard" };
 
 export abstract class ScreenController {
@@ -44,25 +48,3 @@ export interface ScreenSwitcher {
   switchToScreen(screen: Screen): void;
 }
 
-export interface WSResponse {
-  tick: number;
-  troops: Troop[];
-}
-
-export interface Troop {
-  ID: number;
-  Type: string;
-  Health: number;
-  Team: number;
-  Position: Position;
-  Damage: number;
-  Speed: number;
-  Range: number;
-}
-
-export interface Position {
-  X: number;
-  Y: number;
-}
-
-export type Grid = Troop[][][];
