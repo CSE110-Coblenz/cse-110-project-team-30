@@ -39,6 +39,7 @@ fetch("http://localhost:8080/newgame", {
     ws.onmessage = (event) => {
       try {
         const update = JSON.parse(event.data);
+        console.log(update);
         append(`Tick: ${update.tick}`);
         update.troops.forEach(t => {
           append(`Troop ${t.ID} (${t.Type}) - Team: ${t.Team} - Pos: (${t.Position.X}, ${t.Position.Y}) - Health: ${t.Health}`);

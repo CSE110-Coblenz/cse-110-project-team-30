@@ -4,6 +4,7 @@ import { SelectionScreenView } from "./SelectionScreenView.ts";
 
 
 
+
 export class SelectionScreenController extends ScreenController {
     private view: SelectionScreenView;
     private screenSwitcher: ScreenSwitcher;
@@ -12,6 +13,8 @@ export class SelectionScreenController extends ScreenController {
     constructor(screenSwitcher: ScreenSwitcher) {
         super();
         this.screenSwitcher = screenSwitcher;
+        this.resetSelection();
+
 
         // Pass a callback to handle the "Home" button
         this.view = new SelectionScreenView({
@@ -48,18 +51,13 @@ export class SelectionScreenController extends ScreenController {
         console.log("Selected cards:", this.selectedCards); //Test to see if cards are saved
     }
 
-    /** Expose selected cards for other screens to use*/
-    getSelectedCards() {
-        return this.selectedCards;
-    }
-
     /**
      * Handle home button click
      */
     private handleHomeClick(): void {
         // Hide this selection screen
         this.view.hide();
-
+        this.resetSelection();
         // Switch back to menu screen
         this.screenSwitcher.switchToScreen({ type: "menu" });
 
@@ -70,7 +68,12 @@ export class SelectionScreenController extends ScreenController {
         this.view.hide();
 
         // Switch to the battle screen
-        this.screenSwitcher.switchToScreen({ type: "battle" });
+        this.screenSwitcher.switchToScreen({ type: "battle", cards: this.selectedCards});
+        //
+    }
+
+    private resetSelection() {
+        this.selectedCards = [];
     }
 
     /**

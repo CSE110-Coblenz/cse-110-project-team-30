@@ -67,7 +67,7 @@ class App implements ScreenSwitcher {
     this.layer.draw();
 
     // Start with login screen visible
-    this.switchToScreen({ type: "login" });
+    this.switchToScreen({ type: "menu" });
   }
 
   /**
@@ -103,7 +103,13 @@ class App implements ScreenSwitcher {
         break;
 
       case "selection":
-        this.selectionController.show()
+        this.selectionController.show();
+        break;
+
+      case "battle":
+        // Start the battle (which also shows the battle screen)
+        this.battleController.startBattle();
+        this.battleController.setCards(screen.cards);
         break;
 
       case "results":

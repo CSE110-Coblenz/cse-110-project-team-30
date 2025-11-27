@@ -2,15 +2,16 @@ package troops
 
 import (
 	"cse-110-project-team-30/backend/internal/battle/common"
+	"cse-110-project-team-30/backend/internal/util"
 )
 
 type Castle struct {
-	troop *Troop
+	Troop
 }
 
-func NewCastle(id int, team common.Team, pos common.Position) *Castle {
+func NewCastle(id int, team common.Team, pos common.Position) Entity {
 	return &Castle{
-		troop: &Troop{
+		Troop: Troop{
 			ID:       id,
 			Type:     "Castle",
 			Team:     team,
@@ -23,9 +24,9 @@ func NewCastle(id int, team common.Team, pos common.Position) *Castle {
 	}
 }
 
-func NewKingCastle(id int, team common.Team, pos common.Position) *Castle {
+func NewKingCastle(id int, team common.Team, pos common.Position) Entity {
 	return &Castle{
-		troop: &Troop{
+		Troop: Troop{
 			ID:       id,
 			Type:     "KingTower",
 			Team:     team,
@@ -40,31 +41,38 @@ func NewKingCastle(id int, team common.Team, pos common.Position) *Castle {
 
 // CalculateAction finds nearest enemy in range and attacks it
 func (c *Castle) CalculateAction(mv MapView) Action {
-	t := c.troop
-	target, path := mv.FindNearestEnemyBFS(c)
-	if target != nil && len(path) <= t.Range {
-		return Action{
-			NextPosition: t.Position, // castles don’t move
-			AttackTarget: target,
-			Damage:       t.Damage,
-		}
-	}
+	t := c.Troop
 
-	return Action{
+	// Default: do nothing
+	action := Action{
 		NextPosition: t.Position,
 		AttackTarget: nil,
 		Damage:       0,
 	}
+
+	// Find closest enemy relative to the Castle entity
+	enemy, path := mv.FindNearestEnemyBFS(c)
+	if enemy == nil || len(path) == 0 {
+		return action
+	}
+
+	// Castles attack if the target is within range (path distance <= Range)
+	if util.GetDistance(t.Position, enemy.GetPosition()) <= float64(t.Range) {
+		action.AttackTarget = enemy
+		action.Damage = t.Damage
+	}
+
+	return action
 }
 
 func (c *Castle) GetTroop() *Troop {
-	return c.troop
+	return &c.Troop
 }
 
 func (c *Castle) GetPosition() common.Position {
-	return c.troop.Position
+	return c.Troop.Position
 }
 
 func (c *Castle) GetTeam() common.Team {
-	return c.troop.Team
+	return c.Troop.Team
 }
