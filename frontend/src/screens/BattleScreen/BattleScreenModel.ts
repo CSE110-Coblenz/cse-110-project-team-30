@@ -7,6 +7,7 @@ import type { Troop, WSResponse, Grid } from "../../types";
  * Defines the structure of a single troop/card
  */
 interface Troop {
+  type: "Swordsman" | "Archer" | "Spearman" | "Cavalry";
   operation: "Addition" | "Subtraction" | "Multiplication" | "Division";
   hp: number;
   damage: number;
@@ -24,6 +25,8 @@ const troops: Record<string, Troop> = troopsJson as unknown as Record<
  */
 export class BattleScreenModel {
   private currentProblem: MathProblem | null = null;
+  private currentCardType: string | null = null;
+  private currentIsCorrect: boolean | null = null;
   private gameId: string = "";
   public readonly SIZE: number = ARENA_SIZE;
   private tiles!: Grid;
@@ -81,17 +84,28 @@ export class BattleScreenModel {
   }
 
   /**
-   * Get card operation
+   * Get the current card type
    */
-  getCardOperation(cardType: string): string {
-    return troops[cardType].operation;
+  getCurrentCardType(): string {
+    return this.currentCardType;
+  }
+
+  /**
+   * Get the current card object
+   */
+  getCurrentCardObject(): Troop | null {
+    if (!this.currentCardType) return null;
+    return troops[this.currentCardType];
   }
 
   /**
    * Generates each math problem
    */
   generateProblem(cardType: string): MathProblem {
-    console.log(`${troops[cardType].level}`);
+    console.log(
+      `generating problem for level ${troops[cardType].level} ${troops[cardType].operation}`,
+    );
+    this.currentCardType = cardType;
     const problem = generateMathProblem(
       troops[cardType].operation,
       troops[cardType].level,
@@ -113,17 +127,22 @@ export class BattleScreenModel {
   checkAnswer(userAnswer: number, userRemainder?: number): boolean {
     if (!this.currentProblem) return false;
 
-    let isCorrect = false;
     if (this.currentProblem.remainder !== undefined) {
-      isCorrect =
+      this.currentIsCorrect =
         userAnswer === this.currentProblem.answer &&
         userRemainder === this.currentProblem.remainder;
     } else {
-      isCorrect = userAnswer === this.currentProblem.answer;
+      this.currentIsCorrect = userAnswer === this.currentProblem.answer;
     }
-    return isCorrect;
+    return this.currentIsCorrect;
   }
 
+  /**
+   * Get status of current math problem
+   */
+  getCurrentStatus(): MathProblem | null {
+    return this.currentIsCorrect;
+  }
   setTroopToPlace(troopType: string | null): void {
     this.troopToPlace = troopType;
   }
@@ -137,5 +156,7 @@ export class BattleScreenModel {
    */
   reset(): void {
     this.currentProblem = null;
+    this.currentCardType = null;
+    this.currentIsCorrect = null;
   }
 }
