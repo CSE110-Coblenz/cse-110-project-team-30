@@ -27,7 +27,8 @@ export type Screen =
       playerCrowns: number; 
       enemyCrowns: number 
     } 
-  | { type: "battle" }
+  | { type: "battle"; cards: string[] }
+  | { type: "minigame" }
   | { type: "selection" }
   | { type: "leaderboard" };
 
