@@ -27,6 +27,8 @@ export class BattleScreenView implements View {
   private readonly CARD_AREA_HEIGHT: number = STAGE_HEIGHT;
   private callSpawnTroop?: (troop: string, x: number, y: number) => void;
   private model: BattleScreenModel;
+  private playerScore: number = 0;
+  private enemyScore: number = 0;
 
   constructor(
     model: BattleScreenModel,
@@ -988,7 +990,18 @@ export class BattleScreenView implements View {
     if (this.playerCrownText) this.playerCrownText.text(`${playerScore}`);
     if (this.enemyCrownText) this.enemyCrownText.text(`${enemyScore}`);
 
+    this.playerScore = playerScore;
+    this.enemyScore = enemyScore; 
+
     this.battleFieldGroup.getLayer()?.batchDraw();
+  }
+
+  public getPlayerScore(): number {
+    return this.playerScore;
+  }
+
+  public getEnemyScore(): number {
+    return this.enemyScore;
   }
 
   /**

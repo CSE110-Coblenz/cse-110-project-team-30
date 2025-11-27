@@ -285,7 +285,9 @@ export class BattleScreenController extends ScreenController {
       case "complete":
         console.log("Now going to results screen");
         this.screenSwitcher.switchToScreen({
-          type: "results", playerCrowns: 3, enemyCrowns: 2
+          type: "results",
+          playerCrowns: this.view.getPlayerScore(),
+          enemyCrowns: this.view.getEnemyScore()
         });
         break;
     }
