@@ -1,6 +1,7 @@
 import { API_BASE_URL } from "./constants.ts";
 
 export interface PlayerData {
+  token?: string;
   id: string;
   username: string;
   points: number;

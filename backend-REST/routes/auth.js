@@ -1,17 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 const db = require('../db');
 
 // Use singleton pool
 const pool = db.getPool();
 
-/**
- * Helper to hash a password using SHA-256 and return hex digest (64 chars).
- * Note: CHAR(64) in schema expects a hex SHA-256 digest.
- */
+/** Helper to hash passwords using SHA-256 */
 function hashPassword(password) {
     return crypto.createHash('sha256').update(password, 'utf8').digest('hex');
+}
+
+/** Load JWT secret from environment */
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+    throw new Error('JWT_SECRET is not defined in environment variables');
 }
 
 /**
@@ -72,8 +76,17 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
-        // Success — do not return password
+        // Create JWT payload
+        const payload = {
+            id: user.id,
+            username: user.Username,
+        };
+
+        // Sign JWT using secret from environment
+        const token = jwt.sign(payload, JWT_SECRET, { algorithm: 'HS256' });
+
         return res.json({
+            token, // JWT returned to client
             id: user.id,
             username: user.Username,
             careerWins: user.CareerWins,

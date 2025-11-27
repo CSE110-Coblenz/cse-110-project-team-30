@@ -226,7 +226,6 @@ func (b *Battle) removeDeadTroops() {
 			}
 			if t.Type == "KingTower" {
 				if ((-t.ID) % 10) == 2 {
-					println("King tower destroyed for team", t.Team)
 					//destroy all towers for that team
 					for i := range b.TowerStatus[t.Team] {
 						b.TowerStatus[t.Team][i] = false

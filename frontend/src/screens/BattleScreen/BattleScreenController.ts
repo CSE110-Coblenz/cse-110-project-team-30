@@ -49,9 +49,11 @@ export class BattleScreenController extends ScreenController {
     // Implement marshaling logic here
     if (!this.model.isBlueTeam) {
       for (const troop of data.troops) {
-        troop.Team = troop.Team === 1 ? 1 : 0;
         troop.Position = this.flipBoardPosition(troop.Position);
       }
+      let team0Status = data.towerStatus[0];
+      data.towerStatus[0] = data.towerStatus[1]!;
+      data.towerStatus[1] = team0Status!;
     }
     return data;
   }
@@ -109,6 +111,7 @@ export class BattleScreenController extends ScreenController {
           const data: WSResponse = this.marshalWSData(JSON.parse(event.data));
           this.model.updateTiles(data.troops);
           this.view.rerenderTroops(this.model.getTiles());
+          this.view.updateTowerScores(data.towerStatus);
           if (data.ongoing === false) {
             this.endBattle("complete");
           }
