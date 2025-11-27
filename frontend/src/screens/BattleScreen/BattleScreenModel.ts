@@ -7,7 +7,6 @@ import type { Troop, WSResponse, Grid } from "../../types";
  * Defines the structure of a single troop/card
  */
 interface Troop {
-  type: "Swordsman" | "Archer" | "Spearman" | "Cavalry";
   operation: "Addition" | "Subtraction" | "Multiplication" | "Division";
   hp: number;
   damage: number;
