@@ -1153,7 +1153,7 @@ export class BattleScreenView implements View {
   /**
    * Rerender
    */
-  rerenderTroops(grid: Grid): void {
+  rerenderTroops(grid: Grid, towers: Record<string, boolean[]>): void {
     const seenIds = new Set<number>();
 
     for (let y = 0; y < grid.length; y++) {
@@ -1162,7 +1162,7 @@ export class BattleScreenView implements View {
           const troop = grid[y][x][j];
           if (!troop) continue;
 
-          const id = troop.ID; // You MUST have a stable ID from backend
+          const id = troop.ID;
           seenIds.add(id);
           const sameTeam = troop.Team === (this.model.isBlueTeam ? 1 : 0);
 
@@ -1177,6 +1177,7 @@ export class BattleScreenView implements View {
         }
       }
     }
+
     this.troopGroup.getLayer()?.batchDraw();
 
     // Remove troops that disappeared
@@ -1184,11 +1185,10 @@ export class BattleScreenView implements View {
       if (!seenIds.has(id)) {
         node.destroy();
         this.troopNodes.delete(id);
-        this.updateTowerScores()
+        this.updateTowerScores(towers);
       }
     }
   }
-
   /**
    * Show the screen
    */

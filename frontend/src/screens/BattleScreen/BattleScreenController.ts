@@ -123,8 +123,7 @@ export class BattleScreenController extends ScreenController {
         ws.onmessage = (event) => {
           const data: WSResponse = this.marshalWSData(JSON.parse(event.data));
           this.model.updateTiles(data.troops);
-          this.view.rerenderTroops(this.model.getTiles());
-          this.view.updateTowerScores(data.towerStatus);
+          this.view.rerenderTroops(this.model.getTiles(), data.towerStatus);
           if (data.ongoing === false) {
             this.endBattle("complete");
           }
@@ -299,8 +298,9 @@ export class BattleScreenController extends ScreenController {
         console.log("Now going to results screen");
         this.screenSwitcher.switchToScreen({
           type: "results",
-          playerCrowns: this.view.getPlayerScore(),
-          enemyCrowns: this.view.getEnemyScore()
+          playerCrowns: 3,
+          enemyCrowns: 3
+          
         });
         break;
     }
