@@ -24,6 +24,7 @@ export type Screen =
   | { type: "cards" }
   | { type: "selection" }
   | { type: "battle"; cards: string[] }
+  | { type: "minigame" }
   | { type: "results" }
   | { type: "leaderboard" };
 
