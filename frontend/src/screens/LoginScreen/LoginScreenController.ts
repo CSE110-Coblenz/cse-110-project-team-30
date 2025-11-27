@@ -65,10 +65,10 @@ export class LoginScreenController extends ScreenController {
 
       const data = await response.json();
 
+      localStorage.setItem('jwt', data.token);
       if (response.ok) {
         if (endpoint === "login") {
           this.playerModel.setPlayerData({
-            token: data.token,
             id: data.id,
             username: data.username,
             points: data.points ?? 0,

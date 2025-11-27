@@ -65,9 +65,22 @@ export class BattleScreenController extends ScreenController {
     // Connect to matchmaking WebSocket
     const matchWS = new WebSocket(`${BACKEND_URI}/newgamews`);
 
-    matchWS.onopen = () => {
-      console.log("Connected to matchmaking server...");
-    };
+  matchWS.onopen = () => {
+    console.log("Connected to matchmaking server...");
+
+    const token = localStorage.getItem('jwt');
+    if (!token) {
+      console.error("No JWT found!");
+      return;
+    }
+
+    // Send authentication message as first ping
+    matchWS.send(JSON.stringify({
+      type: "auth",  // indicates this is the auth message
+      token: token,  // JWT
+    }));
+  };
+
 
     matchWS.onmessage = (event) => {
       const msg = JSON.parse(event.data) as {
