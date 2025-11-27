@@ -347,6 +347,7 @@ export class SelectionScreenView implements View {
     show(): void {
         this.group.visible(true);
         this.group.getLayer()?.draw();
+        this.updateSelectionBubble([]);
     }
 
   /**
