@@ -290,6 +290,7 @@ export class BattleScreenController extends ScreenController {
   private endBattle(reason: "leave" | "complete"): void {
     this.stopTimer();
     this.view.removeInputs();
+    this.model.clearTiles();
 
     this.isCorrect = null;
     this.currentCardType = null;

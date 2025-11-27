@@ -37,6 +37,11 @@ export class BattleScreenModel {
     );
   }
 
+  clearTiles(): void {
+    this.tiles = Array.from({ length: this.SIZE }, () =>
+      Array.from({ length: this.SIZE }, () => []),
+    );
+  }
   /**
    * Update tiles with new troop data
    */
