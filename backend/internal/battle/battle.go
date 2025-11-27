@@ -210,22 +210,26 @@ func (b *Battle) removeTroopFromBattle(t *troops.Troop) {
 // Step 4: remove dead troops
 
 func (b *Battle) removeDeadTroops() {
-	alive := b.Troops[:0]
+	alive := make([]troops.Entity, 0, len(b.Troops))
 	for _, e := range b.Troops {
 		t := e.GetTroop()
-		if t.Health <= 0 && t.Type == "Castle" {
-			b.TowerStatus[t.Team][(-t.ID)%10-1] = false
-			if (-t.ID)%10 == 2 { // king tower
-				b.EndGame()
-			}
-		}
-		if t.Health > 0 {
-			alive = append(alive, e)
-		} else {
+		if t.Health <= 0 {
 			x, y := int(math.Round(t.Position.X)), int(math.Round(t.Position.Y))
-			b.removeTroopFromTile(t, x, y)
-			b.removeTroopFromBattle(t)
+			if b.Arena.InBounds(common.NewPosition(x, y)) {
+				b.removeTroopFromTile(t, x, y)
+			}
+			if t.Type == "Castle" {
+				idx := ((-t.ID) % 10) - 1
+				if idx >= 0 && idx < len(b.TowerStatus[t.Team]) {
+					b.TowerStatus[t.Team][idx] = false
+				}
+				if ((-t.ID) % 10) == 2 {
+					b.EndGame()
+				}
+			}
+			continue
 		}
+		alive = append(alive, e)
 	}
 	b.Troops = alive
 }
