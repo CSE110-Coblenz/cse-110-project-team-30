@@ -974,13 +974,13 @@ export class BattleScreenView implements View {
     // Each destroyed tower gives 1 point to opposite team
     if (playerTowers) {
       for (const alive of playerTowers) {
-        if (!alive) enemyScore += 1;
+        if (!alive) playerScore += 1;
       }
     }
 
     if (enemyTowers) {
       for (const alive of enemyTowers) {
-        if (!alive) playerScore += 1;
+        if (!alive) enemyScore += 1;
       }
     }
 
@@ -1167,6 +1167,7 @@ export class BattleScreenView implements View {
       if (!seenIds.has(id)) {
         node.destroy();
         this.troopNodes.delete(id);
+        this.updateTowerScores()
       }
     }
   }
