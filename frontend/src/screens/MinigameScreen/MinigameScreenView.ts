@@ -8,7 +8,7 @@ import type { MinigameScreenModel } from "./MinigameScreenModel.ts";
  */
 export class MinigameScreenView implements View {
   private group: Konva.Group;
-  private answerInput: HTMLInputElement;
+  private answerInput: HTMLInputElement | null = null;
   private label: Konva.Text;
   private correctProblems: Konva.Text;
   private timerText: Konva.Text;

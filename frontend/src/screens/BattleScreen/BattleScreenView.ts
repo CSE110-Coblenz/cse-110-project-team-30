@@ -18,7 +18,6 @@ export class BattleScreenView implements View {
   private previewNode: Konva.Group | null = null;
   private previewTroopNode: Konva.Group | null = null;
   private timerText: Konva.Text;
-  private crownText: Konva.Text;
   private readonly BATTLE_AREA_WIDTH: number = (STAGE_WIDTH / 3) * 2;
   private readonly BATTLE_AREA_HEIGHT: number = STAGE_HEIGHT;
   private readonly CARD_AREA_WIDTH: number =
