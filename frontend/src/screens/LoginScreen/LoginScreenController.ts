@@ -23,6 +23,7 @@ if (token) {
   fetch(`${API_BASE_URL}/auth/infoWithToken`, {
     headers: {
       'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
     },
   })
     .then(async (res) => {
@@ -43,7 +44,7 @@ if (token) {
     })
     .catch(() => {
       // token invalid — let them see login screen
-      localStorage.removeItem('jwt');
+      //localStorage.removeItem('jwt');
     });
 
   return; // prevent rendering login screen while fetching
