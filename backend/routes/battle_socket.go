@@ -17,12 +17,6 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { return true },
 }
 
-// First message struct for auth
-type AuthMessage struct {
-	Type  string `json:"type"`  // should be "auth"
-	Token string `json:"token"` // JWT
-}
-
 func RegisterBattleSocket(mux *http.ServeMux, bm *socket.BattleManager) {
 	mux.HandleFunc("/ws/", func(w http.ResponseWriter, r *http.Request) {
 		roomID := strings.TrimPrefix(r.URL.Path, "/ws/")

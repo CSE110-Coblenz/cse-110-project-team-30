@@ -100,8 +100,14 @@ export class BattleScreenController extends ScreenController {
 
         // Open the actual battle WebSocket
         const ws = new WebSocket(`${BACKEND_URI}/ws/${msg.roomID}`);
-
+        const token = localStorage.getItem('jwt');
+        if (!token) {
+          console.error("No JWT found!");
+          ws.close();
+          return;
+        }
         ws.onopen = () => {
+          ws.send(JSON.stringify({ type: "auth", token }));
           // setup troop spawning callback
           this.callSpawnTroop = (troop: string, x: number, y: number) => {
             this.model.setTroopToPlace(null);

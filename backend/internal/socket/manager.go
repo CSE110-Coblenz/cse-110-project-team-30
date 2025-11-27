@@ -6,8 +6,14 @@ import (
 	"cse-110-project-team-30/backend/internal/battle"
 
 	"github.com/google/uuid"
+	"github.com/gorilla/websocket"
 )
 
+type PlayerConn struct {
+	Conn     *websocket.Conn
+	UserID   string
+	Username string
+}
 type BattleManager struct {
 	mu    sync.Mutex
 	rooms map[string]*Room

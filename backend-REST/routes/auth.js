@@ -50,6 +50,50 @@ router.post('/signup', async (req, res) => {
     }
 });
 
+router.get('/infoWithToken', async (req, res) => {
+    const authHeader = req.headers.authorization; // e.g. "Bearer <token>"
+    if (!authHeader) {
+        return res.status(400).json({ error: 'Authorization header is required' });
+    }
+
+    const parts = authHeader.split(' ');
+    if (parts.length !== 2 || parts[0] !== 'Bearer') {
+        return res.status(400).json({ error: 'Invalid Authorization header format' });
+    }
+
+    const token = parts[1];
+    if (!token) {
+        return res.status(400).json({ error: 'Token is required' });
+    }
+
+    try {
+        const payload = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
+        const userId = payload.id;
+
+        const [rows] = await pool.execute(
+            'SELECT id, Username, CareerWins, CareerLosses, Points FROM Users WHERE id = ?',
+            [userId]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const user = rows[0];
+        return res.json({
+            id: user.id,
+            username: user.Username,
+            careerWins: user.CareerWins,
+            careerLosses: user.CareerLosses,
+            points: user.Points,
+        });
+    } catch (err) {
+        console.error('Info with token error:', err);
+        return res.status(401).json({ error: 'Invalid or expired token' });
+    }
+});
+
+
 /**
  * POST /api/auth/login
  * Body: { username, password }

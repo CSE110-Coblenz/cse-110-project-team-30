@@ -17,6 +17,38 @@ export class LoginScreenController extends ScreenController {
     this.screenSwitcher = screenSwitcher;
     this.playerModel = PlayerModel.getInstance();
     this.view = new LoginScreenView((id: string) => this.handleButtonClick(id));
+const token = localStorage.getItem('jwt');
+if (token) {
+  // call backend to verify token and get user info
+  fetch(`${API_BASE_URL}/auth/infoWithToken`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  })
+    .then(async (res) => {
+      if (!res.ok) throw new Error('Token invalid or expired');
+      const data = await res.json();
+      
+      // populate PlayerModel
+      this.playerModel.setPlayerData({
+        id: data.id,
+        username: data.username,
+        points: data.points ?? 0,
+        careerWins: data.careerWins ?? 0,
+        careerLosses: data.careerLosses ?? 0,
+      });
+
+      // switch to main menu
+      this.screenSwitcher.switchToScreen({ type: "menu" });
+    })
+    .catch(() => {
+      // token invalid — let them see login screen
+      localStorage.removeItem('jwt');
+    });
+
+  return; // prevent rendering login screen while fetching
+}
+
   }
 
   /**
