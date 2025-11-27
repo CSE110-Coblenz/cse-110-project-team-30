@@ -2,9 +2,7 @@ import { ScreenController } from "../../types.ts";
 import type { ScreenSwitcher, WSResponse } from "../../types.ts";
 import { BattleScreenModel } from "./BattleScreenModel.ts";
 import { BattleScreenView } from "./BattleScreenView.ts";
-import { BATTLE_DURATION } from "../../constants.ts";
-
-const BACKEND_URI = "http://localhost:8080";
+import { BACKEND_URI, BATTLE_DURATION } from "../../constants.ts";
 
 /**
  * BattleScreenController - Coordinates battle logic between Model and View
