@@ -493,7 +493,7 @@ export class MinigameScreenView implements View {
     // Button handlers
     submitBtn.on("click", () => {
       const answer = parseFloat(this.answerInput.value.trim());
-      this.answerInput.remove();
+      this.removeInputs();
       onSubmitClick(answer);
       submitBtn.visible(false);
       okayBtn.visible(true);
@@ -503,6 +503,13 @@ export class MinigameScreenView implements View {
       mathPopup.destroy();
       onOkayClick("problem");
     });
+  }
+
+  public removeInputs(): void {
+    if (this.answerInput) {
+      this.answerInput.remove();
+      this.answerInput = null;
+    }
   }
 
   /**
