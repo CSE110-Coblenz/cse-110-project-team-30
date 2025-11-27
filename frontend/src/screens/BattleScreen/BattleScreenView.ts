@@ -18,6 +18,8 @@ export class BattleScreenView implements View {
   private previewNode: Konva.Group | null = null;
   private previewTroopNode: Konva.Group | null = null;
   private timerText: Konva.Text;
+  private playerCrownText: Konva.Text;
+  private enemyCrownText: Konva.Text;
   private readonly BATTLE_AREA_WIDTH: number = (STAGE_WIDTH / 3) * 2;
   private readonly BATTLE_AREA_HEIGHT: number = STAGE_HEIGHT;
   private readonly CARD_AREA_WIDTH: number =
@@ -49,6 +51,22 @@ export class BattleScreenView implements View {
     });
 
     this.addBattleField();
+    const paddingX = 20;
+    const paddingY = 80;
+    this.addCrown(
+      -paddingX, 
+      this.BATTLE_AREA_HEIGHT / 2 - paddingY,
+      "/results_images/red-crown.png",
+      "0",
+      false); // enemy
+
+    this.addCrown(
+      -paddingX,
+      this.BATTLE_AREA_HEIGHT / 2 + paddingY,
+      "/results_images/teal-crown.png",
+      "0",
+      true); // player
+      
     this.addTimerDisplay();
     this.group.add(this.battleFieldGroup);
 
@@ -304,6 +322,47 @@ export class BattleScreenView implements View {
       tileWidth: tileWidth,
       tileHeight: tileHeight,
     });
+  }
+
+  // Score display as crowns
+  private addCrown(x, y, imageURL, labelText, isPlayer: boolean) {
+    const crownGroup = new Konva.Group();
+    const crownWidth = 75;
+    const crownHeight = 50;
+    const crownImage = new Image();
+    crownImage.src = imageURL;
+    crownImage.onload = () => {
+      const crown = new Konva.Image({
+        x,
+        y,
+        width: crownWidth,
+        height: crownHeight,
+        image: crownImage,
+      });
+      crown.offsetX(crownWidth / 2);
+      crown.offsetY(crownHeight / 2);
+      crownGroup.add(crown);
+
+      const crownText = new Konva.Text({
+        x: x,
+        y: y + crownHeight / 2 + 5,
+        width: crownWidth,
+        text: labelText,
+        fontSize: 20,
+        fontFamily: "Arial",
+        fill: "black",
+        align: "center",
+      });
+      crownText.offsetX(crownText.width() / 2);
+      crownText.offsetY(crownText.height() / 2);
+      crownGroup.add(crownText);
+
+      this.battleFieldGroup.add(crownGroup);
+
+      // Save references
+      if (isPlayer) this.playerCrownText = crownText;
+      else this.enemyCrownText = crownText;
+    };
   }
 
   // Timer display
@@ -902,6 +961,34 @@ export class BattleScreenView implements View {
         break;
     }
     this.group.getLayer()?.draw();
+  }
+
+  public updateTowerScores(towers: Record<string, boolean[]>): void {
+    let playerScore = 0;
+    let enemyScore = 0;
+
+    // towers["0"] = player towers, towers["1"] = enemy towers
+    const playerTowers = towers["0"];
+    const enemyTowers = towers["1"];
+
+    // Each destroyed tower gives 1 point to opposite team
+    if (playerTowers) {
+      for (const alive of playerTowers) {
+        if (!alive) enemyScore += 1;
+      }
+    }
+
+    if (enemyTowers) {
+      for (const alive of enemyTowers) {
+        if (!alive) playerScore += 1;
+      }
+    }
+
+    // Update Konva text nodes
+    if (this.playerCrownText) this.playerCrownText.text(`${playerScore}`);
+    if (this.enemyCrownText) this.enemyCrownText.text(`${enemyScore}`);
+
+    this.battleFieldGroup.getLayer()?.batchDraw();
   }
 
   /**
