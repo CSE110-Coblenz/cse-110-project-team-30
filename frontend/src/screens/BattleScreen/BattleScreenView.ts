@@ -966,12 +966,16 @@ export class BattleScreenView implements View {
   }
 
   public updateTowerScores(towers: Record<string, boolean[]>): void {
-    let playerScore = 0;
-    let enemyScore = 0;
-
+    if (!towers || !towers["0"] || !towers["1"]) {
+      return; // Towers not ready yet — skip rendering
+    }
+    
     // towers["0"] = player towers, towers["1"] = enemy towers
     const playerTowers = towers["0"];
     const enemyTowers = towers["1"];
+
+    let playerScore = 0;
+    let enemyScore = 0;
 
     // Each destroyed tower gives 1 point to opposite team
     if (playerTowers) {
