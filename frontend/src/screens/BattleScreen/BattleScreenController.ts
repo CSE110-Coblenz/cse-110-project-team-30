@@ -1,5 +1,5 @@
 import { ScreenController } from "../../types.ts";
-import type { ScreenSwitcher, WSResponse } from "../../types.ts";
+import type { ScreenSwitcher, WSResponse, Position } from "../../types.ts";
 import { BattleScreenModel } from "./BattleScreenModel.ts";
 import { BattleScreenView } from "./BattleScreenView.ts";
 import { BACKEND_URI, BATTLE_DURATION } from "../../constants.ts";
@@ -109,6 +109,9 @@ export class BattleScreenController extends ScreenController {
           const data: WSResponse = this.marshalWSData(JSON.parse(event.data));
           this.model.updateTiles(data.troops);
           this.view.rerenderTroops(this.model.getTiles());
+          if (data.ongoing === false) {
+            this.endBattle("complete");
+          }
         };
 
         // Close matchmaking WS after match

@@ -131,7 +131,7 @@ func (b *Battle) EndGame() {
 	}
 	b.Enabled = false
 	go func() {
-		time.Sleep(1000 * time.Millisecond)
+		time.Sleep(5000 * time.Millisecond)
 		if b.OnDelete != nil {
 			b.OnDelete()
 		}
@@ -218,12 +218,19 @@ func (b *Battle) removeDeadTroops() {
 			if b.Arena.InBounds(common.NewPosition(x, y)) {
 				b.removeTroopFromTile(t, x, y)
 			}
-			if t.Type == "Castle" {
+			if t.Type == "Castle" || t.Type == "KingTower" {
 				idx := ((-t.ID) % 10) - 1
 				if idx >= 0 && idx < len(b.TowerStatus[t.Team]) {
 					b.TowerStatus[t.Team][idx] = false
 				}
+			}
+			if t.Type == "KingTower" {
 				if ((-t.ID) % 10) == 2 {
+					println("King tower destroyed for team", t.Team)
+					//destroy all towers for that team
+					for i := range b.TowerStatus[t.Team] {
+						b.TowerStatus[t.Team][i] = false
+					}
 					b.EndGame()
 				}
 			}
