@@ -1,3 +1,47 @@
 name: CI
 on: [push, pull_request]
 jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout code
+      - uses: actions/checkout@v4
+
+      ###############################################
+      # FRONTEND: Node + TypeScript
+      ###############################################
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install frontend deps
+        run: npm ci
+
+      - name: TypeScript type check
+        run: npx tsc --noEmit
+
+      - name: Frontend tests
+        run: npm test --if-present
+
+      # Optional: build frontend if you have a build step
+      - name: Build frontend
+        run: npm run build --if-present
+
+      ###############################################
+      # BACKEND: Go
+      ###############################################
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.25.4"
+
+      - name: Go build
+        run: go build ./...
+
+      - name: Go vet
+        run: go vet ./...
+
+      - name: Go test
+        run: go test ./...
