@@ -1,10 +1,8 @@
 import { ScreenController } from "../../types.ts";
-import type { ScreenSwitcher, WSResponse } from "../../types.ts";
+import type { ScreenSwitcher, WSResponse, Position } from "../../types.ts";
 import { BattleScreenModel } from "./BattleScreenModel.ts";
 import { BattleScreenView } from "./BattleScreenView.ts";
-import { BATTLE_DURATION } from "../../constants.ts";
-
-const BACKEND_URI = "http://localhost:8080";
+import { BACKEND_URI, BATTLE_DURATION } from "../../constants.ts";
 
 /**
  * BattleScreenController - Coordinates battle logic between Model and View
@@ -51,9 +49,11 @@ export class BattleScreenController extends ScreenController {
     // Implement marshaling logic here
     if (!this.model.isBlueTeam) {
       for (const troop of data.troops) {
-        troop.Team = troop.Team === 1 ? 1 : 0;
         troop.Position = this.flipBoardPosition(troop.Position);
       }
+      let team0Status = data.towerStatus[0];
+      data.towerStatus[0] = data.towerStatus[1]!;
+      data.towerStatus[1] = team0Status!;
     }
     return data;
   }
@@ -65,9 +65,22 @@ export class BattleScreenController extends ScreenController {
     // Connect to matchmaking WebSocket
     const matchWS = new WebSocket(`${BACKEND_URI}/newgamews`);
 
-    matchWS.onopen = () => {
-      console.log("Connected to matchmaking server...");
-    };
+  matchWS.onopen = () => {
+    console.log("Connected to matchmaking server...");
+
+    const token = localStorage.getItem('jwt');
+    if (!token) {
+      console.error("No JWT found!");
+      return;
+    }
+
+    // Send authentication message as first ping
+    matchWS.send(JSON.stringify({
+      type: "auth",  // indicates this is the auth message
+      token: token,  // JWT
+    }));
+  };
+
 
     matchWS.onmessage = (event) => {
       const msg = JSON.parse(event.data) as {
@@ -87,8 +100,14 @@ export class BattleScreenController extends ScreenController {
 
         // Open the actual battle WebSocket
         const ws = new WebSocket(`${BACKEND_URI}/ws/${msg.roomID}`);
-
+        const token = localStorage.getItem('jwt');
+        if (!token) {
+          console.error("No JWT found!");
+          ws.close();
+          return;
+        }
         ws.onopen = () => {
+          ws.send(JSON.stringify({ type: "auth", token }));
           // setup troop spawning callback
           this.callSpawnTroop = (troop: string, x: number, y: number) => {
             this.model.setTroopToPlace(null);
@@ -110,7 +129,10 @@ export class BattleScreenController extends ScreenController {
         ws.onmessage = (event) => {
           const data: WSResponse = this.marshalWSData(JSON.parse(event.data));
           this.model.updateTiles(data.troops);
-          this.view.rerenderTroops(this.model.getTiles());
+          this.view.rerenderTroops(this.model.getTiles(), data.towerStatus);
+          if (data.ongoing === false) {
+            this.endBattle("complete");
+          }
         };
 
         // Close matchmaking WS after match
@@ -268,6 +290,7 @@ export class BattleScreenController extends ScreenController {
   private endBattle(reason: "leave" | "complete"): void {
     this.stopTimer();
     this.view.removeInputs();
+    this.model.clearTiles();
 
     this.isCorrect = null;
     this.currentCardType = null;
@@ -281,7 +304,10 @@ export class BattleScreenController extends ScreenController {
       case "complete":
         console.log("Now going to results screen");
         this.screenSwitcher.switchToScreen({
-          type: "results", playerCrowns: 3, enemyCrowns: 2
+          type: "results",
+          playerCrowns: this.view.getPlayerScore(),
+          enemyCrowns: this.view.getEnemyScore()
+          
         });
         break;
     }

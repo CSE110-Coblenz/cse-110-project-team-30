@@ -123,6 +123,7 @@ class App implements ScreenSwitcher {
         break;
 
       case "results":
+        this.resultsController.showResults(screen.playerCrowns, screen.enemyCrowns);
         this.resultsController.show();
         break;
 

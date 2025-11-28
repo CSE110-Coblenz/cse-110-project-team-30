@@ -131,7 +131,7 @@ func (b *Battle) EndGame() {
 	}
 	b.Enabled = false
 	go func() {
-		time.Sleep(1000 * time.Millisecond)
+		time.Sleep(5000 * time.Millisecond)
 		if b.OnDelete != nil {
 			b.OnDelete()
 		}
@@ -210,22 +210,32 @@ func (b *Battle) removeTroopFromBattle(t *troops.Troop) {
 // Step 4: remove dead troops
 
 func (b *Battle) removeDeadTroops() {
-	alive := b.Troops[:0]
+	alive := make([]troops.Entity, 0, len(b.Troops))
 	for _, e := range b.Troops {
 		t := e.GetTroop()
-		if t.Health <= 0 && t.Type == "Castle" {
-			b.TowerStatus[t.Team][(-t.ID)%10-1] = false
-			if (-t.ID)%10 == 2 { // king tower
-				b.EndGame()
-			}
-		}
-		if t.Health > 0 {
-			alive = append(alive, e)
-		} else {
+		if t.Health <= 0 {
 			x, y := int(math.Round(t.Position.X)), int(math.Round(t.Position.Y))
-			b.removeTroopFromTile(t, x, y)
-			b.removeTroopFromBattle(t)
+			if b.Arena.InBounds(common.NewPosition(x, y)) {
+				b.removeTroopFromTile(t, x, y)
+			}
+			if t.Type == "Castle" || t.Type == "KingTower" {
+				idx := ((-t.ID) % 10) - 1
+				if idx >= 0 && idx < len(b.TowerStatus[t.Team]) {
+					b.TowerStatus[t.Team][idx] = false
+				}
+			}
+			if t.Type == "KingTower" {
+				if ((-t.ID) % 10) == 2 {
+					//destroy all towers for that team
+					for i := range b.TowerStatus[t.Team] {
+						b.TowerStatus[t.Team][i] = false
+					}
+					b.EndGame()
+				}
+			}
+			continue
 		}
+		alive = append(alive, e)
 	}
 	b.Troops = alive
 }

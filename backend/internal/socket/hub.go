@@ -45,11 +45,15 @@ func (h *Hub) Run() {
 
 			// Step 2: serialize arena
 			payload := struct {
-				Tick   int             `json:"tick"`
-				Troops []troops.Entity `json:"troops"`
+				Tick        int                    `json:"tick"`
+				Troops      []troops.Entity        `json:"troops"`
+				Ongoing     bool                   `json:"ongoing"`
+				TowerStatus map[common.Team][]bool `json:"towerStatus"`
 			}{
-				Tick:   h.battle.TickCount, // or whatever your tick variable is named
-				Troops: h.battle.Troops,
+				Tick:        h.battle.TickCount, // or whatever your tick variable is named
+				Troops:      h.battle.Troops,
+				Ongoing:     h.battle.Enabled,
+				TowerStatus: h.battle.TowerStatus,
 			}
 
 			state, err := json.Marshal(payload)

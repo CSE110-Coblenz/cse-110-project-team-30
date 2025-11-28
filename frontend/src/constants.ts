@@ -1,5 +1,6 @@
 // API Configuration
-export const API_BASE_URL = "http://localhost:3000/api";
+export const API_BASE_URL = "https://e5eedefef5c4.ngrok-free.app/api";
+export const BACKEND_URI = "https://87493a5cf912.ngrok-free.app";
 
 // Stage dimensions
 export const STAGE_WIDTH = window.innerWidth;
