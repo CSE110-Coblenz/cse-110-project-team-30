@@ -17,17 +17,16 @@ jobs:
           node-version: "20"
 
       - name: Install frontend deps
+        working-directory: ./frontend
         run: npm ci
 
       - name: TypeScript type check
+        working-directory: ./frontend
         run: npx tsc --noEmit
 
       - name: Frontend tests
+        working-directory: ./frontend
         run: npm test --if-present
-
-      # Optional: build frontend if you have a build step
-      - name: Build frontend
-        run: npm run build --if-present
 
       ###############################################
       # BACKEND: Go
@@ -38,10 +37,13 @@ jobs:
           go-version: "1.25.4"
 
       - name: Go build
+        working-directory: ./backend
         run: go build ./...
 
       - name: Go vet
+        working-directory: ./backend
         run: go vet ./...
 
       - name: Go test
+        working-directory: ./backend
         run: go test ./...
