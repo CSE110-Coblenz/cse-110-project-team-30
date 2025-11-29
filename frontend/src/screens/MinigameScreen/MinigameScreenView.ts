@@ -1,7 +1,6 @@
 import Konva from "konva";
 import type { View } from "../../types.ts";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
-import type { MinigameScreenModel } from "./MinigameScreenModel.ts";
 
 /**
  * MinigameScreenView - Renders the minigame UI using Konva
@@ -17,7 +16,6 @@ export class MinigameScreenView implements View {
     onHomeClick: () => void,
     onContinueClick: () => void,
     onLeaveClick: () => void,
-    onCardClick: (cardType: string) => void,
     onSubmitClick: (answer: number, remainder?: number) => void,
     onOkayClick: (location: string) => void,
   ) {
@@ -150,10 +148,7 @@ export class MinigameScreenView implements View {
   }
 
   // Home pop-up for confirmation
-  private showConfirmPopup(
-    onLeaveClick: () => void,
-    onContinueClick: () => void,
-  ) {
+  showConfirmPopup(onLeaveClick: () => void, onContinueClick: () => void) {
     // prevent duplicate popups
     if (this.group.findOne(".confirm-popup")) return;
 
@@ -316,7 +311,7 @@ export class MinigameScreenView implements View {
   }
 
   // Popup for math problem
-  private showMathPopup(
+  showMathPopup(
     problemText: string,
     onSubmitClick: (answer: number) => void,
     onOkayClick: (location: string) => void,
@@ -505,7 +500,7 @@ export class MinigameScreenView implements View {
     });
   }
 
-  public removeInputs(): void {
+  removeInputs(): void {
     if (this.answerInput) {
       this.answerInput.remove();
       this.answerInput = null;
@@ -516,7 +511,7 @@ export class MinigameScreenView implements View {
    * Shows the user the current problem they're at
    * and the number of problems they got correct
    */
-  private showStatusPopup(
+  showStatusPopup(
     problemNumber: number,
     correctAnswers: number,
     totalProblems: number,
@@ -607,7 +602,7 @@ export class MinigameScreenView implements View {
     this.group.getLayer()?.draw();
   }
 
-  private showResultsPopup(
+  showResultsPopup(
     outcome: string = "win" | "lose",
     onOkayClick: (location: string) => void,
     totalProblems: number,
