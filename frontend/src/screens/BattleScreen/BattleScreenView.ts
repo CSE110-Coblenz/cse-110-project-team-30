@@ -18,7 +18,8 @@ export class BattleScreenView implements View {
   private previewNode: Konva.Group | null = null;
   private previewTroopNode: Konva.Group | null = null;
   private timerText: Konva.Text;
-  private crownText: Konva.Text;
+  private playerCrownText: Konva.Text;
+  private enemyCrownText: Konva.Text;
   private readonly BATTLE_AREA_WIDTH: number = (STAGE_WIDTH / 3) * 2;
   private readonly BATTLE_AREA_HEIGHT: number = STAGE_HEIGHT;
   private readonly CARD_AREA_WIDTH: number =
@@ -26,6 +27,8 @@ export class BattleScreenView implements View {
   private readonly CARD_AREA_HEIGHT: number = STAGE_HEIGHT;
   private callSpawnTroop?: (troop: string, x: number, y: number) => void;
   private model: BattleScreenModel;
+  private playerScore: number = 0;
+  private enemyScore: number = 0;
 
   constructor(
     model: BattleScreenModel,
@@ -50,6 +53,22 @@ export class BattleScreenView implements View {
     });
 
     this.addBattleField();
+    const paddingX = 20;
+    const paddingY = 80;
+    this.addCrown(
+      -paddingX, 
+      this.BATTLE_AREA_HEIGHT / 2 - paddingY,
+      "/results_images/red-crown.png",
+      "0",
+      false); // enemy
+
+    this.addCrown(
+      -paddingX,
+      this.BATTLE_AREA_HEIGHT / 2 + paddingY,
+      "/results_images/teal-crown.png",
+      "0",
+      true); // player
+      
     this.addTimerDisplay();
     this.group.add(this.battleFieldGroup);
 
@@ -305,6 +324,47 @@ export class BattleScreenView implements View {
       tileWidth: tileWidth,
       tileHeight: tileHeight,
     });
+  }
+
+  // Score display as crowns
+  private addCrown(x, y, imageURL, labelText, isPlayer: boolean) {
+    const crownGroup = new Konva.Group();
+    const crownWidth = 75;
+    const crownHeight = 50;
+    const crownImage = new Image();
+    crownImage.src = imageURL;
+    crownImage.onload = () => {
+      const crown = new Konva.Image({
+        x,
+        y,
+        width: crownWidth,
+        height: crownHeight,
+        image: crownImage,
+      });
+      crown.offsetX(crownWidth / 2);
+      crown.offsetY(crownHeight / 2);
+      crownGroup.add(crown);
+
+      const crownText = new Konva.Text({
+        x: x,
+        y: y + crownHeight / 2 + 5,
+        width: crownWidth,
+        text: labelText,
+        fontSize: 20,
+        fontFamily: "Arial",
+        fill: "black",
+        align: "center",
+      });
+      crownText.offsetX(crownText.width() / 2);
+      crownText.offsetY(crownText.height() / 2);
+      crownGroup.add(crownText);
+
+      this.battleFieldGroup.add(crownGroup);
+
+      // Save references
+      if (isPlayer) this.playerCrownText = crownText;
+      else this.enemyCrownText = crownText;
+    };
   }
 
   // Timer display
@@ -905,6 +965,49 @@ export class BattleScreenView implements View {
     this.group.getLayer()?.draw();
   }
 
+  public updateTowerScores(towers: Record<string, boolean[]>): void {
+    if (!towers || !towers["0"] || !towers["1"]) {
+      return; // Towers not ready yet — skip rendering
+    }
+    
+    // towers["0"] = player towers, towers["1"] = enemy towers
+    const playerTowers = towers["0"];
+    const enemyTowers = towers["1"];
+
+    let playerScore = 0;
+    let enemyScore = 0;
+
+    // Each destroyed tower gives 1 point to opposite team
+    if (playerTowers) {
+      for (const alive of playerTowers) {
+        if (!alive) playerScore += 1;
+      }
+    }
+
+    if (enemyTowers) {
+      for (const alive of enemyTowers) {
+        if (!alive) enemyScore += 1;
+      }
+    }
+
+    // Update Konva text nodes
+    if (this.playerCrownText) this.playerCrownText.text(`${playerScore}`);
+    if (this.enemyCrownText) this.enemyCrownText.text(`${enemyScore}`);
+
+    this.playerScore = playerScore;
+    this.enemyScore = enemyScore; 
+
+    this.battleFieldGroup.getLayer()?.batchDraw();
+  }
+
+  public getPlayerScore(): number {
+    return this.playerScore;
+  }
+
+  public getEnemyScore(): number {
+    return this.enemyScore;
+  }
+
   /**
    * Update timer display
    */
@@ -1050,7 +1153,7 @@ export class BattleScreenView implements View {
   /**
    * Rerender
    */
-  rerenderTroops(grid: Grid): void {
+  rerenderTroops(grid: Grid, towers: Record<string, boolean[]>): void {
     const seenIds = new Set<number>();
 
     for (let y = 0; y < grid.length; y++) {
@@ -1059,7 +1162,7 @@ export class BattleScreenView implements View {
           const troop = grid[y][x][j];
           if (!troop) continue;
 
-          const id = troop.ID; // You MUST have a stable ID from backend
+          const id = troop.ID;
           seenIds.add(id);
           const sameTeam = troop.Team === (this.model.isBlueTeam ? 1 : 0);
 
@@ -1074,6 +1177,7 @@ export class BattleScreenView implements View {
         }
       }
     }
+
     this.troopGroup.getLayer()?.batchDraw();
 
     // Remove troops that disappeared
@@ -1081,10 +1185,10 @@ export class BattleScreenView implements View {
       if (!seenIds.has(id)) {
         node.destroy();
         this.troopNodes.delete(id);
+        this.updateTowerScores(towers);
       }
     }
   }
-
   /**
    * Show the screen
    */

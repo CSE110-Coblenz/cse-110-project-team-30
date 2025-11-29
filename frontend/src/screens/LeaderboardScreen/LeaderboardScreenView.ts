@@ -95,7 +95,15 @@ export class LeaderboardScreenView implements View {
 
   private async loadLeaderboard(): Promise<void> {
     try {
-      const response = await fetch(`${API_BASE_URL}/leaderboard`);
+      const token = localStorage.getItem('jwt');
+      if (!token) {
+        throw new Error("User not logged in");
+      }
+      const response = await fetch(`${API_BASE_URL}/leaderboard`, {
+        headers: {
+          "Authorization": `Bearer ${token!}`,
+        },
+      });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

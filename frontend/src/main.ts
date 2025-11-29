@@ -5,6 +5,7 @@ import { MenuScreenController } from "./screens/MenuScreen/MenuScreenController.
 import { CardsScreenController } from "./screens/CardsScreen/CardsScreenController.ts";
 import { BattleScreenController } from "./screens/BattleScreen/BattleScreenController.ts";
 import { ResultsScreenController } from "./screens/ResultsScreen/ResultsScreenController.ts";
+import { MinigameScreenController } from "./screens/MinigameScreen/MinigameScreenController.ts";
 import { SelectionScreenController } from "./screens/SelectionScreen/SelectionScreenController.ts";
 import { LeaderboardScreenController } from "./screens/LeaderboardScreen/LeaderboardScreenController.ts";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "./constants.ts";
@@ -28,6 +29,7 @@ class App implements ScreenSwitcher {
   private cardsController: CardsScreenController;
   private battleController: BattleScreenController;
   private resultsController: ResultsScreenController;
+  private minigameController: MinigameScreenController;
   private selectionController: SelectionScreenController;
   private leaderboardController: LeaderboardScreenController;
 
@@ -50,6 +52,7 @@ class App implements ScreenSwitcher {
     this.cardsController = new CardsScreenController(this);
     this.battleController = new BattleScreenController(this);
     this.resultsController = new ResultsScreenController(this);
+    this.minigameController = new MinigameScreenController(this);
     this.selectionController = new SelectionScreenController(this);
     this.leaderboardController = new LeaderboardScreenController(this);
 
@@ -60,6 +63,7 @@ class App implements ScreenSwitcher {
     this.layer.add(this.cardsController.getView().getGroup());
     this.layer.add(this.battleController.getView().getGroup());
     this.layer.add(this.resultsController.getView().getGroup());
+    this.layer.add(this.minigameController.getView().getGroup());
     this.layer.add(this.selectionController.getView().getGroup());
     this.layer.add(this.leaderboardController.getView().getGroup());
 
@@ -67,7 +71,7 @@ class App implements ScreenSwitcher {
     this.layer.draw();
 
     // Start with login screen visible
-    this.switchToScreen({ type: "menu" });
+    this.switchToScreen({ type: "login" });
   }
 
   /**
@@ -86,6 +90,7 @@ class App implements ScreenSwitcher {
     this.cardsController.hide();
     this.battleController.hide();
     this.resultsController.hide();
+    this.minigameController.hide();
     this.selectionController.hide();
     this.leaderboardController.hide();
 
@@ -106,6 +111,11 @@ class App implements ScreenSwitcher {
         this.selectionController.show();
         break;
 
+      case "minigame":
+        this.minigameController.startMinigame();
+        this.minigameController.askProblem();
+        break;
+
       case "battle":
         // Start the battle (which also shows the battle screen)
         this.battleController.startBattle();
@@ -113,6 +123,7 @@ class App implements ScreenSwitcher {
         break;
 
       case "results":
+        this.resultsController.showResults(screen.playerCrowns, screen.enemyCrowns);
         this.resultsController.show();
         break;
 

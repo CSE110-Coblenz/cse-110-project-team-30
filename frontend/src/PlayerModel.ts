@@ -1,6 +1,7 @@
 import { API_BASE_URL } from "./constants.ts";
 
 export interface PlayerData {
+  token?: string;
   id: string;
   username: string;
   points: number;
@@ -54,15 +55,17 @@ export class PlayerModel {
     if (!this.data) {
       throw new Error("User not logged in");
     }
-
+    const token = localStorage.getItem('jwt');
     try {
       const response = await fetch(`${API_BASE_URL}/user/points/update`, {
         method: "POST",
         headers: {
+          "Authorization": `Bearer ${token!}`,
           "Content-Type": "application/json",
         },
+        // [修改] 发送 username 而不是 userId
         body: JSON.stringify({
-          userId: this.data.id,
+          username: this.data.username,
           pointsChange: pointsChange,
         }),
       });
@@ -88,7 +91,8 @@ export class PlayerModel {
    * @returns Promise<number> - New points total
    */
   async setPointsAsync(points: number): Promise<number> {
-    if (!this.data) {
+    const token = localStorage.getItem('jwt');
+    if (!this.data || !token) {
       throw new Error("User not logged in");
     }
 
@@ -96,10 +100,12 @@ export class PlayerModel {
       const response = await fetch(`${API_BASE_URL}/user/points`, {
         method: "PUT",
         headers: {
+          "Authorization": `Bearer ${token!}`,
           "Content-Type": "application/json",
         },
+        // [修改] 发送 username 而不是 userId
         body: JSON.stringify({
-          userId: this.data.id,
+          username: this.data.username,
           points: points,
         }),
       });
@@ -124,12 +130,18 @@ export class PlayerModel {
    * @returns Promise<number> - Current points from server
    */
   async refreshPoints(): Promise<number> {
-    if (!this.data) {
+    const token = localStorage.getItem('jwt');
+    if (!this.data || !token) {
       throw new Error("User not logged in");
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/user/points/${this.data.id}`);
+      // [修改] URL 使用 username
+      const response = await fetch(`${API_BASE_URL}/user/points/${this.data.username}`, {
+        headers: {
+          "Authorization": `Bearer ${token!}`,
+        },
+      });
 
       if (!response.ok) {
         const error = await response.json();
@@ -169,4 +181,3 @@ export class PlayerModel {
     this.subscribers.forEach((cb) => cb());
   }
 }
-

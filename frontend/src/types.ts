@@ -22,9 +22,14 @@ export type Screen =
   | { type: "login" }
   | { type: "menu" }
   | { type: "cards" }
-  | { type: "selection" }
+  | { 
+      type: "results"; 
+      playerCrowns: number; 
+      enemyCrowns: number 
+    } 
   | { type: "battle"; cards: string[] }
-  | { type: "results" }
+  | { type: "minigame" }
+  | { type: "selection" }
   | { type: "leaderboard" };
 
 export abstract class ScreenController {
@@ -46,6 +51,8 @@ export interface ScreenSwitcher {
 export interface WSResponse {
   tick: number;
   troops: Troop[];
+  ongoing: boolean;
+  towerStatus: Record<number, boolean[]>; // team ID → [left, main, right]
 }
 
 export interface Troop {
@@ -58,7 +65,6 @@ export interface Troop {
   Speed: number;
   Range: number;
 }
-
 export interface Position {
   X: number;
   Y: number;
