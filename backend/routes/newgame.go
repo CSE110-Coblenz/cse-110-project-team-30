@@ -37,18 +37,21 @@ func RegisterNewGameWS(mux *http.ServeMux, bm *socket.BattleManager) {
 		// --- wait for first message for authentication ---
 		_, msgBytes, err := conn.ReadMessage()
 		if err != nil {
+			log.Println("ws read message error:", err)
 			conn.Close()
 			return
 		}
 
 		var authMsg AuthMessage
 		if err := json.Unmarshal(msgBytes, &authMsg); err != nil || authMsg.Type != "auth" || authMsg.Token == "" {
+			log.Println("invalid auth message:", err)
 			conn.Close()
 			return
 		}
 
 		jwtSecret := os.Getenv("JWT_SECRET")
 		if jwtSecret == "" {
+			log.Println("JWT_SECRET not set")
 			conn.Close()
 			return
 		}
@@ -60,12 +63,14 @@ func RegisterNewGameWS(mux *http.ServeMux, bm *socket.BattleManager) {
 			return []byte(jwtSecret), nil
 		})
 		if err != nil || !token.Valid {
+			log.Println("invalid JWT token:", err)
 			conn.Close()
 			return
 		}
 
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
+			log.Println("invalid JWT claims")
 			conn.Close()
 			return
 		}
@@ -84,12 +89,22 @@ func RegisterNewGameWS(mux *http.ServeMux, bm *socket.BattleManager) {
 	// --- matchmaking goroutine ---
 	go func() {
 		queue := []*socket.PlayerConn{}
+		inQueue := map[string]*socket.PlayerConn{}
+		log.Println("At least the logging works...")
 
 		for {
 			// Receive new waiting players
 			select {
 			case player := <-waitingQueue:
-				queue = append(queue, player)
+				if inQueue[player.UserID] != nil {
+					log.Println("kick player")
+					inQueue[player.UserID].Conn.Close()       // already in queue
+					inQueue[player.UserID].Conn = player.Conn // update conn
+				} else {
+					log.Println("add player")
+					queue = append(queue, player)
+					inQueue[player.UserID] = player
+				}
 			}
 
 			// Match players in pairs
@@ -115,21 +130,26 @@ func RegisterNewGameWS(mux *http.ServeMux, bm *socket.BattleManager) {
 					log.Println("p1 disconnected, skipping:", err)
 					p1.Conn.Close()
 					queue = append(queue[:i], queue[i+1:]...) // remove p1
+					inQueue[p1.UserID] = nil
 					continue
 				}
 				if err := p2.Conn.WriteMessage(websocket.TextMessage, data2); err != nil {
 					log.Println("p2 disconnected, skipping:", err)
 					p2.Conn.Close()
 					queue = append(queue[:i+1], queue[i+2:]...) // remove p2
+					inQueue[p2.UserID] = nil
 					continue
 				}
 
 				// Close matchmaking WS (client will connect to /ws/{roomID} next)
+				log.Println("matched players:", p1.UserID, "vs", p2.UserID, "in room", room.ID)
 				p1.Conn.Close()
 				p2.Conn.Close()
 
 				// Remove both players from queue
 				queue = append(queue[:i], queue[i+2:]...)
+				inQueue[p1.UserID] = nil
+				inQueue[p2.UserID] = nil
 			}
 		}
 	}()

@@ -5,6 +5,8 @@ import (
 	"cse-110-project-team-30/backend/routes"
 	"fmt"
 	"net/http"
+
+	"github.com/joho/godotenv"
 )
 
 func withCORS(next http.Handler) http.Handler {
@@ -25,7 +27,7 @@ func withCORS(next http.Handler) http.Handler {
 func main() {
 	mux := http.NewServeMux()
 	routes.RegisterHelloWorld(mux)
-
+	godotenv.Load(".env")
 	mgr := socket.NewBattleManager()
 	routes.RegisterBattleSocket(mux, mgr)
 	routes.RegisterNewGameWS(mux, mgr)
