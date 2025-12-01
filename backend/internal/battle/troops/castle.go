@@ -18,7 +18,7 @@ func NewCastle(id int, team common.Team, pos common.Position) Entity {
 			Position: pos,
 			Health:   200,
 			Damage:   1,
-			Range:    4,
+			Range:    10,
 			Speed:    0,
 		},
 	}
@@ -32,8 +32,8 @@ func NewKingCastle(id int, team common.Team, pos common.Position) Entity {
 			Team:     team,
 			Position: pos,
 			Health:   300,
-			Damage:   2,
-			Range:    5,
+			Damage:   1,
+			Range:    10,
 			Speed:    0,
 		},
 	}

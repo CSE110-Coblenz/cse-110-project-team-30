@@ -7,6 +7,14 @@ import { BACKEND_URI, BATTLE_DURATION } from "../../constants.ts";
 /**
  * BattleScreenController - Coordinates battle logic between Model and View
  */
+function tempAlert(msg,duration)
+{
+ var el = document.createElement("div");
+ el.setAttribute("style","position:absolute;top:40%;left:20%;background-color:white;");
+ el.innerHTML = msg;
+ document.body.appendChild(el);
+ return el;
+}
 export class BattleScreenController extends ScreenController {
   private model: BattleScreenModel;
   private view: BattleScreenView;
@@ -15,6 +23,7 @@ export class BattleScreenController extends ScreenController {
   private battleTimer: number | null = null;
   private isMatchReady: boolean = false;
   private callSpawnTroop?: (troop: string, x: number, y: number) => void;
+  private alert: HTMLDivElement | null = null;
 
   constructor(screenSwitcher: ScreenSwitcher) {
     super();
@@ -65,6 +74,7 @@ export class BattleScreenController extends ScreenController {
 
   matchWS.onopen = () => {
     console.log("Connected to matchmaking server...");
+    this.alert = tempAlert("Connected to matchmaking server, waiting for opponent...", 3000);
 
     const token = localStorage.getItem('jwt');
     if (!token) {
@@ -88,6 +98,7 @@ export class BattleScreenController extends ScreenController {
       };
 
       if (msg.type === "matched") {
+        this.alert?.parentNode!.removeChild(this.alert);
         // Save team info
         this.model.isBlueTeam = msg.team === "blue";
 

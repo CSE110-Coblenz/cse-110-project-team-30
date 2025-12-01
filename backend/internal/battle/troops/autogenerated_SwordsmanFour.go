@@ -13,7 +13,7 @@ func NewSwordsmanFour(team common.Team, pos common.Position) Entity {
 	return &SwordsmanFour{
 		Troop: Troop{
 			Type:     "SwordsmanFour",
-			Health:   16,
+			Health:   32,
 			Damage:   5,
 			Speed:    1,
 			Range:    1,

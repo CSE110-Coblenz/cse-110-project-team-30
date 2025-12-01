@@ -4,22 +4,22 @@ import "cse-110-project-team-30/backend/internal/battle/common"
 
 // TroopRegistry maps string keys to constructor functions.
 var TroopRegistry = map[string]func(team common.Team, pos common.Position) Entity{
-	"SwordsmanThree": NewSwordsmanThree,
-	"CavalryOne": NewCavalryOne,
-	"CavalryFour": NewCavalryFour,
-	"SwordsmanFour": NewSwordsmanFour,
-	"ArcherThree": NewArcherThree,
-	"SpearmanOne": NewSpearmanOne,
-	"SpearmanTwo": NewSpearmanTwo,
-	"SpearmanFour": NewSpearmanFour,
-	"SwordsmanTwo": NewSwordsmanTwo,
-	"ArcherOne": NewArcherOne,
 	"ArcherTwo": NewArcherTwo,
+	"SpearmanTwo": NewSpearmanTwo,
+	"SwordsmanTwo": NewSwordsmanTwo,
+	"SpearmanOne": NewSpearmanOne,
 	"SpearmanThree": NewSpearmanThree,
+	"SpearmanFour": NewSpearmanFour,
 	"CavalryTwo": NewCavalryTwo,
-	"ArcherFour": NewArcherFour,
 	"CavalryThree": NewCavalryThree,
 	"SwordsmanOne": NewSwordsmanOne,
+	"ArcherOne": NewArcherOne,
+	"ArcherThree": NewArcherThree,
+	"SwordsmanThree": NewSwordsmanThree,
+	"SwordsmanFour": NewSwordsmanFour,
+	"ArcherFour": NewArcherFour,
+	"CavalryOne": NewCavalryOne,
+	"CavalryFour": NewCavalryFour,
 }
 
 // NewTroopByType creates a new troop by its type string.

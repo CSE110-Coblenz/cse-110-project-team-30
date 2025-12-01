@@ -13,9 +13,9 @@ func NewCavalryFour(team common.Team, pos common.Position) Entity {
 	return &CavalryFour{
 		Troop: Troop{
 			Type:     "CavalryFour",
-			Health:   20,
-			Damage:   6,
-			Speed:    1,
+			Health:   80,
+			Damage:   12,
+			Speed:    1.5,
 			Range:    1,
 			Position: pos,
 			Team:     team,
