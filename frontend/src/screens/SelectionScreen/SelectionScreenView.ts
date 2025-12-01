@@ -42,7 +42,7 @@ export class SelectionScreenView implements View {
             });
             this.group.add(bg);
             bg.moveToBottom();
-            this.createWizardBubble(1100, 275, "Select your cards. Click again to unselect")
+            this.createWizardBubble(STAGE_WIDTH - 200, 275, "Select your cards. Click again to unselect")
 
         };
 

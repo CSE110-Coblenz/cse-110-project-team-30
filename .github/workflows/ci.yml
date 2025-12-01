@@ -1,3 +1,49 @@
 name: CI
 on: [push, pull_request]
 jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout code
+      - uses: actions/checkout@v4
+
+      ###############################################
+      # FRONTEND: Node + TypeScript
+      ###############################################
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install frontend deps
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: TypeScript type check
+        working-directory: ./frontend
+        run: npx tsc --noEmit || true
+
+      - name: Frontend tests
+        working-directory: ./frontend
+        run: npm test --if-present
+
+      ###############################################
+      # BACKEND: Go
+      ###############################################
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.25.4"
+
+      - name: Go build
+        working-directory: ./backend
+        run: go build ./...
+
+      - name: Go vet
+        working-directory: ./backend
+        run: go vet ./...
+
+      - name: Go test
+        working-directory: ./backend
+        run: go test ./...

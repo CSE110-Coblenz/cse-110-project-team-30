@@ -13,8 +13,6 @@ export class BattleScreenController extends ScreenController {
   private screenSwitcher: ScreenSwitcher;
   private selectedCards: string[] = [];
   private battleTimer: number | null = null;
-  private currentCardType: string | null = null;
-  private isCorrect: boolean | null = null;
   private isMatchReady: boolean = false;
   private callSpawnTroop?: (troop: string, x: number, y: number) => void;
 
@@ -228,9 +226,12 @@ export class BattleScreenController extends ScreenController {
       return;
     }
 
-    this.currentCardType = cardType;
     const problem = this.model.generateProblem(cardType);
-    const operation = this.model.getCardOperation(cardType);
+    const operation = this.model.getCurrentCardObject()?.operation;
+    if (!operation) {
+      console.log("cardType not set");
+      return;
+    }
 
     this.view.showMathPopup(
       operation,
@@ -246,8 +247,6 @@ export class BattleScreenController extends ScreenController {
    */
   private handleQuitClick(): void {
     console.log("entered quit click handler for math problem");
-    this.isCorrect = null;
-    this.currentCardType = null;
   }
 
   /**
@@ -256,16 +255,21 @@ export class BattleScreenController extends ScreenController {
   private handleSubmitClick(userAnswer: number, userRemainder?: number): void {
     console.log("entered submit click handler for math problem");
     const problem = this.model.getCurrentProblem();
-    if (!problem) return;
+    if (!problem) {
+      console.log("problem not set");
+      return;
+    }
 
-    this.isCorrect = this.model.checkAnswer(userAnswer, userRemainder);
-    const operation = this.model.getCardOperation(this.currentCardType);
-    console.log("checked answer");
+    const isCorrect = this.model.checkAnswer(userAnswer, userRemainder);
+    const operation = this.model.getCurrentCardObject()?.operation;
+    console.log(
+      `checked answer with answer: ${problem.answer} and remainder: ${problem.remainder}`,
+    );
     this.view.showFeedback(
       operation,
       problem.answer,
       problem.remainder,
-      this.isCorrect,
+      isCorrect,
     );
   }
 
@@ -275,13 +279,10 @@ export class BattleScreenController extends ScreenController {
   private handleOkayClick(): void {
     console.log("entered okay click handler for math problem");
 
-    if (this.isCorrect) {
+    if (this.model.getCurrentStatus()) {
       console.log("correct!");
-      this.model.setTroopToPlace(this.currentCardType);
+      this.model.setTroopToPlace(this.model.getCurrentCardType());
     }
-
-    this.isCorrect = null;
-    this.currentCardType = null;
   }
 
   /**

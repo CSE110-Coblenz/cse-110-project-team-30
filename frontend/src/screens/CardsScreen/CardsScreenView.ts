@@ -34,7 +34,7 @@ export class CardsScreenView implements View {
       });
       this.group.add(bg);
       bg.moveToBottom();
-      this.createWizardBubble(1100, 275, "Click a button to learn more")
+      this.createWizardBubble(STAGE_WIDTH - 200, 275, "Click a button to learn more")
 
     };
 
