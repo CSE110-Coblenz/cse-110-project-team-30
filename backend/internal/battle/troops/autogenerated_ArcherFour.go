@@ -13,10 +13,10 @@ func NewArcherFour(team common.Team, pos common.Position) Entity {
 	return &ArcherFour{
 		Troop: Troop{
 			Type:     "ArcherFour",
-			Health:   16,
+			Health:   32,
 			Damage:   5,
-			Speed:    1,
-			Range:    1,
+			Speed:    1.2,
+			Range:    7,
 			Position: pos,
 			Team:     team,
 		},

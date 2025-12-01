@@ -13,10 +13,10 @@ func NewSpearmanTwo(team common.Team, pos common.Position) Entity {
 	return &SpearmanTwo{
 		Troop: Troop{
 			Type:     "SpearmanTwo",
-			Health:   16,
+			Health:   32,
 			Damage:   5,
 			Speed:    1,
-			Range:    1,
+			Range:    2,
 			Position: pos,
 			Team:     team,
 		},
