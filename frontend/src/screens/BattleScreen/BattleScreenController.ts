@@ -292,6 +292,9 @@ export class BattleScreenController extends ScreenController {
     this.stopTimer();
     this.view.removeInputs();
     this.model.clearTiles();
+
+    this.isCorrect = null;
+    this.currentCardType = null;
     this.isMatchReady = false;
 
     switch (reason) {
