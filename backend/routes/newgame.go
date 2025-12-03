@@ -142,7 +142,7 @@ func RegisterNewGameWS(mux *http.ServeMux, bm *socket.BattleManager) {
 				}
 
 				// Close matchmaking WS (client will connect to /ws/{roomID} next)
-				log.Println("matched players:", p1.UserID, "vs", p2.UserID, "in room", room.ID)
+				log.Println("matched players:", p1.UserID, "(", p1.Username, ") vs", p2.UserID, "in room", room.ID)
 				p1.Conn.Close()
 				p2.Conn.Close()
 

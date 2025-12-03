@@ -98,8 +98,8 @@ if (token) {
 
       const data = await response.json();
 
-      localStorage.setItem('jwt', data.token);
       if (response.ok) {
+        localStorage.setItem('jwt', data.token);
         if (endpoint === "login") {
           this.playerModel.setPlayerData({
             id: data.id,
