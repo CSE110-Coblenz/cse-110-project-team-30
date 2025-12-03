@@ -42,8 +42,12 @@ router.post('/signup', async (req, res) => {
             'INSERT INTO Users (id, Username, Password, CareerWins, CareerLosses, Points) VALUES (?, ?, ?, 0, 0, 0)',
             [id, username, hashed]
         );
-
-        return res.status(201).json({ id, username });
+        const payload = {
+            id: user.id,
+            username: user.Username,
+        };
+        const token = jwt.sign(payload, JWT_SECRET, { algorithm: 'HS256' });
+        return res.status(201).json({ id, username, token });
     } catch (err) {
         console.error('Signup error:', err);
         return res.status(500).json({ error: 'Internal server error' });
