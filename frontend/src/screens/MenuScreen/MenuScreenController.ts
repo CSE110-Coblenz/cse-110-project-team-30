@@ -39,6 +39,7 @@ export class MenuScreenController extends ScreenController {
         break;
       case "logout":
         this.playerModel.clear();
+        localStorage.removeItem('jwt');
         this.screenSwitcher.switchToScreen({ type: "login" });
         break;
     }
