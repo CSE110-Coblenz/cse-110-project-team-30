@@ -14,7 +14,7 @@ func NewSpearmanFour(team common.Team, pos common.Position) Entity {
 		Troop: Troop{
 			Type:     "SpearmanFour",
 			Health:   40,
-			Damage:   6,
+			Damage:   9,
 			Speed:    1,
 			Range:    2,
 			Position: pos,

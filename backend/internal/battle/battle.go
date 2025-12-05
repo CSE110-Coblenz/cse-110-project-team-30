@@ -89,8 +89,11 @@ func (b *Battle) SpawnTroop(team common.Team, pos common.Position, troopType str
 	if !b.Arena.InBounds(pos) {
 		return nil, errors.New("position out of arena bounds")
 	}
-	if (team == common.Team(1) && pos.Y < float64(b.Arena.Height)/2) || (team == common.Team(0) && pos.Y >= float64(b.Arena.Height)/2) {
-		return nil, errors.New("cannot spawn troop in enemy territory")
+	if team == common.Team(1) && pos.Y < float64(b.Arena.Height)/2 {
+		pos.Y = float64(b.Arena.Height) / 2
+	}
+	if team == common.Team(0) && pos.Y >= float64(b.Arena.Height)/2 {
+		pos.Y = float64(b.Arena.Height)/2 - 1
 	}
 	newTroop := troops.NewTroopByType(troopType, team, pos)
 	if newTroop == nil || newTroop.GetTroop() == nil {

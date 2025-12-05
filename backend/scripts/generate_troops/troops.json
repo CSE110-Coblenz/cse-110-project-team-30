@@ -9,13 +9,13 @@
   "ArcherThree": { "operation": "Subtraction", "hp": 28, "damage": 5, "level": 3, "Type": "Archer", "Speed": 1.2, "Range": 7 },
   "ArcherFour": { "operation": "Subtraction", "hp": 32, "damage": 5, "level": 4, "Type": "Archer", "Speed": 1.2, "Range": 7 },
 
-  "SpearmanOne": { "operation": "Multiplication", "hp": 28, "damage": 5, "level": 1, "Type": "Spearman", "Speed": 1.0, "Range": 2 },
-  "SpearmanTwo": { "operation": "Multiplication", "hp": 32, "damage": 5, "level": 2, "Type": "Spearman", "Speed": 1.0, "Range": 2 },
-  "SpearmanThree": { "operation": "Multiplication", "hp": 36, "damage": 6, "level": 3, "Type": "Spearman", "Speed": 1.0, "Range": 2 },
-  "SpearmanFour": { "operation": "Multiplication", "hp": 40, "damage": 6, "level": 4, "Type": "Spearman", "Speed": 1.0, "Range": 2 },
+  "SpearmanOne": { "operation": "Multiplication", "hp": 28, "damage": 8, "level": 1, "Type": "Spearman", "Speed": 1.0, "Range": 2 },
+  "SpearmanTwo": { "operation": "Multiplication", "hp": 32, "damage": 8, "level": 2, "Type": "Spearman", "Speed": 1.0, "Range": 2 },
+  "SpearmanThree": { "operation": "Multiplication", "hp": 36, "damage": 9, "level": 3, "Type": "Spearman", "Speed": 1.0, "Range": 2 },
+  "SpearmanFour": { "operation": "Multiplication", "hp": 40, "damage": 9, "level": 4, "Type": "Spearman", "Speed": 1.0, "Range": 2 },
 
   "CavalryOne": { "operation": "Division", "hp": 28, "damage": 10, "level": 1, "Type": "Cavalry", "Speed": 1.5, "Range": 1 },
-  "CavalryTwo": { "operation": "Division", "hp": 62, "damage": 31, "level": 2, "Type": "Cavalry", "Speed": 1.5, "Range": 1 },
-  "CavalryThree": { "operation": "Division", "hp": 76, "damage": 12, "level": 3, "Type": "Cavalry", "Speed": 1.5, "Range": 1 },
-  "CavalryFour": { "operation": "Division", "hp": 80, "damage": 12, "level": 4, "Type": "Cavalry", "Speed": 1.5, "Range": 1 }
+  "CavalryTwo": { "operation": "Division", "hp": 33, "damage": 11, "level": 2, "Type": "Cavalry", "Speed": 1.5, "Range": 1 },
+  "CavalryThree": { "operation": "Division", "hp": 46, "damage": 12, "level": 3, "Type": "Cavalry", "Speed": 1.5, "Range": 1 },
+  "CavalryFour": { "operation": "Division", "hp": 60, "damage": 12, "level": 4, "Type": "Cavalry", "Speed": 1.5, "Range": 1 }
 }

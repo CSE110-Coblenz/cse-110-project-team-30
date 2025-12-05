@@ -43,8 +43,8 @@ router.post('/signup', async (req, res) => {
             [id, username, hashed]
         );
         const payload = {
-            id: user.id,
-            username: user.Username,
+            id: id,
+            username: username,
         };
         const token = jwt.sign(payload, JWT_SECRET, { algorithm: 'HS256' });
         return res.status(201).json({ id, username, token });
